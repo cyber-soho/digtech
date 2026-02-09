@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Technology Flashcards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        stone: { 50: '#fafaf9', 100: '#f5f5f4', 800: '#292524', 900: '#1c1917' },
+                        teal: { 600: '#0d9488', 50: '#f0fdfa' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        
+        /* Card Flip Animation Class */
+        .flipped { transform: rotateY(180deg); }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Header -->
+    <header class="mb-8 text-center">
+        <h1 class="text-2xl md:text-3xl font-bold text-stone-900 mb-2">Digital Technology</h1>
+        <p class="text-stone-500 text-sm uppercase tracking-wider font-semibold">Study Mode</p>
+    </header>
+
+    <!-- Main Card Container -->
+    <div class="relative w-full max-w-xl h-80 md:h-96 perspective-1000 group cursor-pointer" onclick="flipCard()">
+        <div id="card-inner" class="relative w-full h-full text-center transition-transform duration-500 transform-style-3d">
+            
+            <!-- Front Face -->
+            <div class="card-face bg-white border border-stone-200 text-stone-800">
+                <div class="absolute top-4 left-4 text-xs font-bold text-teal-600 uppercase tracking-widest">Question</div>
+                <div id="card-front-text" class="text-xl md:text-2xl font-semibold leading-relaxed">
+                    <!-- Front Text Injected Here -->
+                </div>
+                <div class="absolute bottom-4 text-stone-400 text-xs flex items-center gap-1">
+                    <span>Click to flip</span> ↻
+                </div>
+            </div>
+
+            <!-- Back Face -->
+            <div class="card-face bg-stone-900 text-white rotate-y-180">
+                <div class="absolute top-4 left-4 text-xs font-bold text-teal-400 uppercase tracking-widest">Answer</div>
+                <div id="card-back-text" class="text-lg md:text-xl leading-relaxed">
+                    <!-- Back Text Injected Here -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="mt-8 flex items-center gap-6 select-none">
+        <button onclick="prevCard()" class="p-3 rounded-full bg-white border border-stone-200 shadow-sm hover:bg-stone-100 hover:border-stone-300 transition active:scale-95 group">
+            <svg class="w-6 h-6 text-stone-600 group-hover:text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+
+        <div class="text-stone-500 font-mono text-sm">
+            <span id="current-index" class="text-stone-900 font-bold">1</span> / <span id="total-count">25</span>
+        </div>
+
+        <button onclick="nextCard()" class="p-3 rounded-full bg-white border border-stone-200 shadow-sm hover:bg-stone-100 hover:border-stone-300 transition active:scale-95 group">
+            <svg class="w-6 h-6 text-stone-600 group-hover:text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+    </div>
+
+    <div class="mt-4 text-xs text-stone-400">
+        Tip: Use Arrow Keys (← →) to navigate, Spacebar to flip
+    </div>
+
+    <!-- Logic -->
+    <script>
+        const flashcards = [
+            { front: "Definition of Digitalization", back: "The process of converting information from analog to digital format, transforming the world into ones and zeros that computers can understand and manipulate." },
+            { front: "Difference between Digitization and Digitalization", back: "Digitization is converting analog to digital (format conversion); Digitalization is using digital tech to transform processes (process transformation)." },
+            { front: "Four Key Components of Digitalization", back: "Conversion, Integration, Optimization, and Innovation." },
+            { front: "Digitalization Component: Integration", back: "Connecting digital systems to work together, such as through Cloud synchronization or API connections." },
+            { front: "Digitalization Component: Innovation", back: "Creating entirely new capabilities, such as real-time collaboration or predictive analytics." },
+            { front: "Core Principle of Digital Transformation", back: "Digital transformation = Better data + Better decisions + Better outcomes." },
+            { front: "Moore's Law", back: "The observation that the number of transistors on a microchip doubles approximately every two years, while the cost halves." },
+            { front: "First Generation Computing Technology (1940s-50s)", back: "Vacuum tubes (e.g., ENIAC), characterized by room-sized computers." },
+            { front: "Second Generation Computing Technology (1960s-70s)", back: "Transistors, characterized by mainframes and the beginning of business computing." },
+            { front: "Third Generation Computing Technology (1980s)", back: "Integrated circuits, characterized by the rise of Personal Computers (PCs)." },
+            { front: "Fourth Generation Computing Technology (1990s)", back: "Microprocessors, characterized by the Internet boom and global connectivity." },
+            { front: "Fifth Generation Computing Technology (2000s)", back: "Mobile computing and cloud, characterized by smartphones and SaaS." },
+            { front: "Sixth Generation Computing Technology (2010s)", back: "AI, IoT (Internet of Things), and Big Data, characterized by intelligent systems." },
+            { front: "Technology Trends of the 2020s", back: "Quantum computing, Edge computing, and Generative AI." },
+            { front: "Definition of Automation", back: "The use of technology to perform tasks with minimal human intervention." },
+            { front: "Level 1: Basic Automation", back: "Simple, rule-based tasks utilizing if-then logic (e.g., Auto-reply emails)." },
+            { front: "Level 2: Process Automation", back: "Multi-step workflows utilizing sequential operations (e.g., Onboarding workflows)." },
+            { front: "Level 3: Intelligent Automation", back: "AI-powered decision-making utilizing machine learning models (e.g., Fraud detection)." },
+            { front: "Level 4: Autonomous Systems", back: "Self-learning, self-correcting systems utilizing adaptive algorithms (e.g., Self-driving vehicles)." },
+            { front: "Robotic Process Automation (RPA)", back: "Software robots that mimic human digital actions, used for tasks like data entry and report generation." },
+            { front: "Efficiency Gains of Automated Invoice Processing", back: "6x faster processing and 95% fewer errors compared to manual processing." },
+            { front: "Reality of Automation's Impact on Jobs", back: "Automation replaces repetitive tasks, not people; humans shift to creative and strategic work." },
+            { front: "The Cycle of Digital Transformation", back: "Digitalization (creates data) -> Tech Evolution (enables new capabilities) -> Automation (improves efficiency) -> Insights (drive better digitalization)." },
+            { front: "Amazon's Role in Tech Evolution", back: "Expanded from books to everything and built cloud infrastructure (AWS)." },
+            { front: "Role of Data Scientists in Digitalization", back: "Identify valuable data sources, structure data for analysis, and extract insights from digital information." }
+        ];
+
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        const cardInner = document.getElementById('card-inner');
+        const frontText = document.getElementById('card-front-text');
+        const backText = document.getElementById('card-back-text');
+        const currentIndexEl = document.getElementById('current-index');
+        const totalCountEl = document.getElementById('total-count');
+
+        function updateCard() {
+            // Reset flip state
+            isFlipped = false;
+            cardInner.classList.remove('flipped');
+
+            // Wait brief moment for flip reset before changing text if it was flipped
+            setTimeout(() => {
+                const card = flashcards[currentIndex];
+                frontText.textContent = card.front;
+                backText.textContent = card.back;
+                currentIndexEl.textContent = currentIndex + 1;
+                totalCountEl.textContent = flashcards.length;
+            }, 150);
+        }
+
+        function flipCard() {
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                cardInner.classList.add('flipped');
+            } else {
+                cardInner.classList.remove('flipped');
+            }
+        }
+
+        function nextCard() {
+            if (currentIndex < flashcards.length - 1) {
+                currentIndex++;
+                updateCard();
+            } else {
+                // Loop to start
+                currentIndex = 0;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            } else {
+                // Loop to end
+                currentIndex = flashcards.length - 1;
+                updateCard();
+            }
+        }
+
+        // Initialize
+        updateCard();
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextCard();
+            if (e.key === 'ArrowLeft') prevCard();
+            if (e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault(); // Prevent scroll
+                flipCard();
+            }
+        });
+
+    </script>
+</body>
+</html>
+
+
+

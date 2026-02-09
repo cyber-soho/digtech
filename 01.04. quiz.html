@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Digital Technology</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        stone: { 50: '#fafaf9', 100: '#f5f5f4', 800: '#292524', 900: '#1c1917' },
+                        teal: { 600: '#0d9488', 50: '#f0fdfa', 700: '#0f766e' },
+                        red: { 50: '#fef2f2', 600: '#dc2626', 700: '#b91c1c' },
+                        green: { 50: '#f0fdf4', 600: '#16a34a', 700: '#15803d' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-stone-50 text-stone-800 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden border border-stone-200">
+        
+        <!-- Header & Progress -->
+        <div class="bg-stone-900 text-white p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-xl font-bold">Digital Technology Quiz</h1>
+                <span id="score-display" class="bg-stone-800 px-3 py-1 rounded-full text-sm font-mono hidden">Score: 0</span>
+            </div>
+            <div class="w-full bg-stone-700 h-2 rounded-full overflow-hidden">
+                <div id="progress-bar" class="bg-teal-500 h-full transition-all duration-500 ease-out" style="width: 0%"></div>
+            </div>
+            <div class="mt-2 text-right text-xs text-stone-400">
+                Question <span id="current-q-num">1</span> of <span id="total-q-num">10</span>
+            </div>
+        </div>
+
+        <!-- Quiz Content -->
+        <div id="quiz-container" class="p-6 md:p-8">
+            
+            <!-- Question -->
+            <h2 id="question-text" class="text-xl md:text-2xl font-bold text-stone-900 mb-6 leading-relaxed">
+                <!-- Question loads here -->
+            </h2>
+
+            <!-- Hint Section -->
+            <div class="mb-6">
+                <button onclick="toggleHint()" class="text-sm text-teal-600 font-semibold hover:underline focus:outline-none flex items-center gap-1">
+                    <span class="text-lg">💡</span> Need a hint?
+                </button>
+                <div id="hint-text" class="hidden mt-2 p-3 bg-yellow-50 text-yellow-800 text-sm rounded border border-yellow-100 italic">
+                    <!-- Hint loads here -->
+                </div>
+            </div>
+
+            <!-- Options -->
+            <div id="options-container" class="space-y-3">
+                <!-- Buttons generate here -->
+            </div>
+
+            <!-- Feedback / Rationale -->
+            <div id="feedback-container" class="hidden mt-6 p-4 rounded-xl border animate-fade-in">
+                <div class="flex items-start gap-3">
+                    <div id="feedback-icon" class="text-2xl"></div>
+                    <div>
+                        <h3 id="feedback-title" class="font-bold text-lg mb-1"></h3>
+                        <p id="feedback-rationale" class="text-sm leading-relaxed"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Button -->
+            <div class="mt-8 text-right h-12">
+                <button id="next-btn" onclick="nextQuestion()" class="hidden px-6 py-3 bg-stone-900 text-white font-bold rounded-lg hover:bg-stone-800 transition shadow-lg flex items-center gap-2 ml-auto">
+                    Next Question <span>→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Screen (Hidden initially) -->
+        <div id="results-container" class="hidden p-8 text-center">
+            <div class="text-6xl mb-4">🏆</div>
+            <h2 class="text-3xl font-bold text-stone-900 mb-2">Quiz Complete!</h2>
+            <p class="text-stone-600 mb-8">Here is how you performed:</p>
+            
+            <div class="inline-block p-6 bg-stone-100 rounded-2xl mb-8">
+                <div class="text-5xl font-bold text-teal-600 mb-1" id="final-score">0/0</div>
+                <div class="text-sm text-stone-500 uppercase tracking-wide">Final Score</div>
+            </div>
+
+            <p id="final-message" class="text-lg font-medium text-stone-800 mb-8"></p>
+
+            <button onclick="location.reload()" class="px-8 py-3 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 transition shadow-lg">
+                Restart Quiz
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- QUIZ DATA ---
+        const quizData = [
+            {
+                question: "A hospital scans old patient paper records and saves them as PDF files on a local server. Which term best describes this specific action?",
+                options: [
+                    { text: "Digitization", rationale: "This describes the conversion of information from an analog format (paper) to a digital format (PDF) without necessarily transforming the underlying process.", isCorrect: true },
+                    { text: "Digitalization", rationale: "Digitalization involves using digital technologies to transform processes and create new value, not just converting format.", isCorrect: false },
+                    { text: "Automation", rationale: "Automation would imply the system is performing tasks with minimal human intervention, such as automatically sorting the files, which isn't described here.", isCorrect: false },
+                    { text: "Integration", rationale: "Integration involves connecting different digital systems to work together, whereas this is a standalone conversion task.", isCorrect: false }
+                ],
+                hint: "Focus on the distinction between changing the format of information versus transforming the entire process."
+            },
+            {
+                question: "Which component of digitalization is best illustrated by a system that uses historical sales data to predict future inventory needs?",
+                options: [
+                    { text: "Innovation", rationale: "Creating predictive analytics capabilities represents an entirely new capability that was not previously possible, fitting the definition of innovation.", isCorrect: true },
+                    { text: "Conversion", rationale: "Conversion is simply changing analog data to digital, which is a precursor to prediction but not the act of prediction itself.", isCorrect: false },
+                    { text: "Integration", rationale: "Integration connects systems, but using data to create new predictive capabilities goes beyond just connection.", isCorrect: false },
+                    { text: "Digitization", rationale: "Digitization is the format change, whereas this scenario describes using data for a new strategic capability.", isCorrect: false }
+                ],
+                hint: "Think about which component involves creating entirely new capabilities like predictive analytics."
+            },
+            {
+                question: "Moore's Law (1965) predicts a specific trend regarding microchips. Which of the following accurately reflects this prediction?",
+                options: [
+                    { text: "Transistor count doubles roughly every two years while costs halve.", rationale: "Moore's Law specifically observed the exponential growth of transistor density and the inverse trend in cost.", isCorrect: true },
+                    { text: "Computing power increases linearly every year.", rationale: "Moore's Law describes exponential growth (doubling), not linear growth.", isCorrect: false },
+                    { text: "The size of computers doubles every two years.", rationale: "The trend is towards miniaturization (more transistors in the same space), not larger computers.", isCorrect: false },
+                    { text: "Internet speeds double every two years.", rationale: "While internet speeds have increased, Moore's Law specifically refers to the number of transistors on a microchip.", isCorrect: false }
+                ],
+                hint: "Recall the relationship between the number of transistors and the time period mentioned in the law."
+            },
+            {
+                question: "In the evolution of technology, which generation is characterized by the emergence of the Internet boom and global connectivity?",
+                options: [
+                    { text: "Fourth Generation (1990s)", rationale: "The 1990s and the Fourth Generation are defined by microprocessors and the explosion of the internet.", isCorrect: true },
+                    { text: "Third Generation (1980s)", rationale: "The Third Generation was characterized by the rise of personal computers (PCs), before the widespread internet boom.", isCorrect: false },
+                    { text: "Fifth Generation (2000s)", rationale: "The Fifth Generation is associated with mobile computing and the cloud, building upon the internet connectivity established previously.", isCorrect: false },
+                    { text: "Sixth Generation (2010s)", rationale: "The Sixth Generation focuses on AI, IoT, and Big Data, occurring well after the initial internet boom.", isCorrect: false }
+                ],
+                hint: "Think about the decade when the World Wide Web became a household term."
+            },
+            {
+                question: "An email system that automatically sends an 'Out of Office' reply when a user is on vacation is an example of which level of automation?",
+                options: [
+                    { text: "Basic Automation", rationale: "Basic automation handles simple, rule-based tasks using if-then logic, such as sending a reply if a specific condition is met.", isCorrect: true },
+                    { text: "Process Automation", rationale: "Process automation involves multi-step workflows like onboarding, which is more complex than a single auto-reply.", isCorrect: false },
+                    { text: "Intelligent Automation", rationale: "Intelligent automation requires AI decision-making, which is not needed for a simple rule-based auto-reply.", isCorrect: false },
+                    { text: "Autonomous Systems", rationale: "Autonomous systems are self-learning and self-correcting, far exceeding the complexity of a static auto-reply rule.", isCorrect: false }
+                ],
+                hint: "Consider the complexity of the logic involved: is it a simple rule or a complex learning algorithm?"
+            },
+            {
+                question: "According to the 'Cycle of Digital Transformation', what follows 'Automation' to drive better digitalization?",
+                options: [
+                    { text: "Insights", rationale: "The cycle indicates that automation produces data and outcomes that generate insights, which then inform further improvements in digitalization.", isCorrect: true },
+                    { text: "Technology Evolution", rationale: "Technology evolution provides the tools that enable automation, but it is not the direct output of automation in this specific feedback loop.", isCorrect: false },
+                    { text: "Conversion", rationale: "Conversion is the initial step of digitalization, not the output of automation in the cycle.", isCorrect: false },
+                    { text: "Analog Processes", rationale: "The goal of the cycle is to move away from analog processes, not to return to them.", isCorrect: false }
+                ],
+                hint: "What do we gain from automated processes that helps us make better decisions for the next iteration?"
+            },
+            {
+                question: "Which of the following best describes the difference between 'Process Automation' and 'Intelligent Automation'?",
+                options: [
+                    { text: "Process Automation uses sequential workflows, while Intelligent Automation uses AI decision-making.", rationale: "Process automation follows a set path (Level 2), whereas intelligent automation (Level 3) uses machine learning to make decisions based on data.", isCorrect: true },
+                    { text: "Process Automation is for physical tasks, while Intelligent Automation is for digital tasks.", rationale: "Both types of automation occur primarily in the digital realm; the distinction is in the logic used (sequential vs. AI).", isCorrect: false },
+                    { text: "Process Automation requires no human oversight, while Intelligent Automation does.", rationale: "Both may require oversight, but Intelligent Automation is actually more capable of independent decision-making than standard process automation.", isCorrect: false },
+                    { text: "Process Automation is Level 4, while Intelligent Automation is Level 2.", rationale: "This reverses the hierarchy; Process Automation is Level 2 and Intelligent Automation is Level 3.", isCorrect: false }
+                ],
+                hint: "Compare the underlying logic: one follows a fixed path, the other adapts using data."
+            },
+            {
+                question: "Why did the number of bank tellers increase after the introduction of ATMs, despite the prediction that ATMs would replace them?",
+                options: [
+                    { text: "Banks opened more branches, and tellers shifted to advisory roles.", rationale: "Automation lowered the cost of operating a branch, allowing banks to open more of them, while tellers moved to higher-value customer service tasks.", isCorrect: true },
+                    { text: "The ATMs were unreliable and required constant human supervision.", rationale: "While early tech has issues, the long-term trend was driven by the economic shift in branch costs, not machine failure.", isCorrect: false },
+                    { text: "Customers refused to use the ATMs.", rationale: "Adoption was successful; the increase in tellers was a result of business expansion, not customer rejection of ATMs.", isCorrect: false },
+                    { text: "Regulations required a human teller for every ATM installed.", rationale: "There was no such regulation; the shift was driven by market dynamics and the changing role of the teller.", isCorrect: false }
+                ],
+                hint: "Think about how lowering the cost of a service (like cash dispensing) might allow a business to expand its physical presence."
+            },
+            {
+                question: "In the context of the 2020s technology era, which technologies are beginning to blur the line between reality and digital?",
+                options: [
+                    { text: "Quantum computing, Edge computing, and Generative AI", rationale: "These are explicitly listed as the defining technologies of the Current Era (2020s) that are blurring this boundary.", isCorrect: true },
+                    { text: "Mobile computing and Cloud", rationale: "These were the defining technologies of the Fifth Generation (2000s).", isCorrect: false },
+                    { text: "Microprocessors and the Internet", rationale: "These defined the Fourth Generation (1990s).", isCorrect: false },
+                    { text: "Mainframes and Transistors", rationale: "These were characteristic of the Second Generation (1960s-70s).", isCorrect: false }
+                ],
+                hint: "Look for the most recent technologies mentioned in the 'Current Era' section of the timeline."
+            },
+            {
+                question: "What is the primary efficiency gain cited in the 'Invoice Processing' automation example?",
+                options: [
+                    { text: "6x faster processing and 95% fewer errors", rationale: "The example contrasts the manual process with the automated one, highlighting these specific gains in speed and accuracy.", isCorrect: true },
+                    { text: "Elimination of all human employees in the department", rationale: "The material emphasizes that automation replaces tasks, not people, and does not claim total elimination of staff.", isCorrect: false },
+                    { text: "100% reduction in processing costs", rationale: "While costs are reduced, a 100% reduction is impossible due to software and maintenance costs.", isCorrect: false },
+                    { text: "Ability to process invoices without OCR", rationale: "The automated process specifically mentions using OCR (Optical Character Recognition) extraction, not doing without it.", isCorrect: false }
+                ],
+                hint: "Recall the specific statistics used to compare the manual process with the automated one."
+            }
+        ];
+
+        // --- STATE & LOGIC ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let hasAnswered = false;
+
+        // Elements
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const hintTextEl = document.getElementById('hint-text');
+        const nextBtn = document.getElementById('next-btn');
+        const currentQNumEl = document.getElementById('current-q-num');
+        const totalQNumEl = document.getElementById('total-q-num');
+        const progressBar = document.getElementById('progress-bar');
+        const scoreDisplay = document.getElementById('score-display');
+        
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackRationale = document.getElementById('feedback-rationale');
+        const feedbackIcon = document.getElementById('feedback-icon');
+
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+        const finalScoreEl = document.getElementById('final-score');
+        const finalMessageEl = document.getElementById('final-message');
+
+        // Initialize
+        totalQNumEl.textContent = quizData.length;
+        loadQuestion();
+
+        function loadQuestion() {
+            const data = quizData[currentQuestionIndex];
+            
+            // Reset UI
+            hasAnswered = false;
+            hintTextEl.classList.add('hidden');
+            feedbackContainer.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            optionsContainer.innerHTML = '';
+            
+            // Update Progress
+            currentQNumEl.textContent = currentQuestionIndex + 1;
+            const progressPct = ((currentQuestionIndex) / quizData.length) * 100;
+            progressBar.style.width = `${progressPct}%`;
+
+            // Set Text
+            questionTextEl.textContent = data.question;
+            hintTextEl.textContent = data.hint;
+
+            // Generate Options (Shuffle them visually, but keep track of logic)
+            // Note: Data is already structured, we'll just map them. 
+            // If you wanted true random shuffling of options every time, you'd shuffle the array copy here.
+            
+            // Let's simple-shuffle for better variety
+            const shuffledOptions = [...data.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-4 rounded-xl border border-stone-200 hover:bg-stone-50 hover:border-stone-300 transition-all duration-200 font-medium text-stone-700 active:scale-[0.99]`;
+                btn.textContent = opt.text;
+                btn.onclick = () => checkAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function toggleHint() {
+            hintTextEl.classList.toggle('hidden');
+        }
+
+        function checkAnswer(selectedOption, btnElement) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+
+            // UI Updates
+            nextBtn.classList.remove('hidden');
+            feedbackContainer.classList.remove('hidden');
+
+            // Disable all buttons
+            const allBtns = optionsContainer.querySelectorAll('button');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-60', 'cursor-not-allowed');
+            });
+
+            // Highlight Logic
+            if (selectedOption.isCorrect) {
+                score++;
+                btnElement.classList.remove('opacity-60', 'hover:bg-stone-50', 'border-stone-200');
+                btnElement.classList.add('bg-teal-50', 'border-teal-500', 'text-teal-900', 'ring-1', 'ring-teal-500');
+                
+                feedbackContainer.className = "mt-6 p-4 rounded-xl border border-teal-200 bg-teal-50 text-teal-900 animate-fade-in";
+                feedbackIcon.textContent = "✅";
+                feedbackTitle.textContent = "Correct!";
+            } else {
+                btnElement.classList.remove('opacity-60', 'hover:bg-stone-50', 'border-stone-200');
+                btnElement.classList.add('bg-red-50', 'border-red-500', 'text-red-900');
+                
+                // Highlight correct one
+                const correctOption = quizData[currentQuestionIndex].options.find(o => o.isCorrect);
+                // Find button with correct text
+                Array.from(allBtns).find(b => b.textContent === correctOption.text).classList.remove('opacity-60');
+                Array.from(allBtns).find(b => b.textContent === correctOption.text).classList.add('bg-green-50', 'border-green-500', 'ring-1', 'ring-green-500');
+
+                feedbackContainer.className = "mt-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-900 animate-fade-in";
+                feedbackIcon.textContent = "❌";
+                feedbackTitle.textContent = "Incorrect";
+            }
+
+            scoreDisplay.textContent = `Score: ${score}`;
+            feedbackRationale.textContent = selectedOption.rationale;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            progressBar.style.width = '100%';
+            
+            finalScoreEl.textContent = `${score}/${quizData.length}`;
+            
+            const pct = (score / quizData.length) * 100;
+            if (pct === 100) finalMessageEl.textContent = "Perfect! You're a digital expert! 🌟";
+            else if (pct >= 80) finalMessageEl.textContent = "Great job! You know your stuff. 👍";
+            else if (pct >= 60) finalMessageEl.textContent = "Good effort! Review the flashcards to improve. 📚";
+            else finalMessageEl.textContent = "Keep studying! You'll get it next time. 💪";
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+</body>
+</html>
+
+
+
+

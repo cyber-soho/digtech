@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Technology: Understanding Digitalization</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
+
+    <!-- Chosen Palette: Warm Neutrals & Calming Harmony -->
+    <!-- Background: Stone-50, Surface: White, Text: Stone-800 -->
+    <!-- Accents: Teal (Digitalization), Indigo (Evolution), Amber (Automation) -->
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                    },
+                    colors: {
+                        stone: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            800: '#292524',
+                            900: '#1c1917',
+                        },
+                        teal: {
+                            600: '#0d9488',
+                            50: '#f0fdfa',
+                        },
+                        indigo: {
+                            600: '#4f46e5',
+                            50: '#eef2ff',
+                        },
+                        amber: {
+                            600: '#d97706',
+                            50: '#fffbeb',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Chart Container Styling per Requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Constrain width on large screens */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar for internal overflow elements */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d6d3d1; 
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e; 
+        }
+
+        /* Utility for hiding elements with transition */
+        .fade-enter {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+        .fade-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .tab-active {
+            border-bottom: 2px solid #292524;
+            color: #292524;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            color: #78716c;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-inactive:hover {
+            color: #57534e;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 antialiased font-sans selection:bg-teal-100 selection:text-teal-900">
+
+    <!-- Application Structure Plan: 
+         1. Header/Hero: Sets the context (Course, Central Question).
+         2. Navigation: Sticky tab bar to navigate the three core lessons + synthesis.
+         3. Dynamic Content Area: 
+            - "The Concept" (Digitalization): Definition cards, Comparison Table, Healthcare Case Study.
+            - "The Timeline" (Evolution): Moore's Law visual, Timeline interactions, Acceleration Chart (Chart.js), Photo Evolution.
+            - "The Engine" (Automation): Levels accordion, Invoice Processing Efficiency Chart (Chart.js), Job Impact stats.
+            - "The Ecosystem" (Synthesis): Interactive Cycle diagram, Real-world examples (Amazon/Covid), Career Skills.
+         4. Footer: Resources & Takeaways.
+         
+         Why this structure? The report is structured linearly (Lesson 1, 2, 3), but the concepts are interconnected. 
+         A tabbed interface allows users to focus on one pillar at a time while easily jumping between them to see connections. 
+         Dashboard-style charts are used to visualize the quantitative data (adoption rates, efficiency gains) which are buried in text in the source.
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. "Time to 50M Users" -> Goal: Compare speed of adoption -> Bar Chart (Chart.js) -> Visualizes the 'Acceleration' concept better than a table.
+         2. "Invoice Processing" -> Goal: Compare Manual vs Auto efficiency -> Grouped Bar Chart -> Highlights the drastic time reduction.
+         3. "Generations Timeline" -> Goal: Change/History -> Interactive Clickable Timeline -> Users can explore each era without wall-of-text.
+         4. "Digitization vs Digitalization" -> Goal: Inform/Distinguish -> Toggle/Comparison Cards -> Clarifies the subtle difference.
+         5. "The Cycle" -> Goal: Relationships -> CSS Grid/Flex Circular Layout -> Shows the feedback loop described in the 'Ecosystem' section.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All icons are Unicode or CSS shapes. -->
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">⚡</span>
+                    <span class="font-serif font-bold text-lg tracking-tight">DigitalTech<span class="text-teal-600">Fund</span></span>
+                </div>
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex space-x-8" id="nav-container">
+                    <button onclick="switchTab('concept')" id="nav-concept" class="tab-active py-5 px-1 text-sm transition-colors">1. Digitalization</button>
+                    <button onclick="switchTab('evolution')" id="nav-evolution" class="tab-inactive py-5 px-1 text-sm transition-colors">2. Evolution</button>
+                    <button onclick="switchTab('automation')" id="nav-automation" class="tab-inactive py-5 px-1 text-sm transition-colors">3. Automation</button>
+                    <button onclick="switchTab('ecosystem')" id="nav-ecosystem" class="tab-inactive py-5 px-1 text-sm transition-colors">Synthesis & Career</button>
+                </div>
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-md text-stone-600 hover:bg-stone-100">
+                    <span class="text-xl">☰</span>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Nav Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-stone-200">
+            <button onclick="switchTab('concept'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 text-sm font-medium hover:bg-stone-50">1. Digitalization</button>
+            <button onclick="switchTab('evolution'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 text-sm font-medium hover:bg-stone-50">2. Evolution</button>
+            <button onclick="switchTab('automation'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 text-sm font-medium hover:bg-stone-50">3. Automation</button>
+            <button onclick="switchTab('ecosystem'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 text-sm font-medium hover:bg-stone-50">Synthesis & Career</button>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
+        
+        <!-- Intro / Hero -->
+        <header class="mb-12 text-center max-w-3xl mx-auto fade-enter fade-enter-active">
+            <div class="inline-block bg-stone-100 rounded-full px-3 py-1 text-xs font-semibold text-stone-600 mb-4 border border-stone-200">Graduate Entry-Level Course</div>
+            <h1 class="text-4xl md:text-5xl font-serif font-bold text-stone-900 mb-4">Understanding Digitalization</h1>
+            <p class="text-xl text-stone-600 italic">"How has digitalization transformed the way we process, store, and leverage information?"</p>
+        </header>
+
+        <!-- SECTION 1: DIGITALIZATION -->
+        <section id="section-concept" class="space-y-12 fade-enter fade-enter-active">
+            <!-- Intro Paragraph -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-stone-100">
+                <h2 class="text-2xl font-bold text-teal-600 mb-4 flex items-center gap-2">
+                    <span>➊</span> The Foundation: Digitalization
+                </h2>
+                <p class="text-stone-600 leading-relaxed">
+                    Digitalization is the bedrock of modern technology. It goes beyond simply converting physical items to digital formats; it fundamentally reimagines how we work, communicate, and create value. In this section, explore the core definitions, the four key components, and the critical difference between <em>Digitization</em> and <em>Digitalization</em>.
+                </p>
+            </div>
+
+            <!-- Definition & Components Grid -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Definition Card -->
+                <div class="bg-teal-50 rounded-2xl p-8 border border-teal-100">
+                    <h3 class="font-serif font-bold text-xl mb-4 text-teal-900">What is Digitalization?</h3>
+                    <p class="mb-6 text-teal-800">The process of converting information from analog (physical) format into digital format—transforming the world into ones and zeros.</p>
+                    <div class="bg-white p-4 rounded-xl shadow-sm">
+                        <span class="font-bold text-teal-700 block mb-1">💡 Core Principle</span>
+                        <span class="text-sm text-stone-600">Digital Transformation = Better Data + Better Decisions + Better Outcomes</span>
+                    </div>
+                </div>
+
+                <!-- Components Interactive List -->
+                <div class="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm">
+                    <h3 class="font-bold text-lg mb-4">4 Key Components</h3>
+                    <div class="space-y-3">
+                        <details class="group p-3 bg-stone-50 rounded-lg cursor-pointer open:bg-teal-50 open:ring-1 open:ring-teal-200 transition-all">
+                            <summary class="font-semibold list-none flex justify-between items-center">
+                                <span>1. Conversion</span>
+                                <span class="text-stone-400 group-open:rotate-180 transition-transform">▼</span>
+                            </summary>
+                            <p class="mt-2 text-sm text-stone-600 pl-2 border-l-2 border-teal-400">Transforming analog data to digital. <br><span class="italic text-xs">Ex: Paper → PDF, Vinyl → MP3</span></p>
+                        </details>
+                        <details class="group p-3 bg-stone-50 rounded-lg cursor-pointer open:bg-teal-50 open:ring-1 open:ring-teal-200 transition-all">
+                            <summary class="font-semibold list-none flex justify-between items-center">
+                                <span>2. Integration</span>
+                                <span class="text-stone-400 group-open:rotate-180 transition-transform">▼</span>
+                            </summary>
+                            <p class="mt-2 text-sm text-stone-600 pl-2 border-l-2 border-teal-400">Connecting digital systems. <br><span class="italic text-xs">Ex: Cloud sync, APIs</span></p>
+                        </details>
+                        <details class="group p-3 bg-stone-50 rounded-lg cursor-pointer open:bg-teal-50 open:ring-1 open:ring-teal-200 transition-all">
+                            <summary class="font-semibold list-none flex justify-between items-center">
+                                <span>3. Optimization</span>
+                                <span class="text-stone-400 group-open:rotate-180 transition-transform">▼</span>
+                            </summary>
+                            <p class="mt-2 text-sm text-stone-600 pl-2 border-l-2 border-teal-400">Using data to improve processes. <br><span class="italic text-xs">Ex: Analytics, monitoring</span></p>
+                        </details>
+                        <details class="group p-3 bg-stone-50 rounded-lg cursor-pointer open:bg-teal-50 open:ring-1 open:ring-teal-200 transition-all">
+                            <summary class="font-semibold list-none flex justify-between items-center">
+                                <span>4. Innovation</span>
+                                <span class="text-stone-400 group-open:rotate-180 transition-transform">▼</span>
+                            </summary>
+                            <p class="mt-2 text-sm text-stone-600 pl-2 border-l-2 border-teal-400">Creating new capabilities. <br><span class="italic text-xs">Ex: Real-time collaboration</span></p>
+                        </details>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+                <div class="bg-stone-100 px-6 py-4 border-b border-stone-200">
+                    <h3 class="font-bold text-lg">Digitization vs. Digitalization</h3>
+                    <p class="text-sm text-stone-500">Understanding the nuance</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-stone-50 text-stone-500 font-medium">
+                            <tr>
+                                <th class="px-6 py-3">Aspect</th>
+                                <th class="px-6 py-3 text-stone-700">Digitization</th>
+                                <th class="px-6 py-3 text-teal-700">Digitalization</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-stone-100">
+                            <tr>
+                                <td class="px-6 py-4 font-medium text-stone-400">Definition</td>
+                                <td class="px-6 py-4">Converting analog to digital</td>
+                                <td class="px-6 py-4 font-medium bg-teal-50/30">Transforming processes using tech</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 font-medium text-stone-400">Example</td>
+                                <td class="px-6 py-4">Scanning paper to PDF</td>
+                                <td class="px-6 py-4 font-medium bg-teal-50/30">Using PDF for auto-workflows</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 font-medium text-stone-400">Value</td>
+                                <td class="px-6 py-4">Accessibility</td>
+                                <td class="px-6 py-4 font-medium bg-teal-50/30">New capabilities & efficiency</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Real World Impact: Healthcare -->
+            <div class="bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl p-8 text-white">
+                <h3 class="text-xl font-bold mb-6 text-center">Real-World Impact: Healthcare</h3>
+                <div class="grid md:grid-cols-2 gap-8 relative">
+                    <!-- 2005 -->
+                    <div class="space-y-4 opacity-75 hover:opacity-100 transition-opacity">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-2xl">🏥</span>
+                            <h4 class="font-bold text-lg border-b border-stone-600 pb-1 w-full">2005 (Analog)</h4>
+                        </div>
+                        <ul class="space-y-2 text-sm text-stone-300">
+                            <li>• Manual file search: <span class="text-red-300">10-15 mins</span></li>
+                            <li>• Handwritten notes: Hard to read</li>
+                            <li>• Paper test results: <span class="text-red-300">2 hours delay</span></li>
+                            <li>• Manual drug interaction checking</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Arrow for mobile -->
+                    <div class="md:hidden flex justify-center text-stone-500">▼</div>
+
+                    <!-- 2025 -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-2xl">💻</span>
+                            <h4 class="font-bold text-lg text-teal-300 border-b border-teal-800 pb-1 w-full">2025 (Digital)</h4>
+                        </div>
+                        <ul class="space-y-2 text-sm">
+                            <li>• <span class="text-teal-300 font-semibold">Instant</span> digital record access</li>
+                            <li>• AI flags medical history automatically</li>
+                            <li>• Integrated test results: <span class="text-teal-300 font-semibold">20 minutes</span></li>
+                            <li>• Automatic drug interaction alerts</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-8 text-center text-sm text-stone-400 border-t border-stone-700 pt-4">
+                    Impact: Faster response, fewer errors, better patient outcomes.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: EVOLUTION -->
+        <section id="section-evolution" class="hidden space-y-12">
+            <!-- Intro -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-stone-100">
+                <h2 class="text-2xl font-bold text-indigo-600 mb-4 flex items-center gap-2">
+                    <span>➋</span> The Evolution of Technology
+                </h2>
+                <p class="text-stone-600 leading-relaxed">
+                    Technology doesn't improve linearly—it improves exponentially. From vacuum tubes to quantum computing, each generation builds on the previous one. This section traces the history of tech, visualizes the acceleration of adoption, and explores Moore's Law.
+                </p>
+            </div>
+
+            <!-- Moore's Law Concept -->
+            <div class="bg-indigo-50 rounded-2xl p-6 border border-indigo-100 text-center">
+                <h3 class="font-bold text-xl text-indigo-900 mb-2">Moore's Law (1965)</h3>
+                <p class="text-indigo-800 max-w-2xl mx-auto mb-4">"The number of transistors on a microchip doubles approximately every two years."</p>
+                <div class="inline-flex gap-4 text-sm font-medium text-indigo-700">
+                    <span>📈 Exponential Growth</span>
+                    <span>💰 Cost Halves</span>
+                    <span>🚀 50+ Years Validity</span>
+                </div>
+            </div>
+
+            <!-- Adoption Chart -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
+                <div class="mb-6">
+                    <h3 class="font-bold text-lg">The Acceleration of Change</h3>
+                    <p class="text-sm text-stone-500">Years taken to reach 50 million users</p>
+                </div>
+                <!-- Chart Container -->
+                <div class="chart-container">
+                    <canvas id="adoptionChart"></canvas>
+                </div>
+                <div class="mt-4 text-xs text-stone-400 text-center">
+                    Note: Pokémon GO took just 19 days.
+                </div>
+            </div>
+
+            <!-- Interactive Timeline -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-lg px-2">Evolution Timeline</h3>
+                <div class="flex flex-wrap gap-2 justify-center mb-4" id="timeline-btns">
+                    <!-- Buttons generated by JS -->
+                </div>
+                <div id="timeline-content" class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-indigo-500 min-h-[200px] flex flex-col justify-center items-center text-center transition-all duration-300">
+                    <!-- Content injected by JS -->
+                </div>
+            </div>
+
+            <!-- Photography Example Grid -->
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- 1990s -->
+                <div class="bg-stone-200 p-6 rounded-xl">
+                    <div class="text-3xl mb-3">🎞️</div>
+                    <h4 class="font-bold mb-2">1990s: Film</h4>
+                    <ul class="text-sm space-y-2 text-stone-600">
+                        <li>Wait 7-14 days</li>
+                        <li>No preview</li>
+                        <li>~$1 per photo</li>
+                    </ul>
+                </div>
+                <!-- 2000s -->
+                <div class="bg-stone-100 p-6 rounded-xl">
+                    <div class="text-3xl mb-3">📷</div>
+                    <h4 class="font-bold mb-2">2000s: Digital</h4>
+                    <ul class="text-sm space-y-2 text-stone-600">
+                        <li>Instant preview</li>
+                        <li>Email sharing</li>
+                        <li>~$0 per photo</li>
+                    </ul>
+                </div>
+                <!-- 2020s -->
+                <div class="bg-indigo-600 text-white p-6 rounded-xl shadow-lg transform md:-translate-y-2">
+                    <div class="text-3xl mb-3">🤖</div>
+                    <h4 class="font-bold mb-2">2020s: Computational</h4>
+                    <ul class="text-sm space-y-2 text-indigo-100">
+                        <li>AI Processing</li>
+                        <li>Instant Global Share</li>
+                        <li>Built-in Search</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: AUTOMATION -->
+        <section id="section-automation" class="hidden space-y-12">
+            <!-- Intro -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-stone-100">
+                <h2 class="text-2xl font-bold text-amber-600 mb-4 flex items-center gap-2">
+                    <span>➌</span> The Engine: Automation
+                </h2>
+                <p class="text-stone-600 leading-relaxed">
+                    Once data is digital, systems can be programmed to act on it automatically. Automation isn't about replacing people; it's about replacing tasks. This section breaks down the levels of automation and proves the efficiency gains with data.
+                </p>
+            </div>
+
+            <!-- Levels of Automation -->
+            <div class="grid md:grid-cols-4 gap-4">
+                <div class="p-4 bg-white border border-stone-200 rounded-xl hover:border-amber-400 transition-colors">
+                    <span class="text-xs font-bold text-stone-400 uppercase tracking-wider">Level 1</span>
+                    <h4 class="font-bold text-lg mb-2">Basic</h4>
+                    <p class="text-xs text-stone-600">Simple, rule-based. <br><em>Ex: Auto-reply</em></p>
+                </div>
+                <div class="p-4 bg-white border border-stone-200 rounded-xl hover:border-amber-400 transition-colors">
+                    <span class="text-xs font-bold text-stone-400 uppercase tracking-wider">Level 2</span>
+                    <h4 class="font-bold text-lg mb-2">Process</h4>
+                    <p class="text-xs text-stone-600">Multi-step workflows. <br><em>Ex: Onboarding</em></p>
+                </div>
+                <div class="p-4 bg-white border border-stone-200 rounded-xl hover:border-amber-400 transition-colors">
+                    <span class="text-xs font-bold text-stone-400 uppercase tracking-wider">Level 3</span>
+                    <h4 class="font-bold text-lg mb-2">Intelligent</h4>
+                    <p class="text-xs text-stone-600">AI decision-making. <br><em>Ex: Fraud detection</em></p>
+                </div>
+                <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                    <span class="text-xs font-bold text-amber-600 uppercase tracking-wider">Level 4</span>
+                    <h4 class="font-bold text-lg mb-2 text-amber-900">Autonomous</h4>
+                    <p class="text-xs text-stone-600">Self-learning systems. <br><em>Ex: Self-driving cars</em></p>
+                </div>
+            </div>
+
+            <!-- Efficiency Chart -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-6">
+                    <div>
+                        <h3 class="font-bold text-lg">Case Study: Invoice Processing</h3>
+                        <p class="text-sm text-stone-500">Manual Process vs. Automated Process</p>
+                    </div>
+                    <div class="mt-4 md:mt-0 text-right">
+                        <span class="block text-2xl font-bold text-green-600">6x Faster</span>
+                        <span class="text-xs text-stone-500">Efficiency Gain</span>
+                    </div>
+                </div>
+                
+                <!-- Chart Container -->
+                <div class="chart-container">
+                    <canvas id="invoiceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Job Impact Stats -->
+            <div class="bg-stone-800 text-stone-200 rounded-2xl p-8 grid md:grid-cols-2 items-center gap-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-2">Will Robots Take My Job?</h3>
+                    <p class="mb-4">Common Misconception: "Automation will replace humans."</p>
+                    <p class="font-bold text-amber-400">Reality: Automation replaces tasks, not people.</p>
+                </div>
+                <div class="bg-stone-700 p-6 rounded-xl text-center">
+                    <div class="text-4xl font-bold text-white mb-1">60%</div>
+                    <p class="text-sm text-stone-300">of occupations have...</p>
+                    <div class="text-3xl font-bold text-amber-400 my-2">30%+</div>
+                    <p class="text-sm text-stone-300">automatable activities</p>
+                    <div class="mt-4 text-xs text-stone-500 border-t border-stone-600 pt-2">Source: McKinsey & Company</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: ECOSYSTEM -->
+        <section id="section-ecosystem" class="hidden space-y-12">
+            <!-- Intro -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm border border-stone-100">
+                <h2 class="text-2xl font-bold text-stone-800 mb-4 flex items-center gap-2">
+                    <span>➍</span> The Ecosystem & You
+                </h2>
+                <p class="text-stone-600 leading-relaxed">
+                    Digitalization, Technology Evolution, and Automation form a continuous cycle of improvement. Understanding this ecosystem is key to defining your career in the digital age.
+                </p>
+            </div>
+
+            <!-- The Cycle Diagram -->
+            <div class="relative max-w-2xl mx-auto py-8">
+                <div class="absolute left-1/2 top-0 bottom-0 w-1 bg-stone-200 -translate-x-1/2 z-0 hidden md:block"></div>
+                
+                <div class="space-y-8 relative z-10">
+                    <!-- Step 1 -->
+                    <div class="flex flex-col md:flex-row items-center gap-4 group cursor-default">
+                        <div class="flex-1 md:text-right">
+                            <h4 class="font-bold text-teal-700">1. Digitalization</h4>
+                            <p class="text-xs text-stone-500">Converts analog to digital</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold shadow-md group-hover:scale-110 transition-transform">1</div>
+                        <div class="flex-1 bg-white p-3 rounded-lg shadow-sm border border-stone-100 text-sm">
+                            Creates Data
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="flex flex-col md:flex-row items-center gap-4 group cursor-default">
+                        <div class="flex-1 md:text-right order-1 md:order-none">
+                            <div class="bg-white p-3 rounded-lg shadow-sm border border-stone-100 text-sm md:text-right">
+                                Enables New Capabilities
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md group-hover:scale-110 transition-transform order-first md:order-none">2</div>
+                        <div class="flex-1 order-2 md:order-none">
+                            <h4 class="font-bold text-indigo-700">2. Tech Evolution</h4>
+                            <p class="text-xs text-stone-500">Provides better tools</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="flex flex-col md:flex-row items-center gap-4 group cursor-default">
+                        <div class="flex-1 md:text-right">
+                            <h4 class="font-bold text-amber-700">3. Automation</h4>
+                            <p class="text-xs text-stone-500">Uses digital data & tools</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold shadow-md group-hover:scale-110 transition-transform">3</div>
+                        <div class="flex-1 bg-white p-3 rounded-lg shadow-sm border border-stone-100 text-sm">
+                            Improves Efficiency
+                        </div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="flex flex-col md:flex-row items-center gap-4 group cursor-default">
+                        <div class="flex-1 md:text-right order-1 md:order-none">
+                            <div class="bg-white p-3 rounded-lg shadow-sm border border-stone-100 text-sm md:text-right">
+                                Drive Better Digitalization
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-stone-600 text-white flex items-center justify-center font-bold shadow-md group-hover:scale-110 transition-transform order-first md:order-none">4</div>
+                        <div class="flex-1 order-2 md:order-none">
+                            <h4 class="font-bold text-stone-700">4. Insights</h4>
+                            <p class="text-xs text-stone-500">From automated processes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Career Skills Interactive -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Tabs for Real World -->
+                <div class="bg-white p-6 rounded-2xl border border-stone-200">
+                    <h3 class="font-bold mb-4 border-b pb-2">Real World Examples</h3>
+                    <div class="flex gap-2 mb-4">
+                        <button onclick="showExample('amazon')" class="flex-1 py-2 text-sm bg-stone-100 hover:bg-stone-200 rounded transition" id="btn-amazon">Amazon</button>
+                        <button onclick="showExample('healthcare')" class="flex-1 py-2 text-sm bg-stone-100 hover:bg-stone-200 rounded transition" id="btn-healthcare">Healthcare (Covid)</button>
+                    </div>
+                    <div id="example-content" class="text-sm space-y-3 min-h-[150px]">
+                        <!-- JS injected content -->
+                    </div>
+                </div>
+
+                <!-- Skills Matrix -->
+                <div class="bg-stone-900 text-white p-6 rounded-2xl">
+                    <h3 class="font-bold mb-4 text-teal-400">Essential Skills</h3>
+                    <div class="space-y-4 text-sm">
+                        <div>
+                            <span class="block text-xs uppercase text-stone-500 font-bold">Technical</span>
+                            <p>Python, R, SQL, Machine Learning, Cloud Computing</p>
+                        </div>
+                        <div>
+                            <span class="block text-xs uppercase text-stone-500 font-bold">Business</span>
+                            <p>Problem-solving, Domain knowledge, Communication</p>
+                        </div>
+                        <div>
+                            <span class="block text-xs uppercase text-stone-500 font-bold">Human</span>
+                            <p>Ethical thinking, Empathy, Critical thinking</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-teal-600 to-indigo-600 text-white p-8 rounded-2xl text-center">
+                <p class="text-lg md:text-xl font-bold mb-2">"You're not just learning technology—you're shaping the future." 🚀</p>
+                <p class="text-sm text-white/80">Remember: Technology should serve people, not replace them.</p>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-stone-200 mt-12 py-8">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <h4 class="font-bold text-stone-800 mb-4">Additional Resources</h4>
+            <div class="flex flex-wrap justify-center gap-4 text-sm text-stone-600 mb-8">
+                <span class="px-3 py-1 bg-stone-50 rounded border">AWS / Azure / GCP</span>
+                <span class="px-3 py-1 bg-stone-50 rounded border">Coursera / edX / MIT</span>
+                <span class="px-3 py-1 bg-stone-50 rounded border">IEEE / ISO / W3C</span>
+            </div>
+            <p class="text-xs text-stone-400">Digital Technology | Understanding Digitalization</p>
+        </div>
+    </footer>
+
+    <!-- LOGIC -->
+    <script>
+        // --- DATA & STATE ---
+        const state = {
+            activeTab: 'concept',
+            timelineIndex: 6 // Start at current
+        };
+
+        const timelineData = [
+            { period: "1st Gen (40s-50s)", tech: "Vacuum Tubes", desc: "Room-sized computers like ENIAC.", impact: "Scientific calculation" },
+            { period: "2nd Gen (60s-70s)", tech: "Transistors", desc: "Mainframes.", impact: "Business computing begins" },
+            { period: "3rd Gen (80s)", tech: "Integrated Circuits", desc: "Personal computers (PCs).", impact: "Computing becomes accessible" },
+            { period: "4th Gen (90s)", tech: "Microprocessors", desc: "Internet boom.", impact: "Global connectivity" },
+            { period: "5th Gen (00s)", tech: "Mobile & Cloud", desc: "Smartphones, SaaS.", impact: "Computing becomes ubiquitous" },
+            { period: "6th Gen (10s)", tech: "AI & IoT", desc: "Big Data, Intelligent systems.", impact: "Systems become smart" },
+            { period: "Current (20s)", tech: "Quantum & Gen AI", desc: "Edge computing, Reality blurring.", impact: "Digital/Physical merge" }
+        ];
+
+        const examples = {
+            amazon: `
+                <p><strong>Digitalization:</strong> Moved shopping online, digital catalogs.</p>
+                <p><strong>Evolution:</strong> Started with books → Cloud Infrastructure (AWS).</p>
+                <p><strong>Automation:</strong> Robotic warehouses & AI recommendations.</p>
+                <p class="text-teal-600 font-bold mt-2">Result: Transformed retail globally.</p>
+            `,
+            healthcare: `
+                <p><strong>Digitalization:</strong> EHR, Telemedicine platforms.</p>
+                <p><strong>Evolution:</strong> Video conferencing, Mobile health apps.</p>
+                <p><strong>Automation:</strong> AI symptom checkers, Remote monitoring.</p>
+                <p class="text-teal-600 font-bold mt-2">Result: Maintained access during lockdowns.</p>
+            `
+        };
+
+        // --- NAVIGATION LOGIC ---
+        function switchTab(tabId) {
+            // Update State
+            state.activeTab = tabId;
+
+            // DOM Elements
+            const tabs = ['concept', 'evolution', 'automation', 'ecosystem'];
+            
+            tabs.forEach(t => {
+                const section = document.getElementById(`section-${t}`);
+                const btn = document.getElementById(`nav-${t}`);
+                
+                if (t === tabId) {
+                    section.classList.remove('hidden');
+                    // Add fade animation
+                    section.classList.remove('fade-enter');
+                    void section.offsetWidth; // trigger reflow
+                    section.classList.add('fade-enter-active');
+                    
+                    // Button styles
+                    if (btn) {
+                        btn.classList.remove('tab-inactive');
+                        btn.classList.add('tab-active');
+                    }
+                } else {
+                    section.classList.add('hidden');
+                    if (btn) {
+                        btn.classList.remove('tab-active');
+                        btn.classList.add('tab-inactive');
+                    }
+                }
+            });
+
+            // Trigger chart resize/render if entering a section with charts
+            if (tabId === 'evolution') renderAdoptionChart();
+            if (tabId === 'automation') renderInvoiceChart();
+
+            // Scroll to top of main content on mobile
+            if(window.innerWidth < 768) {
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- SECTION SPECIFIC LOGIC ---
+
+        // 1. Timeline
+        function initTimeline() {
+            const btnContainer = document.getElementById('timeline-btns');
+            btnContainer.innerHTML = '';
+            
+            timelineData.forEach((item, index) => {
+                const btn = document.createElement('button');
+                btn.innerText = item.period.split(' ')[0]; // Just "1st", "2nd" etc
+                btn.className = `px-3 py-1 text-xs rounded-full border transition-all ${index === state.timelineIndex ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-stone-500 border-stone-200 hover:border-indigo-400'}`;
+                btn.onclick = () => setTimeline(index);
+                btnContainer.appendChild(btn);
+            });
+            
+            setTimeline(state.timelineIndex); // Initial load
+        }
+
+        function setTimeline(index) {
+            state.timelineIndex = index;
+            const content = document.getElementById('timeline-content');
+            const data = timelineData[index];
+            
+            // Re-render buttons to update active state
+            const btns = document.getElementById('timeline-btns').children;
+            Array.from(btns).forEach((btn, i) => {
+                btn.className = `px-3 py-1 text-xs rounded-full border transition-all ${i === index ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-stone-500 border-stone-200 hover:border-indigo-400'}`;
+            });
+
+            // Update content with fade
+            content.style.opacity = 0;
+            setTimeout(() => {
+                content.innerHTML = `
+                    <h4 class="text-xl font-bold text-indigo-900 mb-2">${data.period}</h4>
+                    <div class="text-3xl font-bold text-indigo-600 mb-2">${data.tech}</div>
+                    <p class="text-stone-600 mb-4">${data.desc}</p>
+                    <div class="inline-block bg-indigo-50 px-4 py-2 rounded-lg text-sm text-indigo-800 font-semibold">
+                        Impact: ${data.impact}
+                    </div>
+                `;
+                content.style.opacity = 1;
+            }, 200);
+        }
+
+        // 2. Real World Examples
+        function showExample(key) {
+            const content = document.getElementById('example-content');
+            content.innerHTML = examples[key];
+            
+            // Toggle active button styles
+            const btnAmazon = document.getElementById('btn-amazon');
+            const btnHealth = document.getElementById('btn-healthcare');
+            
+            if(key === 'amazon') {
+                btnAmazon.classList.add('bg-stone-800', 'text-white');
+                btnAmazon.classList.remove('bg-stone-100');
+                btnHealth.classList.remove('bg-stone-800', 'text-white');
+                btnHealth.classList.add('bg-stone-100');
+            } else {
+                btnHealth.classList.add('bg-stone-800', 'text-white');
+                btnHealth.classList.remove('bg-stone-100');
+                btnAmazon.classList.remove('bg-stone-800', 'text-white');
+                btnAmazon.classList.add('bg-stone-100');
+            }
+        }
+
+        // --- CHARTS ---
+        let adoptionChartInstance = null;
+        let invoiceChartInstance = null;
+
+        function renderAdoptionChart() {
+            const ctx = document.getElementById('adoptionChart').getContext('2d');
+            
+            if (adoptionChartInstance) return; // Already rendered
+
+            adoptionChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Radio', 'Television', 'Internet', 'Facebook', 'Pokémon GO'],
+                    datasets: [{
+                        label: 'Years to reach 50 Million Users',
+                        data: [38, 13, 4, 3.5, 0.05], // 19 days approx 0.05 years
+                        backgroundColor: [
+                            '#e5e7eb', '#d1d5db', '#9ca3af', '#4f46e5', '#ec4899'
+                        ],
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Horizontal bar
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if(context.raw < 1) return '19 Days';
+                                    return context.raw + ' Years';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Years' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderInvoiceChart() {
+            const ctx = document.getElementById('invoiceChart').getContext('2d');
+            
+            if (invoiceChartInstance) return;
+
+            invoiceChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Time per Invoice (Minutes)', 'Error Rate (%)'],
+                    datasets: [
+                        {
+                            label: 'Manual Process',
+                            data: [17.5, 7.5], // Averages from report
+                            backgroundColor: '#ef4444', // Red for bad
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Automated Process',
+                            data: [2.5, 0.5],
+                            backgroundColor: '#10b981', // Green for good
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initTimeline();
+            showExample('amazon'); // Default load
+            switchTab('concept'); // Default tab
+        });
+
+    </script>
+</body>
+</html>
+
+
+
+
