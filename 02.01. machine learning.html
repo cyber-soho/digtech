@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning: The Revolution That's Already Here</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Chart Container Styles */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Hide scrollbar for clean horizontal scrolling if needed */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals & Deep Indigo -->
+    <!-- Background: Stone-50 (Warm White) -->
+    <!-- Primary Text: Stone-800 -->
+    <!-- Accents: Indigo-600 (Tech/Logic), Orange-500 (Data/Highlights) -->
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans antialiased selection:bg-indigo-100 selection:text-indigo-800">
+
+    <!-- Application Structure Plan:
+         1. Hero: Immediate engagement with "How does it work?" questions (Netflix/Spam).
+         2. Foundations: Interactive "Flip the Script" visual to contrast Trad Programming vs ML.
+         3. The Three Kingdoms: Tabbed interface to explore Supervised, Unsupervised, and RL without overwhelming text.
+         4. The Engine (Metrics): An interactive calculator to teach Precision/Recall/Accuracy actively, connected to a Chart.js bar chart.
+         5. Deep Learning: A Radar Chart comparing Traditional ML vs Deep Learning to visualize the trade-offs (Data, Compute, Interpretability).
+         6. The Pipeline: A vertical stepper to walk through the lifecycle.
+         7. Ethics & Future: Grid layouts for real-world impact and challenges.
+         This structure moves from "What" -> "How" -> "Deep Dive" -> "Context", allowing users to build mental models step-by-step.
+    -->
+
+    <!-- Visualization & Content Choices:
+         - Trad vs ML: CSS/Flexbox Flowchart. Interaction: Toggle button. Justification: Shows the fundamental logic shift clearly. NO SVG.
+         - Metrics Lab: Chart.js Bar Chart. Interaction: Sliders for TP/FP/TN/FN. Justification: Abstract formulas are hard; seeing bars move makes metrics intuitive. NO SVG.
+         - Deep Learning: Chart.js Radar Chart. Interaction: Hover. Justification: Multivariable comparison is best suited for Radar charts. NO SVG.
+         - Navigation: Sticky top bar for easy jumping between concepts.
+         - Icons: Unicode characters (e.g., 🧠, 🤖, 📊). NO SVG.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <span class="text-2xl">🧠</span>
+                    <span class="font-bold text-xl tracking-tight text-indigo-900">ML Fundamentals</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#foundations" class="text-stone-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Foundations</a>
+                    <a href="#kingdoms" class="text-stone-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">The 3 Kingdoms</a>
+                    <a href="#metrics" class="text-stone-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">The Lab</a>
+                    <a href="#deep-learning" class="text-stone-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Deep Learning</a>
+                    <a href="#ethics" class="text-stone-600 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Ethics</a>
+                </div>
+                <!-- Mobile menu button stub -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-stone-600 hover:text-indigo-600 text-xl">☰</button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-stone-200">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#foundations" class="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:bg-stone-100">Foundations</a>
+                <a href="#kingdoms" class="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:bg-stone-100">The 3 Kingdoms</a>
+                <a href="#metrics" class="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:bg-stone-100">The Lab</a>
+                <a href="#deep-learning" class="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:bg-stone-100">Deep Learning</a>
+                <a href="#ethics" class="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:bg-stone-100">Ethics</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-20">
+
+        <!-- Hero Section -->
+        <section class="text-center space-y-8 py-12">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-stone-900 tracking-tight">
+                Machine Learning: <span class="text-indigo-600">The Revolution</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-stone-600 max-w-3xl mx-auto">
+                How does Netflix know what you'll watch next? How does your phone recognize your face? It's not magic. It's math.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-10">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+                    <div class="text-4xl mb-4">📺</div>
+                    <h3 class="font-bold text-lg mb-2">Recommendation</h3>
+                    <p class="text-stone-500 text-sm">Netflix analyzes viewing history to predict your next binge.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+                    <div class="text-4xl mb-4">📧</div>
+                    <h3 class="font-bold text-lg mb-2">Filtering</h3>
+                    <p class="text-stone-500 text-sm">Email providers learn from 10,000s of examples to block spam.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+                    <div class="text-4xl mb-4">🤳</div>
+                    <h3 class="font-bold text-lg mb-2">Recognition</h3>
+                    <p class="text-stone-500 text-sm">Phones map facial geometry to unlock securely.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Foundations: Trad vs ML -->
+        <section id="foundations" class="scroll-mt-20">
+            <div class="mb-8 border-l-4 border-indigo-600 pl-4">
+                <h2 class="text-3xl font-bold text-stone-900">1. The Paradigm Shift</h2>
+                <p class="mt-2 text-lg text-stone-600">Traditional programming relies on explicit rules. Machine Learning flips this upside down: you provide the answers (data), and the machine discovers the rules.</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-stone-200 overflow-hidden">
+                <div class="bg-stone-100 px-6 py-4 border-b border-stone-200 flex justify-between items-center">
+                    <h3 class="font-semibold text-stone-700">Logic Flow Simulator</h3>
+                    <button id="toggle-paradigm-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                        🔄 Switch Paradigm
+                    </button>
+                </div>
+                <div class="p-8 md:p-12 relative min-h-[300px] flex items-center justify-center bg-slate-50">
+                    
+                    <!-- Traditional View -->
+                    <div id="flow-traditional" class="flex flex-col md:flex-row items-center gap-4 transition-opacity duration-500 w-full justify-center">
+                        <div class="flex flex-col gap-4">
+                            <div class="bg-white border-2 border-stone-300 p-4 rounded-lg w-48 text-center shadow-sm">
+                                <span class="block text-2xl mb-1">📜</span>
+                                <span class="font-bold text-stone-700">Rules</span>
+                                <p class="text-xs text-stone-500">"If subject='Free Money'..."</p>
+                            </div>
+                            <div class="bg-white border-2 border-stone-300 p-4 rounded-lg w-48 text-center shadow-sm">
+                                <span class="block text-2xl mb-1">💿</span>
+                                <span class="font-bold text-stone-700">Data</span>
+                                <p class="text-xs text-stone-500">Email Content</p>
+                            </div>
+                        </div>
+                        <div class="text-3xl text-stone-400">➡</div>
+                        <div class="bg-indigo-100 border-2 border-indigo-300 p-6 rounded-xl w-48 text-center shadow-md">
+                            <span class="block text-2xl mb-2">💻</span>
+                            <span class="font-bold text-indigo-900">Traditional Prog.</span>
+                            <p class="text-xs text-indigo-700 mt-1">Executes Logic</p>
+                        </div>
+                        <div class="text-3xl text-stone-400">➡</div>
+                        <div class="bg-green-100 border-2 border-green-300 p-4 rounded-lg w-48 text-center shadow-sm">
+                            <span class="block text-2xl mb-1">📤</span>
+                            <span class="font-bold text-green-900">Answers</span>
+                            <p class="text-xs text-green-700">Spam / Not Spam</p>
+                        </div>
+                    </div>
+
+                    <!-- ML View (Hidden by default) -->
+                    <div id="flow-ml" class="hidden flex flex-col md:flex-row items-center gap-4 transition-opacity duration-500 w-full justify-center">
+                        <div class="flex flex-col gap-4">
+                            <div class="bg-green-100 border-2 border-green-300 p-4 rounded-lg w-48 text-center shadow-sm">
+                                <span class="block text-2xl mb-1">📤</span>
+                                <span class="font-bold text-green-900">Answers</span>
+                                <p class="text-xs text-green-700">Labels (Spam/Ham)</p>
+                            </div>
+                            <div class="bg-white border-2 border-stone-300 p-4 rounded-lg w-48 text-center shadow-sm">
+                                <span class="block text-2xl mb-1">💿</span>
+                                <span class="font-bold text-stone-700">Data</span>
+                                <p class="text-xs text-stone-500">Email Content</p>
+                            </div>
+                        </div>
+                        <div class="text-3xl text-stone-400">➡</div>
+                        <div class="bg-orange-100 border-2 border-orange-300 p-6 rounded-xl w-48 text-center shadow-md">
+                            <span class="block text-2xl mb-2">🤖</span>
+                            <span class="font-bold text-orange-900">Machine Learning</span>
+                            <p class="text-xs text-orange-700 mt-1">Finds Patterns</p>
+                        </div>
+                        <div class="text-3xl text-stone-400">➡</div>
+                        <div class="bg-white border-2 border-stone-300 p-4 rounded-lg w-48 text-center shadow-sm">
+                            <span class="block text-2xl mb-1">📜</span>
+                            <span class="font-bold text-stone-700">Rules (Model)</span>
+                            <p class="text-xs text-stone-500">Learned Logic</p>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="bg-white p-4 text-center text-sm text-stone-500 border-t border-stone-200">
+                    <p id="flow-description">Traditional programming requires you to know the rules beforehand.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Three Kingdoms -->
+        <section id="kingdoms" class="scroll-mt-20">
+            <div class="mb-8 border-l-4 border-orange-500 pl-4">
+                <h2 class="text-3xl font-bold text-stone-900">2. The Three Kingdoms of ML</h2>
+                <p class="mt-2 text-lg text-stone-600">Machine Learning isn't one thing. It's broadly categorized into three main approaches based on how the learning happens.</p>
+            </div>
+
+            <!-- Tabbed Interface -->
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-200">
+                <div class="flex border-b border-stone-200 overflow-x-auto">
+                    <button class="kingdom-tab flex-1 py-4 px-6 text-center font-semibold text-stone-600 hover:text-indigo-600 hover:bg-stone-50 border-b-2 border-transparent focus:outline-none transition-all active-tab" data-target="supervised">
+                        1. Supervised Learning
+                    </button>
+                    <button class="kingdom-tab flex-1 py-4 px-6 text-center font-semibold text-stone-600 hover:text-indigo-600 hover:bg-stone-50 border-b-2 border-transparent focus:outline-none transition-all" data-target="unsupervised">
+                        2. Unsupervised Learning
+                    </button>
+                    <button class="kingdom-tab flex-1 py-4 px-6 text-center font-semibold text-stone-600 hover:text-indigo-600 hover:bg-stone-50 border-b-2 border-transparent focus:outline-none transition-all" data-target="reinforcement">
+                        3. Reinforcement Learning
+                    </button>
+                </div>
+
+                <div class="p-8 min-h-[300px]">
+                    <!-- Supervised Content -->
+                    <div id="supervised" class="kingdom-content space-y-6">
+                        <div class="flex items-start gap-4">
+                            <div class="text-5xl">👨‍🏫</div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-indigo-900 mb-2">Learning with a Teacher</h3>
+                                <p class="text-stone-700 mb-4">The algorithm is trained on labeled data. It knows the "correct" answer for past examples and tries to predict answers for new data.</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-indigo-50 p-4 rounded-lg">
+                                        <h4 class="font-bold text-indigo-800">Goal</h4>
+                                        <p class="text-sm">Predict labels for new data.</p>
+                                    </div>
+                                    <div class="bg-stone-50 p-4 rounded-lg">
+                                        <h4 class="font-bold text-stone-800">Examples</h4>
+                                        <ul class="text-sm list-disc list-inside text-stone-600">
+                                            <li>Spam Detection (Spam/Not Spam)</li>
+                                            <li>House Price Prediction</li>
+                                            <li>Medical Diagnosis</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Unsupervised Content -->
+                    <div id="unsupervised" class="kingdom-content hidden space-y-6">
+                        <div class="flex items-start gap-4">
+                            <div class="text-5xl">🧩</div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-orange-900 mb-2">Finding Hidden Patterns</h3>
+                                <p class="text-stone-700 mb-4">The algorithm is given data without explicit labels. It must discover the structure, clusters, or anomalies on its own, like a child sorting LEGOs by color.</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-orange-50 p-4 rounded-lg">
+                                        <h4 class="font-bold text-orange-800">Goal</h4>
+                                        <p class="text-sm">Discover structure in data.</p>
+                                    </div>
+                                    <div class="bg-stone-50 p-4 rounded-lg">
+                                        <h4 class="font-bold text-stone-800">Examples</h4>
+                                        <ul class="text-sm list-disc list-inside text-stone-600">
+                                            <li>Customer Segmentation</li>
+                                            <li>Anomaly Detection</li>
+                                            <li>Recommendation Systems</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reinforcement Content -->
+                    <div id="reinforcement" class="kingdom-content hidden space-y-6">
+                        <div class="flex items-start gap-4">
+                            <div class="text-5xl">🐕</div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-green-900 mb-2">Trial and Error</h3>
+                                <p class="text-stone-700 mb-4">The agent interacts with an environment and learns through a system of rewards and penalties, seeking to maximize the long-term reward.</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-green-50 p-4 rounded-lg">
+                                        <h4 class="font-bold text-green-800">Goal</h4>
+                                        <p class="text-sm">Learn optimal behavior strategy.</p>
+                                    </div>
+                                    <div class="bg-stone-50 p-4 rounded-lg">
+                                        <h4 class="font-bold text-stone-800">Examples</h4>
+                                        <ul class="text-sm list-disc list-inside text-stone-600">
+                                            <li>Self-driving Cars</li>
+                                            <li>Game Playing (Chess, Go)</li>
+                                            <li>Robotics</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Anatomy & Metrics Lab -->
+        <section id="metrics" class="scroll-mt-20">
+            <div class="mb-8 border-l-4 border-indigo-600 pl-4">
+                <h2 class="text-3xl font-bold text-stone-900">3. The Engine Room: Evaluation</h2>
+                <p class="mt-2 text-lg text-stone-600">How do we know if a model works? We can't just rely on "Accuracy". Explore how different metrics reveal different truths about a model's performance.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Controls -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
+                        <h3 class="font-bold text-xl mb-4 text-stone-800">Confusion Matrix Simulator</h3>
+                        <p class="text-sm text-stone-500 mb-6">Adjust the outcomes of a hypothetical model (e.g., a Cancer Detector) to see how metrics change.</p>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="flex justify-between text-sm font-medium text-green-700 mb-1">
+                                    <span>True Positives (Correctly Detected)</span>
+                                    <span id="val-tp">50</span>
+                                </label>
+                                <input type="range" min="0" max="100" value="50" id="input-tp" class="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer accent-green-600">
+                            </div>
+                            <div>
+                                <label class="flex justify-between text-sm font-medium text-red-700 mb-1">
+                                    <span>False Positives (False Alarm)</span>
+                                    <span id="val-fp">10</span>
+                                </label>
+                                <input type="range" min="0" max="100" value="10" id="input-fp" class="w-full h-2 bg-red-200 rounded-lg appearance-none cursor-pointer accent-red-600">
+                            </div>
+                            <div>
+                                <label class="flex justify-between text-sm font-medium text-orange-700 mb-1">
+                                    <span>False Negatives (Missed)</span>
+                                    <span id="val-fn">5</span>
+                                </label>
+                                <input type="range" min="0" max="100" value="5" id="input-fn" class="w-full h-2 bg-orange-200 rounded-lg appearance-none cursor-pointer accent-orange-600">
+                            </div>
+                            <div>
+                                <label class="flex justify-between text-sm font-medium text-blue-700 mb-1">
+                                    <span>True Negatives (Correctly Cleared)</span>
+                                    <span id="val-tn">80</span>
+                                </label>
+                                <input type="range" min="0" max="100" value="80" id="input-tn" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-4 border-t border-stone-100 text-xs text-stone-400">
+                            Adjust sliders to recalculate metrics instantly.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualization -->
+                <div class="lg:col-span-7">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 h-full flex flex-col justify-center">
+                        <div class="chart-container">
+                            <canvas id="metricsChart"></canvas>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mt-6 text-center">
+                            <div class="p-3 bg-stone-50 rounded-lg">
+                                <div class="text-xs text-stone-500 uppercase tracking-wide">Precision</div>
+                                <div class="font-bold text-indigo-700 text-lg" id="disp-precision">--%</div>
+                                <div class="text-[10px] text-stone-400">Trustworthiness of a "Positive"</div>
+                            </div>
+                            <div class="p-3 bg-stone-50 rounded-lg">
+                                <div class="text-xs text-stone-500 uppercase tracking-wide">Recall</div>
+                                <div class="font-bold text-indigo-700 text-lg" id="disp-recall">--%</div>
+                                <div class="text-[10px] text-stone-400">Ability to find all "Positives"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Deep Learning -->
+        <section id="deep-learning" class="scroll-mt-20">
+            <div class="mb-8 border-l-4 border-purple-600 pl-4">
+                <h2 class="text-3xl font-bold text-stone-900">4. Deep Learning</h2>
+                <p class="mt-2 text-lg text-stone-600">When data gets massive and complex, Traditional ML struggles. Enter Deep Learning: Neural Networks that mimic the human brain.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="order-2 md:order-1">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
+                         <div class="chart-container">
+                            <canvas id="dlRadarChart"></canvas>
+                        </div>
+                        <p class="text-center text-sm text-stone-500 mt-4">Deep Learning vs Traditional ML Trade-offs</p>
+                    </div>
+                </div>
+                <div class="order-1 md:order-2 space-y-6">
+                    <h3 class="text-2xl font-bold text-purple-900">Why Deep Learning Dominates</h3>
+                    <ul class="space-y-4">
+                        <li class="flex gap-3">
+                            <span class="text-xl bg-purple-100 w-8 h-8 flex items-center justify-center rounded-full text-purple-700">🔍</span>
+                            <div>
+                                <strong class="block text-stone-800">Automatic Feature Learning</strong>
+                                <span class="text-stone-600 text-sm">No need to manually define "corners" or "edges" in an image. The network learns them.</span>
+                            </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-xl bg-purple-100 w-8 h-8 flex items-center justify-center rounded-full text-purple-700">📈</span>
+                            <div>
+                                <strong class="block text-stone-800">Scalability</strong>
+                                <span class="text-stone-600 text-sm">Performance continues to improve with massive datasets, unlike traditional models which plateau.</span>
+                            </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-xl bg-purple-100 w-8 h-8 flex items-center justify-center rounded-full text-purple-700">📸</span>
+                            <div>
+                                <strong class="block text-stone-800">Unstructured Data King</strong>
+                                <span class="text-stone-600 text-sm">Excels at processing images, audio, and natural language.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ethics & Society -->
+        <section id="ethics" class="scroll-mt-20 bg-stone-100 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-16">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-10 text-center">
+                    <h2 class="text-3xl font-bold text-stone-900">5. The Dark Side: Ethics & Responsibility</h2>
+                    <p class="mt-2 text-lg text-stone-600 max-w-2xl mx-auto">With great power comes great responsibility. ML models are not neutral; they reflect the data they are fed.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Card 1 -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-red-500">
+                        <h3 class="text-xl font-bold text-stone-800 mb-3">Bias & Fairness</h3>
+                        <p class="text-stone-600 text-sm mb-4">"Garbage in, Bias out." If historical data contains discrimination (e.g., hiring bias), the model will learn and amplify it.</p>
+                        <div class="bg-red-50 p-3 rounded text-xs text-red-800 font-mono">
+                            Alert: Amazon's hiring AI discriminated against resumes containing "Women's".
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-stone-800">
+                        <h3 class="text-xl font-bold text-stone-800 mb-3">The Black Box</h3>
+                        <p class="text-stone-600 text-sm mb-4">Deep learning models are often uninterpretable. In healthcare or criminal justice, not knowing <em>why</em> a decision was made is dangerous.</p>
+                        <div class="bg-stone-100 p-3 rounded text-xs text-stone-800 font-mono">
+                            Challenge: Explainable AI (XAI) is now a critical field of research.
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-green-600">
+                        <h3 class="text-xl font-bold text-stone-800 mb-3">Environmental Cost</h3>
+                        <p class="text-stone-600 text-sm mb-4">Training massive models consumes enormous energy. GPT-3 training emitted as much CO2 as 5 cars produce in their lifetime.</p>
+                        <div class="bg-green-50 p-3 rounded text-xs text-green-800 font-mono">
+                            Stat: ~1,287 MWh for one training run.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Roadmap / Footer -->
+        <section id="roadmap" class="scroll-mt-20 py-12 border-t border-stone-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <h2 class="text-2xl font-bold text-stone-900 mb-6">Your ML Roadmap</h2>
+                    <ul class="space-y-3">
+                        <li class="flex items-center gap-3">
+                            <span class="text-green-500 font-bold">✓</span>
+                            <span>Pick a Language: <strong>Python</strong> (NumPy, Pandas, Scikit-learn)</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="text-green-500 font-bold">✓</span>
+                            <span>Learn Fundamentals: Linear Algebra, Calculus, Stats</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="text-stone-300 font-bold">▢</span>
+                            <span>First Project: Titanic Survival or House Prices (Kaggle)</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="text-stone-300 font-bold">▢</span>
+                            <span>Deep Dive: Andrew Ng's Course / Fast.ai</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-indigo-900 text-white p-8 rounded-2xl flex flex-col justify-center text-center">
+                    <h3 class="text-xl font-bold mb-2">"The best time to start was yesterday."</h3>
+                    <p class="text-indigo-200 mb-6">The second best time is today.</p>
+                    <a href="https://www.kaggle.com/" target="_blank" class="inline-block bg-white text-indigo-900 font-bold py-3 px-6 rounded-lg hover:bg-indigo-50 transition-colors">
+                        Start on Kaggle
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center text-stone-400 text-sm py-8">
+            <p>© 2026 Cyber.SoHo. All Rights Reserved. | Based on Day 02 Lecture Material.</p>
+        </footer>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 1. Foundations Toggle Logic ---
+            const toggleBtn = document.getElementById('toggle-paradigm-btn');
+            const flowTrad = document.getElementById('flow-traditional');
+            const flowML = document.getElementById('flow-ml');
+            const flowDesc = document.getElementById('flow-description');
+            let isML = false;
+
+            toggleBtn.addEventListener('click', () => {
+                isML = !isML;
+                if (isML) {
+                    flowTrad.classList.add('hidden');
+                    flowML.classList.remove('hidden');
+                    flowDesc.textContent = "Machine Learning finds patterns in data to create the rules (model).";
+                    toggleBtn.textContent = "🔄 Switch to Traditional";
+                    toggleBtn.classList.replace('bg-indigo-600', 'bg-orange-500');
+                    toggleBtn.classList.replace('hover:bg-indigo-700', 'hover:bg-orange-600');
+                } else {
+                    flowTrad.classList.remove('hidden');
+                    flowML.classList.add('hidden');
+                    flowDesc.textContent = "Traditional programming requires you to know the rules beforehand.";
+                    toggleBtn.textContent = "🔄 Switch Paradigm";
+                    toggleBtn.classList.replace('bg-orange-500', 'bg-indigo-600');
+                    toggleBtn.classList.replace('hover:bg-orange-600', 'hover:bg-indigo-700');
+                }
+            });
+
+            // --- 2. Kingdoms Tab Logic ---
+            const tabs = document.querySelectorAll('.kingdom-tab');
+            const contents = document.querySelectorAll('.kingdom-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Reset tabs
+                    tabs.forEach(t => {
+                        t.classList.remove('border-indigo-600', 'text-indigo-600', 'bg-stone-50');
+                        t.classList.add('border-transparent', 'text-stone-600');
+                    });
+                    // Reset contents
+                    contents.forEach(c => c.classList.add('hidden'));
+
+                    // Activate clicked
+                    tab.classList.remove('border-transparent', 'text-stone-600');
+                    tab.classList.add('border-indigo-600', 'text-indigo-600', 'bg-stone-50');
+                    
+                    const targetId = tab.getAttribute('data-target');
+                    document.getElementById(targetId).classList.remove('hidden');
+                });
+            });
+            // Init first tab styling
+            tabs[0].classList.add('border-indigo-600', 'text-indigo-600', 'bg-stone-50');
+            tabs[0].classList.remove('border-transparent');
+
+
+            // --- 3. Metrics Lab Logic (Chart.js) ---
+            const ctxMetrics = document.getElementById('metricsChart').getContext('2d');
+            
+            // Initial Data
+            let tp = 50, fp = 10, fn = 5, tn = 80;
+
+            const calcMetrics = () => {
+                const total = tp + fp + fn + tn;
+                const accuracy = total > 0 ? (tp + tn) / total : 0;
+                const precision = (tp + fp) > 0 ? tp / (tp + fp) : 0;
+                const recall = (tp + fn) > 0 ? tp / (tp + fn) : 0;
+                const f1 = (precision + recall) > 0 ? 2 * (precision * recall) / (precision + recall) : 0;
+                return { accuracy, precision, recall, f1 };
+            };
+
+            const metricsChart = new Chart(ctxMetrics, {
+                type: 'bar',
+                data: {
+                    labels: ['Accuracy', 'Precision', 'Recall', 'F1-Score'],
+                    datasets: [{
+                        label: 'Score',
+                        data: [0, 0, 0, 0], // placeholders
+                        backgroundColor: [
+                            'rgba(99, 102, 241, 0.6)', // Indigo
+                            'rgba(16, 185, 129, 0.6)', // Green
+                            'rgba(245, 158, 11, 0.6)', // Amber
+                            'rgba(239, 68, 68, 0.6)'   // Red
+                        ],
+                        borderColor: [
+                            'rgb(99, 102, 241)',
+                            'rgb(16, 185, 129)',
+                            'rgb(245, 158, 11)',
+                            'rgb(239, 68, 68)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                            ticks: {
+                                callback: function(value) { return (value * 100) + "%" }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return (context.raw * 100).toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const updateMetrics = () => {
+                // Update display values
+                document.getElementById('val-tp').innerText = tp;
+                document.getElementById('val-fp').innerText = fp;
+                document.getElementById('val-fn').innerText = fn;
+                document.getElementById('val-tn').innerText = tn;
+
+                const m = calcMetrics();
+                
+                // Update Chart
+                metricsChart.data.datasets[0].data = [m.accuracy, m.precision, m.recall, m.f1];
+                metricsChart.update();
+
+                // Update Text Cards
+                document.getElementById('disp-precision').innerText = (m.precision * 100).toFixed(1) + "%";
+                document.getElementById('disp-recall').innerText = (m.recall * 100).toFixed(1) + "%";
+            };
+
+            // Listeners
+            document.getElementById('input-tp').addEventListener('input', (e) => { tp = parseInt(e.target.value); updateMetrics(); });
+            document.getElementById('input-fp').addEventListener('input', (e) => { fp = parseInt(e.target.value); updateMetrics(); });
+            document.getElementById('input-fn').addEventListener('input', (e) => { fn = parseInt(e.target.value); updateMetrics(); });
+            document.getElementById('input-tn').addEventListener('input', (e) => { tn = parseInt(e.target.value); updateMetrics(); });
+
+            // Initial call
+            updateMetrics();
+
+
+            // --- 4. Deep Learning Radar Chart ---
+            const ctxDL = document.getElementById('dlRadarChart').getContext('2d');
+            new Chart(ctxDL, {
+                type: 'radar',
+                data: {
+                    labels: ['Accuracy', 'Data Needed', 'Compute Power', 'Interpretability', 'Training Time'],
+                    datasets: [{
+                        label: 'Traditional ML',
+                        data: [65, 30, 20, 90, 20],
+                        fill: true,
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderColor: 'rgb(99, 102, 241)',
+                        pointBackgroundColor: 'rgb(99, 102, 241)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(99, 102, 241)'
+                    }, {
+                        label: 'Deep Learning',
+                        data: [95, 95, 90, 20, 85],
+                        fill: true,
+                        backgroundColor: 'rgba(147, 51, 234, 0.2)',
+                        borderColor: 'rgb(147, 51, 234)',
+                        pointBackgroundColor: 'rgb(147, 51, 234)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(147, 51, 234)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { display: false },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+             // Mobile Menu Logic
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+
+            btn.addEventListener('click', () => {
+                menu.classList.toggle('hidden');
+            });
+            
+            // Close mobile menu on link click
+            menu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    menu.classList.add('hidden');
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
+
+
+
+

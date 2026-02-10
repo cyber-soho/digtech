@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning Fundamentals Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-slate-200 p-4 sticky top-0 z-10">
+        <div class="max-w-3xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">📝</span>
+                <h1 class="font-bold text-xl text-indigo-900 tracking-tight">ML Fundamentals Quiz</h1>
+            </div>
+            <div class="flex items-center gap-4 text-sm font-medium">
+                <div class="text-slate-500">Question <span id="current-q-num">1</span>/10</div>
+                <div class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full">Score: <span id="score">0</span></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center justify-start pt-8 p-4 w-full max-w-3xl mx-auto">
+        
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="w-full bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden fade-in">
+            
+            <!-- Progress Bar -->
+            <div class="w-full h-2 bg-slate-100">
+                <div id="progress-bar" class="h-full bg-indigo-500 transition-all duration-300" style="width: 10%"></div>
+            </div>
+
+            <div class="p-6 md:p-8">
+                <!-- Question -->
+                <h2 id="question-text" class="text-xl md:text-2xl font-bold text-slate-800 mb-6 leading-relaxed">
+                    <!-- Question goes here -->
+                </h2>
+
+                <!-- Hint (Hidden by default) -->
+                <div id="hint-box" class="hidden mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 text-sm text-yellow-800 rounded-r">
+                    <span class="font-bold">💡 Hint:</span> <span id="hint-text"></span>
+                </div>
+
+                <!-- Options -->
+                <div id="options-container" class="space-y-3">
+                    <!-- Buttons go here -->
+                </div>
+
+                <!-- Rationale / Feedback (Hidden initially) -->
+                <div id="feedback-container" class="hidden mt-6 p-4 rounded-xl border transition-all">
+                    <div class="flex items-start gap-3">
+                        <div id="feedback-icon" class="text-2xl"></div>
+                        <div>
+                            <h3 id="feedback-title" class="font-bold text-lg mb-1"></h3>
+                            <p id="feedback-text" class="text-slate-700 leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="mt-8 flex justify-between items-center">
+                    <button onclick="toggleHint()" class="text-sm text-slate-500 hover:text-indigo-600 underline decoration-dotted underline-offset-4">
+                        Need a hint?
+                    </button>
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all active:scale-95">
+                        Next Question →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen (Hidden initially) -->
+        <div id="results-screen" class="hidden w-full bg-white rounded-2xl shadow-lg border border-slate-200 p-8 text-center fade-in">
+            <div class="text-6xl mb-4">🎉</div>
+            <h2 class="text-3xl font-bold text-slate-900 mb-2">Quiz Completed!</h2>
+            <p class="text-slate-500 mb-8">Here is how you performed:</p>
+            
+            <div class="text-5xl font-black text-indigo-600 mb-2" id="final-score">0/10</div>
+            <p id="final-message" class="text-lg font-medium text-slate-700 mb-8"></p>
+
+            <button onclick="restartQuiz()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-xl shadow-md transition-all active:scale-95">
+                Retake Quiz
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        const quizData = [
+            {
+                "question": "What is the fundamental difference in approach between Traditional Programming and Machine Learning?",
+                "options": [
+                    { "text": "Traditional Programming uses data to find patterns, while Machine Learning uses rules to produce output.", "rationale": "This reverses the definitions; Machine Learning finds patterns in data, while traditional programming relies on preset rules.", "isCorrect": false },
+                    { "text": "Traditional Programming inputs rules and data to produce answers, while Machine Learning inputs data and answers to produce rules.", "rationale": "In traditional programming, you explicitly write the logic (rules). In ML, the algorithm learns the logic (rules/model) by analyzing examples (data and answers).", "isCorrect": true },
+                    { "text": "Traditional Programming is faster to execute than Machine Learning models.", "rationale": "Speed depends on the complexity of the task; simple ML models can be very fast, and complex traditional code can be slow.", "isCorrect": false },
+                    { "text": "Traditional Programming handles unstructured data better than Machine Learning.", "rationale": "Machine Learning, particularly Deep Learning, is specifically superior at handling unstructured data like images and text compared to rule-based programming.", "isCorrect": false }
+                ],
+                "hint": "Think about what acts as the input and what is the resulting output in each approach."
+            },
+            {
+                "question": "You are building a system to predict housing prices based on square footage and location using a dataset of past sales. Which type of Machine Learning is this?",
+                "options": [
+                    { "text": "Unsupervised Learning", "rationale": "Unsupervised learning deals with unlabeled data (finding hidden structures), but here we have the 'answers' (past prices).", "isCorrect": false },
+                    { "text": "Reinforcement Learning", "rationale": "Reinforcement learning involves an agent learning from rewards and penalties in an environment, not predicting values from a static dataset.", "isCorrect": false },
+                    { "text": "Supervised Learning", "rationale": "This is Supervised Learning because the model is trained on labeled data (features + known prices) to predict the label for new data.", "isCorrect": true },
+                    { "text": "Clustering", "rationale": "Clustering is a technique used in Unsupervised Learning to group data, not to predict a specific continuous value like price.", "isCorrect": false }
+                ],
+                "hint": "Does your data include the 'correct answer' (labels) that you want the model to learn to predict?"
+            },
+            {
+                "question": "Which of the following scenarios best describes Unsupervised Learning?",
+                "options": [
+                    { "text": "A computer learning to play Chess by playing millions of games against itself.", "rationale": "This is Reinforcement Learning, where the agent learns strategies through trial, error, and the reward of winning or losing.", "isCorrect": false },
+                    { "text": "An email filter flagging messages as 'Spam' based on user markings.", "rationale": "This is Supervised Learning because the model learns from emails explicitly labeled as 'Spam' or 'Not Spam'.", "isCorrect": false },
+                    { "text": "A retail company segmenting its customers into groups based on purchasing behavior without predefined categories.", "rationale": "This is Unsupervised Learning because the algorithm looks for hidden structures and patterns (clusters) in the data without being told what the groups are.", "isCorrect": true },
+                    { "text": "A medical system predicting whether a tumor is benign or malignant based on biopsy results.", "rationale": "This is Supervised Learning because the training data includes the diagnosis (the label).", "isCorrect": false }
+                ],
+                "hint": "Think of a child sorting LEGO blocks by shape without being told the names of the shapes."
+            },
+            {
+                "question": "In the context of Machine Learning evaluation, what does the metric 'Recall' measure?",
+                "options": [
+                    { "text": "The percentage of total predictions that were correct.", "rationale": "This describes Accuracy, not Recall.", "isCorrect": false },
+                    { "text": "Of all the instances that were actually positive, the percentage the model correctly identified.", "rationale": "Recall calculates the ability of the model to find all the relevant cases (True Positives / (True Positives + False Negatives)).", "isCorrect": true },
+                    { "text": "Of all the instances predicted as positive, the percentage that were actually positive.", "rationale": "This describes Precision, which measures the trustworthiness of a positive prediction.", "isCorrect": false },
+                    { "text": "The average absolute difference between predicted and actual values.", "rationale": "This describes Mean Absolute Error (MAE), which is a metric for regression, not classification.", "isCorrect": false }
+                ],
+                "hint": "If you are fishing with a net, this metric tells you how many of the fish in the lake you managed to catch."
+            },
+            {
+                "question": "What is the primary advantage of Deep Learning over Traditional Machine Learning?",
+                "options": [
+                    { "text": "It requires significantly less computational power.", "rationale": "Deep Learning is GPU-intensive and requires much more computational power than traditional ML.", "isCorrect": false },
+                    { "text": "It works effectively with very small datasets.", "rationale": "Deep Learning typically requires massive datasets to perform well, whereas traditional ML can often work with smaller data.", "isCorrect": false },
+                    { "text": "It performs automatic feature learning.", "rationale": "Deep Learning networks can automatically discover relevant features from raw data (like edges in an image), eliminating the need for manual feature engineering.", "isCorrect": true },
+                    { "text": "It is always easier to interpret and explain than decision trees.", "rationale": "Deep Learning models are often 'Black Boxes' and are harder to interpret than simple models like Decision Trees.", "isCorrect": false }
+                ],
+                "hint": "Consider how the model handles raw inputs—does a human need to tell it what characteristics to look for?"
+            },
+            {
+                "question": "Why is it critical to separate your dataset into Training and Test sets?",
+                "options": [
+                    { "text": "To ensure the model has more data to learn from.", "rationale": "Splitting the data actually reduces the amount of data available for training.", "isCorrect": false },
+                    { "text": "To evaluate how well the model generalizes to new, unseen data.", "rationale": "Testing on data the model has never seen prevents the illusion of high performance caused by the model simply memorizing the training examples.", "isCorrect": true },
+                    { "text": "To balance the number of positive and negative examples.", "rationale": "Balancing classes is a preprocessing step, but it is not the primary reason for the train/test split.", "isCorrect": false },
+                    { "text": "To speed up the training process by using less data.", "rationale": "While training on less data is faster, the purpose of the split is evaluation validity, not speed.", "isCorrect": false }
+                ],
+                "hint": "Would you give a student the exact same questions on the final exam that they practiced with in the study guide?"
+            },
+            {
+                "question": "What is 'Overfitting' in a Machine Learning model?",
+                "options": [
+                    { "text": "When the model is too simple to capture the underlying patterns in the data.", "rationale": "This describes Underfitting, where the model performs poorly on both training and test data.", "isCorrect": false },
+                    { "text": "When the model learns the training data (including noise) too well but fails to generalize to new data.", "rationale": "Overfitting happens when a model memorizes the training examples, resulting in high training accuracy but poor test accuracy.", "isCorrect": true },
+                    { "text": "When the model takes too long to train due to hardware limitations.", "rationale": "This is a computational issue, not a learning error related to the model's generalization ability.", "isCorrect": false },
+                    { "text": "When the model has too few features to make accurate predictions.", "rationale": "Having too few features usually leads to Underfitting, not Overfitting.", "isCorrect": false }
+                ],
+                "hint": "This occurs when a model memorizes the specific examples instead of learning the general rules."
+            },
+            {
+                "question": "According to the '80% Rule' (Disparate Impact), when is there evidence of potential discrimination in a model?",
+                "options": [
+                    { "text": "When the model's accuracy is below 80%.", "rationale": "This refers to general model performance, not fairness or discrimination between groups.", "isCorrect": false },
+                    { "text": "When the approval rate for a minority group is less than 80% of the approval rate for the majority group.", "rationale": "If the ratio of the minority rate to the majority rate is less than 0.80, it indicates adverse impact under legal standards.", "isCorrect": true },
+                    { "text": "When 80% of the training data comes from one demographic group.", "rationale": "While this is a data imbalance issue that causes bias, the '80% Rule' specifically refers to the outcome ratio (Disparate Impact).", "isCorrect": false },
+                    { "text": "When the model makes mistakes on 20% of the test data.", "rationale": "This describes an error rate of 20%, which is unrelated to the specific definition of Disparate Impact.", "isCorrect": false }
+                ],
+                "hint": "This rule compares the success rate of one group against another."
+            },
+            {
+                "question": "What is 'Transfer Learning'?",
+                "options": [
+                    { "text": "Moving data from a local server to the cloud for processing.", "rationale": "This describes data migration or cloud computing, not an ML training technique.", "isCorrect": false },
+                    { "text": "Training a model on one task and using it as a starting point for a related task.", "rationale": "Transfer learning allows you to leverage knowledge (like feature detection in images) from a pre-trained model to solve a new problem with less data.", "isCorrect": true },
+                    { "text": "Converting a Supervised Learning problem into an Unsupervised one.", "rationale": "This is not a standard technique; Transfer Learning specifically refers to transferring model weights/knowledge.", "isCorrect": false },
+                    { "text": "The process of updating a model in production with real-time data.", "rationale": "This is often called online learning or continuous retraining, not Transfer Learning.", "isCorrect": false }
+                ],
+                "hint": "Don't reinvent the wheel—if a model already knows how to recognize shapes, use that knowledge to help it recognize cars."
+            },
+            {
+                "question": "Which of the following best follows the 'Garbage In, Garbage Out' principle?",
+                "options": [
+                    { "text": "Using a simple algorithm on high-quality data will always fail.", "rationale": "Simple algorithms can actually perform very well on high-quality data; the principle states that data quality is the limiting factor.", "isCorrect": false },
+                    { "text": "If your training data is biased or full of errors, your model's predictions will be flawed regardless of how good the algorithm is.", "rationale": "The quality of the output (predictions) is strictly limited by the quality of the input (data).", "isCorrect": true },
+                    { "text": "You should always discard 50% of your data to prevent overcrowding the model.", "rationale": "Discarding data is not a general rule; usually, more high-quality data is better.", "isCorrect": false },
+                    { "text": "Deep Learning models can automatically fix errors in the input data.", "rationale": "Models generally learn the errors as if they were truth; they do not automatically correct factual errors in the dataset.", "isCorrect": false }
+                ],
+                "hint": "A Michelin-star chef cannot make a good meal if the ingredients are rotten."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let hasAnswered = false;
+
+        // Elements
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const hintBox = document.getElementById('hint-box');
+        const hintText = document.getElementById('hint-text');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+        const feedbackIcon = document.getElementById('feedback-icon');
+        const nextBtn = document.getElementById('next-btn');
+        const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        const qNumDisplay = document.getElementById('current-q-num');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsScreen = document.getElementById('results-screen');
+
+        function loadQuestion() {
+            hasAnswered = false;
+            const q = quizData[currentQuestionIndex];
+            
+            // Reset UI
+            questionText.textContent = q.question;
+            hintText.textContent = q.hint;
+            hintBox.classList.add('hidden');
+            feedbackContainer.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            optionsContainer.innerHTML = '';
+            
+            // Update Progress
+            qNumDisplay.textContent = currentQuestionIndex + 1;
+            const progress = ((currentQuestionIndex) / quizData.length) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            // Randomize options for display only (keep index mapping logic simple though)
+            // For simplicity in this vanilla JS, we'll just map them. 
+            // If we wanted true shuffle we'd need to track original indices.
+            // Let's just render them as provided for now to keep logic clean.
+            
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl border-2 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all font-medium text-slate-700 flex items-center justify-between group";
+                btn.onclick = () => checkAnswer(index, btn);
+                
+                const span = document.createElement('span');
+                span.textContent = opt.text;
+                btn.appendChild(span);
+                
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function toggleHint() {
+            hintBox.classList.toggle('hidden');
+        }
+
+        function checkAnswer(selectedIndex, btn) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+
+            const q = quizData[currentQuestionIndex];
+            const selectedOpt = q.options[selectedIndex];
+            const allBtns = optionsContainer.children;
+
+            // Highlight Logic
+            if (selectedOpt.isCorrect) {
+                score++;
+                scoreDisplay.textContent = score;
+                btn.classList.remove('border-slate-200', 'hover:border-indigo-300', 'hover:bg-indigo-50');
+                btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                
+                showFeedback(true, selectedOpt.rationale);
+            } else {
+                btn.classList.remove('border-slate-200', 'hover:border-indigo-300', 'hover:bg-indigo-50');
+                btn.classList.add('bg-red-50', 'border-red-500', 'text-red-800');
+                
+                // Highlight the correct one
+                for (let i = 0; i < allBtns.length; i++) {
+                    if (q.options[i].isCorrect) {
+                        allBtns[i].classList.add('bg-green-50', 'border-green-400', 'text-green-700');
+                    }
+                }
+                
+                showFeedback(false, selectedOpt.rationale);
+            }
+
+            // Disable all buttons
+            for (let b of allBtns) {
+                b.disabled = true;
+                b.classList.add('cursor-default');
+            }
+
+            nextBtn.classList.remove('hidden');
+        }
+
+        function showFeedback(isCorrect, rationale) {
+            feedbackContainer.classList.remove('hidden', 'bg-green-50', 'border-green-200', 'bg-red-50', 'border-red-200');
+            feedbackContainer.classList.add('block');
+            
+            if (isCorrect) {
+                feedbackContainer.classList.add('bg-green-50', 'border-green-200');
+                feedbackIcon.textContent = '✅';
+                feedbackTitle.textContent = 'Correct!';
+                feedbackTitle.className = 'font-bold text-lg mb-1 text-green-800';
+            } else {
+                feedbackContainer.classList.add('bg-red-50', 'border-red-200');
+                feedbackIcon.textContent = '❌';
+                feedbackTitle.textContent = 'Not quite...';
+                feedbackTitle.className = 'font-bold text-lg mb-1 text-red-800';
+            }
+            feedbackText.textContent = rationale;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            
+            const finalScoreEl = document.getElementById('final-score');
+            const finalMsgEl = document.getElementById('final-message');
+            
+            finalScoreEl.textContent = `${score}/${quizData.length}`;
+            
+            const percentage = (score / quizData.length) * 100;
+            if (percentage === 100) {
+                finalMsgEl.textContent = "Perfect score! You're a Machine Learning Master! 🏆";
+            } else if (percentage >= 80) {
+                finalMsgEl.textContent = "Great job! You have a solid grasp of the fundamentals. 🚀";
+            } else if (percentage >= 60) {
+                finalMsgEl.textContent = "Good effort! Review the tricky concepts and try again. 📚";
+            } else {
+                finalMsgEl.textContent = "Keep practicing! Review the flashcards and come back stronger. 💪";
+            }
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreDisplay.textContent = '0';
+            resultsScreen.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            loadQuestion();
+        }
+
+        // Init
+        loadQuestion();
+
+    </script>
+</body>
+</html>
+
+

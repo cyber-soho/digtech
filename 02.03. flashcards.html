@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning Flashcards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- MathJax Configuration for LaTeX rendering -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            startup: {
+                typeset: false // Prevent automatic typesetting to control it manually if needed, though usually true is fine. We will stick to manual calls in the app flow.
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+    <style>
+        /* 3D Flip Animation Styles */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        /* Card Container Transition */
+        .flashcard-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        /* Prevent text selection for better flip experience */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-slate-200 p-4 sticky top-0 z-10">
+        <div class="max-w-3xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🧠</span>
+                <h1 class="font-bold text-xl text-indigo-900 tracking-tight">ML Fundamentals</h1>
+            </div>
+            <div class="text-sm font-medium text-slate-500" id="progress-text">Card 1 / 25</div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center justify-center p-4 w-full max-w-3xl mx-auto">
+        
+        <!-- Flashcard Container -->
+        <div class="perspective-1000 w-full max-w-xl aspect-[3/2] cursor-pointer group" onclick="flipCard()">
+            <div id="card-inner" class="flashcard-inner relative w-full h-full text-center transform-style-3d shadow-xl rounded-2xl">
+                
+                <!-- Front Side -->
+                <div class="absolute w-full h-full backface-hidden bg-white rounded-2xl border-2 border-slate-200 flex flex-col items-center justify-center p-8 md:p-12">
+                    <div class="absolute top-4 left-4 text-xs font-bold text-indigo-500 uppercase tracking-wide">Question</div>
+                    <div id="card-front" class="text-xl md:text-2xl font-bold text-slate-800 leading-relaxed no-select">
+                        <!-- Content injected via JS -->
+                    </div>
+                    <div class="absolute bottom-4 text-slate-400 text-sm animate-pulse">Click to flip ↻</div>
+                </div>
+
+                <!-- Back Side -->
+                <div class="absolute w-full h-full backface-hidden rotate-y-180 bg-indigo-50 rounded-2xl border-2 border-indigo-200 flex flex-col items-center justify-center p-8 md:p-12">
+                    <div class="absolute top-4 left-4 text-xs font-bold text-indigo-600 uppercase tracking-wide">Answer</div>
+                    <div id="card-back" class="text-lg md:text-xl font-medium text-slate-700 leading-relaxed overflow-y-auto max-h-full no-select scrollbar-hide">
+                        <!-- Content injected via JS -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="mt-8 flex items-center gap-4 md:gap-8 w-full max-w-xl justify-between">
+            <button onclick="prevCard(event)" class="flex-1 bg-white hover:bg-slate-50 text-slate-700 font-semibold py-3 px-6 rounded-xl border border-slate-300 shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2">
+                <span>←</span> Previous
+            </button>
+            
+            <button onclick="shuffleCards(event)" class="p-3 bg-white hover:bg-slate-50 text-slate-500 hover:text-indigo-600 rounded-full border border-slate-300 shadow-sm transition-all" title="Shuffle Deck">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l14.2-17.3"/><path d="M2 5h1.4c1.3 0 2.5.6 3.3 1.7l14.2 17.3"/></svg>
+            </button>
+
+            <button onclick="nextCard(event)" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2">
+                Next <span>→</span>
+            </button>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full max-w-xl mt-8 h-2 bg-slate-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-indigo-500 transition-all duration-300" style="width: 4%"></div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="p-6 text-center text-slate-400 text-sm">
+        Use arrow keys to navigate • Spacebar to flip
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Data derived from previous context
+        const initialFlashcards = [
+            {
+                "front": "Traditional Programming vs Machine Learning Approach",
+                "back": "Traditional: Rules → Output. ML: Data → Learn Patterns → Output."
+            },
+            {
+                "front": "Machine Learning Definition",
+                "back": "Algorithms that learn from data to make predictions or decisions without being explicitly programmed for specific tasks."
+            },
+            {
+                "front": "Supervised Learning",
+                "back": "Learning with labeled examples (Features + Labels) to predict labels for new data. Example: Spam detection."
+            },
+            {
+                "front": "Unsupervised Learning",
+                "back": "Finding hidden patterns or structures in data without labels. Example: Customer segmentation."
+            },
+            {
+                "front": "Reinforcement Learning",
+                "back": "Learning an optimal behavior strategy through trial, error, and rewards/penalties."
+            },
+            {
+                "front": "Structured vs Unstructured Data",
+                "back": "Structured: Tables/Databases. Unstructured: Text, images, audio, video."
+            },
+            {
+                "front": "Garbage In, Garbage Out",
+                "back": "A principle stating that the quality of the output is determined by the quality of the input data."
+            },
+            {
+                "front": "Feature Engineering",
+                "back": "The process of using domain knowledge to create new features (measurable properties) from raw data to improve model performance."
+            },
+            {
+                "front": "Model Training Process",
+                "back": "Feeding labeled data to an algorithm, which learns patterns and adjusts internal parameters to reduce prediction errors."
+            },
+            {
+                "front": "Training Data vs Test Data",
+                "back": "Training data teaches the model patterns; Test data evaluates performance and must never be used during training."
+            },
+            {
+                "front": "Formula for Accuracy",
+                "back": "$\\frac{\\text{Correct Predictions}}{\\text{Total Predictions}}$"
+            },
+            {
+                "front": "Precision",
+                "back": "The proportion of predicted positives that were actually positive. Formula: $\\frac{\\text{True Positives}}{\\text{True Positives} + \\text{False Positives}}$"
+            },
+            {
+                "front": "Recall",
+                "back": "The proportion of actual positives correctly identified by the model. Formula: $\\frac{\\text{True Positives}}{\\text{True Positives} + \\text{False Negatives}}$"
+            },
+            {
+                "front": "F1-Score",
+                "back": "The harmonic mean of Precision and Recall, useful when you need to balance both metrics."
+            },
+            {
+                "front": "Deep Learning vs Traditional ML (Features)",
+                "back": "Traditional ML relies on manual feature extraction, while Deep Learning performs automatic feature learning."
+            },
+            {
+                "front": "Neural Network Architecture",
+                "back": "Consists of an Input Layer, Hidden Layers (where deep learning happens), and an Output Layer."
+            },
+            {
+                "front": "Overfitting",
+                "back": "When a model learns the training data and noise too well, resulting in high training accuracy but poor performance on new data."
+            },
+            {
+                "front": "Underfitting",
+                "back": "When a model is too simple to capture the underlying patterns, resulting in poor performance on both training and test data."
+            },
+            {
+                "front": "Bias-Variance Tradeoff",
+                "back": "The conflict between trying to minimize bias (underfitting) and variance (overfitting) to achieve the best generalization."
+            },
+            {
+                "front": "The Black Box Problem",
+                "back": "The difficulty in explaining or interpreting why complex models (like deep neural networks) made a specific decision."
+            },
+            {
+                "front": "Disparate Impact Ratio (80% Rule)",
+                "back": "$\\frac{\\text{Minority Group Rate}}{\\text{Majority Group Rate}}$. If result < 0.80, it indicates evidence of adverse impact/discrimination."
+            },
+            {
+                "front": "AutoML (Automated Machine Learning)",
+                "back": "Platforms that automate algorithm selection, parameter tuning, and model optimization."
+            },
+            {
+                "front": "Federated Learning",
+                "back": "Training models across distributed devices without collecting data centrally, which enhances privacy."
+            },
+            {
+                "front": "Transfer Learning",
+                "back": "Using a pre-trained model (e.g., trained on millions of images) as a starting point for a new, related task."
+            },
+            {
+                "front": "Generative AI",
+                "back": "AI capable of creating new content (text, images, code) rather than just analyzing existing data. Examples: GPT-4, DALL-E."
+            }
+        ];
+
+        // State
+        let flashcards = [...initialFlashcards];
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        // Elements
+        const cardInner = document.getElementById('card-inner');
+        const cardFront = document.getElementById('card-front');
+        const cardBack = document.getElementById('card-back');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+
+        // Render Function
+        function renderCard() {
+            const card = flashcards[currentIndex];
+            
+            // 1. Reset Flip
+            isFlipped = false;
+            cardInner.classList.remove('rotate-y-180');
+
+            // 2. Update Content (Delayed slightly if flipping back to ensure smooth transition, or immediate)
+            setTimeout(() => {
+                cardFront.innerHTML = card.front;
+                cardBack.innerHTML = card.back;
+                
+                // 3. Trigger MathJax Typeset for LaTeX
+                // Fix: Check if MathJax is loaded and typesetPromise is a function
+                if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                    MathJax.typesetPromise([cardFront, cardBack]).catch((err) => console.log(err));
+                } else if (window.MathJax && typeof window.MathJax.typeset === 'function') {
+                    // Fallback for older versions or synchronous methods if typesetPromise isn't there
+                     MathJax.typeset([cardFront, cardBack]);
+                }
+            }, 150);
+
+            // 4. Update UI
+            progressText.innerText = `Card ${currentIndex + 1} / ${flashcards.length}`;
+            const percentage = ((currentIndex + 1) / flashcards.length) * 100;
+            progressBar.style.width = `${percentage}%`;
+        }
+
+        // Interaction Functions
+        function flipCard() {
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                cardInner.classList.add('rotate-y-180');
+            } else {
+                cardInner.classList.remove('rotate-y-180');
+            }
+        }
+
+        function nextCard(e) {
+            if(e) e.stopPropagation(); // Prevent flip when clicking button
+            if (currentIndex < flashcards.length - 1) {
+                currentIndex++;
+                renderCard();
+            } else {
+                // Loop back to start option or just shake? Let's loop.
+                currentIndex = 0;
+                renderCard();
+            }
+        }
+
+        function prevCard(e) {
+            if(e) e.stopPropagation();
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderCard();
+            } else {
+                currentIndex = flashcards.length - 1;
+                renderCard();
+            }
+        }
+
+        function shuffleCards(e) {
+            if(e) e.stopPropagation();
+            // Fisher-Yates Shuffle
+            for (let i = flashcards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
+            }
+            currentIndex = 0;
+            renderCard();
+        }
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault(); // Prevent scroll
+                flipCard();
+            } else if (e.code === 'ArrowRight') {
+                nextCard();
+            } else if (e.code === 'ArrowLeft') {
+                prevCard();
+            }
+        });
+
+        // Initialize
+        renderCard();
+
+        // Extra check: ensure MathJax typesets once loaded if it wasn't ready during initial render
+        window.addEventListener('load', () => {
+             if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                 MathJax.typesetPromise([cardFront, cardBack]).catch((err) => console.log(err));
+             }
+        });
+
+    </script>
+</body>
+</html>
+
+
+
