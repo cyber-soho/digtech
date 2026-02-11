@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Exchange Study Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; color: #334155; }
+        
+        /* Flip Card Styles */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        
+        .flashcard-inner {
+            transition: transform 0.6s;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .flashcard-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        
+        /* Tab Styles */
+        .tab-btn.active {
+            border-bottom: 2px solid #0F766E; /* Teal-700 */
+            color: #0F766E;
+            font-weight: 600;
+        }
+        .tab-btn {
+            color: #64748B; /* Slate-500 */
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: #334155; }
+
+        /* Animation */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 p-4 shadow-sm z-10">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-slate-800"><i class="fas fa-graduation-cap text-teal-600 mr-2"></i>Study: Data Exchange</h1>
+            <div class="flex gap-6">
+                <button onclick="switchTab('flashcards')" id="tab-flashcards" class="tab-btn active pb-2 px-2"><i class="fas fa-clone mr-2"></i>Flashcards</button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn pb-2 px-2"><i class="fas fa-question-circle mr-2"></i>Quiz</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 relative bg-slate-50">
+        <div class="max-w-3xl mx-auto h-full flex flex-col">
+
+            <!-- TAB: FLASHCARDS -->
+            <div id="flashcards-content" class="h-full flex flex-col fade-in">
+                <!-- Progress -->
+                <div class="flex justify-between items-center mb-4 text-sm text-slate-500 font-medium">
+                    <span id="fc-progress">Card 1 of 25</span>
+                    <button onclick="resetFlashcards()" class="text-teal-600 hover:text-teal-800"><i class="fas fa-redo-alt mr-1"></i> Restart</button>
+                </div>
+
+                <!-- Card Container -->
+                <div class="flex-1 flex items-center justify-center min-h-[300px] mb-6 perspective-1000">
+                    <div id="flashcard" class="flashcard-inner relative w-full h-full max-h-[400px] bg-white rounded-2xl shadow-xl transform-style-3d border border-slate-200" onclick="flipCard()">
+                        
+                        <!-- Front -->
+                        <div class="absolute w-full h-full backface-hidden flex flex-col items-center justify-center p-8 text-center bg-white rounded-2xl">
+                            <span class="text-xs uppercase tracking-widest text-slate-400 mb-4 font-bold">Concept</span>
+                            <h2 id="fc-front" class="text-3xl font-bold text-slate-800">Definition of Data Exchange</h2>
+                            <p class="absolute bottom-6 text-xs text-slate-400"><i class="fas fa-sync text-teal-500 mr-1"></i> Click to flip</p>
+                        </div>
+
+                        <!-- Back -->
+                        <div class="absolute w-full h-full backface-hidden rotate-y-180 flex flex-col items-center justify-center p-8 text-center bg-teal-50 rounded-2xl border-2 border-teal-100">
+                            <span class="text-xs uppercase tracking-widest text-teal-600 mb-4 font-bold">Explanation</span>
+                            <p id="fc-back" class="text-xl text-slate-700 leading-relaxed">The process of sending and receiving data between different systems, applications, or organizations in a structured, understandable format.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex justify-center gap-4 mt-auto pb-4">
+                    <button onclick="prevCard()" class="bg-white border border-slate-300 text-slate-700 px-6 py-3 rounded-full hover:bg-slate-50 shadow-sm transition-all active:scale-95 disabled:opacity-50" id="btn-prev"><i class="fas fa-arrow-left"></i> Prev</button>
+                    <button onclick="nextCard()" class="bg-teal-600 text-white px-8 py-3 rounded-full hover:bg-teal-700 shadow-md transition-all active:scale-95 disabled:opacity-50 font-semibold" id="btn-next">Next <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>
+            </div>
+
+            <!-- TAB: QUIZ -->
+            <div id="quiz-content" class="hidden h-full flex flex-col fade-in">
+                
+                <!-- Quiz Intro (Start Screen) -->
+                <div id="quiz-start" class="flex flex-col items-center justify-center h-full text-center">
+                    <div class="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mb-6 text-teal-600 text-3xl shadow-sm">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-slate-800 mb-2">Ready to test your knowledge?</h2>
+                    <p class="text-slate-500 mb-8 max-w-md">10 Questions on Data Formats, APIs, and Security.</p>
+                    <button onclick="startQuiz()" class="bg-teal-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-teal-700 shadow-lg transition-transform hover:-translate-y-1">Start Quiz</button>
+                </div>
+
+                <!-- Quiz Question UI -->
+                <div id="quiz-active" class="hidden flex flex-col h-full">
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-200 h-2 rounded-full mb-6">
+                        <div id="quiz-progress-bar" class="bg-teal-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+
+                    <!-- Question -->
+                    <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-xs font-bold text-teal-600 uppercase tracking-wider">Question <span id="q-number">1</span>/10</span>
+                            <div class="text-sm font-bold text-slate-400">Score: <span id="q-score" class="text-slate-800">0</span></div>
+                        </div>
+                        <h3 id="q-text" class="text-xl md:text-2xl font-bold text-slate-800 mb-4">Question Text Here</h3>
+                        <div id="q-hint-box" class="hidden bg-yellow-50 text-yellow-800 p-3 rounded-lg text-sm mb-4 border border-yellow-200">
+                            <i class="fas fa-lightbulb mr-2"></i> <span id="q-hint">Hint text</span>
+                        </div>
+                        <button onclick="toggleHint()" class="text-xs text-slate-400 hover:text-slate-600 underline">Show/Hide Hint</button>
+                    </div>
+
+                    <!-- Options -->
+                    <div id="q-options" class="grid gap-3 mb-6">
+                        <!-- Options injected by JS -->
+                    </div>
+
+                    <!-- Rationale / Next Button -->
+                    <div id="q-feedback" class="hidden mt-auto bg-slate-100 p-4 rounded-lg border border-slate-200">
+                        <div class="flex items-start gap-3">
+                            <div id="feedback-icon" class="mt-1"></div>
+                            <div>
+                                <h4 id="feedback-title" class="font-bold text-sm mb-1">Correct!</h4>
+                                <p id="feedback-text" class="text-sm text-slate-600">Rationale goes here.</p>
+                            </div>
+                        </div>
+                        <button onclick="nextQuestion()" class="mt-4 w-full bg-slate-800 text-white py-2 rounded-lg hover:bg-slate-700 transition-colors">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Quiz Results -->
+                <div id="quiz-results" class="hidden flex flex-col items-center justify-center h-full text-center fade-in">
+                    <h2 class="text-3xl font-bold text-slate-800 mb-2">Quiz Complete!</h2>
+                    <div class="text-6xl font-bold text-teal-600 mb-4" id="final-score">8/10</div>
+                    <p id="final-msg" class="text-slate-500 mb-8">Great job!</p>
+                    <button onclick="restartQuiz()" class="bg-white border-2 border-slate-200 text-slate-700 px-8 py-3 rounded-lg font-bold hover:border-teal-500 hover:text-teal-600 transition-all">Try Again</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // --- DATA ---
+        
+        const flashcards = [
+            { front: "Definition of Data Exchange", back: "The process of sending and receiving data between different systems, applications, or organizations in a structured, understandable format." },
+            { front: "Three Pillars of Data Exchange", back: "Format (how data is packaged), Protocol (rules for sending), and Security (ensuring protection)." },
+            { front: "JSON (JavaScript Object Notation)", back: "A lightweight, human-readable format using key-value pairs; currently the modern standard for web APIs and mobile apps." },
+            { front: "XML (eXtensible Markup Language)", back: "A verbose, tag-based format similar to HTML; widely used in enterprise, healthcare, and legacy systems due to built-in validation." },
+            { front: "CSV (Comma-Separated Values)", back: "A simple tabular format ideal for spreadsheets, data analysis, and bulk data exports." },
+            { front: "API (Application Programming Interface)", back: "A set of rules allowing different software programs to communicate with each other, analogous to a restaurant menu." },
+            { front: "REST API", back: "The most common API style that uses standard HTTP methods (GET, POST, PUT, DELETE) to perform operations on resources." },
+            { front: "HTTP Method: GET", back: "Used to retrieve data from a server (analogous to reading a book)." },
+            { front: "HTTP Method: POST", back: "Used to create new data on a server (analogous to writing a new chapter)." },
+            { front: "HTTP Status Code 200", back: "OK; indicates the request was successful." },
+            { front: "HTTP Status Code 404", back: "Not Found; indicates the requested resource does not exist." },
+            { front: "Serialization", back: "The process of converting complex program data into a format (like JSON or XML) suitable for storage or transmission." },
+            { front: "Deserialization", back: "The process of converting serialized data back into a complex program object." },
+            { front: "HTTP vs. HTTPS", back: "HTTP sends data as plain text; HTTPS encrypts the connection using SSL/TLS to protect data in transit." },
+            { front: "Data Transformation", back: "Converting data between different formats (e.g., JSON to XML) to enable interoperability between incompatible systems." },
+            { front: "Confidentiality (Security Pillar)", back: "Ensuring only authorized parties can read the data, typically achieved through encryption." },
+            { front: "Integrity (Security Pillar)", back: "Ensuring data has not been tampered with or modified during transmission, typically achieved through hashing." },
+            { front: "Symmetric Encryption", back: "Encryption where the same key is used to both encrypt and decrypt data (e.g., AES-256)." },
+            { front: "Asymmetric Encryption", back: "Encryption using a public key to encrypt and a private key to decrypt, allowing for secure key exchange (e.g., RSA)." },
+            { front: "Hashing", back: "A one-way process creating a unique, fixed-size digital 'fingerprint' of data; changing even one bit changes the hash completely." },
+            { front: "Digital Signature", back: "A cryptographic mechanism that uses hashing and encryption to prove the authenticity and integrity of a message." },
+            { front: "OAuth 2.0", back: "The industry-standard protocol for authorization, used by services like Google and Facebook to grant access via tokens." },
+            { front: "JWT (JSON Web Token)", back: "A compact, self-contained way for securely transmitting information between parties as a JSON object, often used for stateless authentication." },
+            { front: "CRUD Operations", back: "Create, Read, Update, Delete; the four basic functions of persistent storage mapped to HTTP methods in REST." },
+            { front: "Primary Use of CSV", back: "Data analysis, spreadsheets, and machine learning datasets due to its simplicity and high portability." }
+        ];
+
+        const quizQuestions = [
+            {
+                question: "Which data format is the industry standard for modern mobile applications requiring minimal data usage?",
+                options: [
+                    { text: "JSON (JavaScript Object Notation)", rationale: "JSON is lightweight, compact, and natively supported by web technologies, making it ideal for mobile bandwidth.", isCorrect: true },
+                    { text: "XML (eXtensible Markup Language)", rationale: "XML is more verbose and results in larger file sizes, which is less optimal for mobile data.", isCorrect: false },
+                    { text: "CSV (Comma-Separated Values)", rationale: "CSV lacks the ability to structure complex or nested data often required for apps.", isCorrect: false },
+                    { text: "HTML", rationale: "HTML is for display, not raw data transfer.", isCorrect: false }
+                ],
+                hint: "Consider the format described as the 'current king of data exchange' due to its lightweight nature."
+            },
+            {
+                question: "Which HTTP method corresponds to creating a completely new record?",
+                options: [
+                    { text: "POST", rationale: "POST submits data to create a new resource.", isCorrect: true },
+                    { text: "GET", rationale: "GET retrieves data without modification.", isCorrect: false },
+                    { text: "PUT", rationale: "PUT updates or replaces an existing resource.", isCorrect: false },
+                    { text: "DELETE", rationale: "DELETE removes resources.", isCorrect: false }
+                ],
+                hint: "Think of 'writing a new chapter' rather than editing one."
+            },
+            {
+                question: "Why is Serialization necessary?",
+                options: [
+                    { text: "To convert objects into a linear, storable format.", rationale: "Memory structures are complex; serialization packs them into simple text/binary for transport.", isCorrect: true },
+                    { text: "To encrypt the data.", rationale: "Encryption is for security; serialization is for format compatibility.", isCorrect: false },
+                    { text: "To compress file size.", rationale: "While some formats compress, the primary goal is structural conversion.", isCorrect: false },
+                    { text: "To validate business rules.", rationale: "Validation checks correctness; serialization handles state conversion.", isCorrect: false }
+                ],
+                hint: "Recall the 'suitcase analogy': packing complex items for travel."
+            },
+            {
+                question: "Which format is best for systems requiring strict built-in schema validation (XSD)?",
+                options: [
+                    { text: "XML", rationale: "XML supports XSD for strict structure/type validation, essential for enterprise systems.", isCorrect: true },
+                    { text: "JSON", rationale: "JSON schemas are optional and external, not strictly built-in.", isCorrect: false },
+                    { text: "CSV", rationale: "CSV has no schema enforcement.", isCorrect: false },
+                    { text: "YAML", rationale: "YAML is flexible like JSON, lacking strict built-in XSD-style validation.", isCorrect: false }
+                ],
+                hint: "Often described as 'verbose' but dominant in banking/legacy systems."
+            },
+            {
+                question: "Why can't a hacker read data intercepted over HTTPS?",
+                options: [
+                    { text: "It is encrypted using SSL/TLS.", rationale: "HTTPS wraps traffic in encryption, making it unreadable without the key.", isCorrect: true },
+                    { text: "It is hashed.", rationale: "Hashing is for integrity, not confidentiality.", isCorrect: false },
+                    { text: "It is serialized.", rationale: "Serialization just changes the format, it doesn't hide the data.", isCorrect: false },
+                    { text: "They don't have the API key.", rationale: "API keys authorize access but don't encrypt the traffic itself.", isCorrect: false }
+                ],
+                hint: "Functions like sending 'registered mail' in a locked box."
+            },
+            {
+                question: "What is the primary characteristic of a Hashing algorithm regarding integrity?",
+                options: [
+                    { text: "A tiny input change results in a completely different output.", rationale: "This 'avalanche effect' makes any tampering immediately obvious.", isCorrect: true },
+                    { text: "It allows decryption.", rationale: "Hashing is one-way and cannot be reversed/decrypted.", isCorrect: false },
+                    { text: "It compresses data.", rationale: "Hashes are fixed-length fingerprints, not compression.", isCorrect: false },
+                    { text: "It uses public/private keys.", rationale: "Keys are for encryption, not hashing itself.", isCorrect: false }
+                ],
+                hint: "Think of a unique 'digital fingerprint'."
+            },
+            {
+                question: "Why is CSV generally NOT used for complex web APIs?",
+                options: [
+                    { text: "It does not support nested data.", rationale: "CSV is flat (tabular), making hierarchies like trees or folders impossible.", isCorrect: true },
+                    { text: "It cannot be opened in Excel.", rationale: "It is actually the most Excel-compatible format.", isCorrect: false },
+                    { text: "It is too slow.", rationale: "CSV is fast to parse; the issue is structure.", isCorrect: false },
+                    { text: "It is binary.", rationale: "CSV is plain text.", isCorrect: false }
+                ],
+                hint: "How would you represent a 'folder inside a folder' in a simple list?"
+            },
+            {
+                question: "What does HTTP 404 indicate?",
+                options: [
+                    { text: "Resource Not Found", rationale: "The server cannot locate the requested URL/resource.", isCorrect: true },
+                    { text: "Success", rationale: "Success is 200.", isCorrect: false },
+                    { text: "Unauthorized", rationale: "Unauthorized is 401.", isCorrect: false },
+                    { text: "Server Error", rationale: "Server Error is 500.", isCorrect: false }
+                ],
+                hint: "You see this when clicking a broken link."
+            },
+            {
+                question: "Which mechanism guarantees 'Non-repudiation'?",
+                options: [
+                    { text: "Digital Signatures", rationale: "Requires the sender's private key, proving only they could have sent it.", isCorrect: true },
+                    { text: "Symmetric Encryption", rationale: "Shared keys mean either party could create the message.", isCorrect: false },
+                    { text: "Hashing", rationale: "Proves integrity but not identity on its own.", isCorrect: false },
+                    { text: "Base64", rationale: "Just encoding, no security.", isCorrect: false }
+                ],
+                hint: "Relies on a private key to 'sign' data like a contract."
+            },
+            {
+                question: "What does 'Stateless' mean in REST APIs?",
+                options: [
+                    { text: "The server does not remember previous interactions.", rationale: "Every request must contain all necessary info; transactions are independent.", isCorrect: true },
+                    { text: "No database used.", rationale: "Databases are used, but the connection doesn't hold state.", isCorrect: false },
+                    { text: "No response sent.", rationale: "Responses are always expected.", isCorrect: false },
+                    { text: "Static files only.", rationale: "REST handles dynamic data.", isCorrect: false }
+                ],
+                hint: "If the server restarts, the next request still works perfectly."
+            }
+        ];
+
+        // --- APP STATE ---
+        let currentTab = 'flashcards';
+        
+        // Flashcard State
+        let fcIndex = 0;
+        let isFlipped = false;
+
+        // Quiz State
+        let qIndex = 0;
+        let score = 0;
+        let quizActive = false;
+        let questionAnswered = false; // prevents double clicking
+
+        // --- TABS LOGIC ---
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update Buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+
+            // Update Content
+            document.getElementById('flashcards-content').classList.add('hidden');
+            document.getElementById('quiz-content').classList.add('hidden');
+            
+            document.getElementById(`${tab}-content`).classList.remove('hidden');
+        }
+
+
+        // --- FLASHCARD LOGIC ---
+        function updateCardUI() {
+            const card = flashcards[fcIndex];
+            const cardEl = document.getElementById('flashcard');
+            
+            // Reset Flip
+            isFlipped = false;
+            cardEl.classList.remove('is-flipped');
+
+            // Update Text (Wait briefly if flipping back to ensure smooth transition context)
+            setTimeout(() => {
+                document.getElementById('fc-front').textContent = card.front;
+                document.getElementById('fc-back').textContent = card.back;
+                document.getElementById('fc-progress').textContent = `Card ${fcIndex + 1} of ${flashcards.length}`;
+            }, 150);
+
+            // Button States
+            document.getElementById('btn-prev').disabled = fcIndex === 0;
+            document.getElementById('btn-next').disabled = fcIndex === flashcards.length - 1;
+        }
+
+        function flipCard() {
+            isFlipped = !isFlipped;
+            document.getElementById('flashcard').classList.toggle('is-flipped');
+        }
+
+        function nextCard() {
+            if (fcIndex < flashcards.length - 1) {
+                fcIndex++;
+                updateCardUI();
+            }
+        }
+
+        function prevCard() {
+            if (fcIndex > 0) {
+                fcIndex--;
+                updateCardUI();
+            }
+        }
+
+        function resetFlashcards() {
+            fcIndex = 0;
+            updateCardUI();
+        }
+
+
+        // --- QUIZ LOGIC ---
+        function startQuiz() {
+            quizActive = true;
+            qIndex = 0;
+            score = 0;
+            document.getElementById('quiz-start').classList.add('hidden');
+            document.getElementById('quiz-active').classList.remove('hidden');
+            document.getElementById('quiz-results').classList.add('hidden');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = quizQuestions[qIndex];
+            questionAnswered = false;
+
+            // UI Updates
+            document.getElementById('q-number').textContent = qIndex + 1;
+            document.getElementById('q-score').textContent = score;
+            document.getElementById('quiz-progress-bar').style.width = `${((qIndex) / quizQuestions.length) * 100}%`;
+            
+            document.getElementById('q-text').textContent = q.question;
+            document.getElementById('q-hint').textContent = q.hint;
+            document.getElementById('q-hint-box').classList.add('hidden');
+            document.getElementById('q-feedback').classList.add('hidden');
+
+            // Render Options
+            const optionsContainer = document.getElementById('q-options');
+            optionsContainer.innerHTML = '';
+            
+            // Shuffle options visually but keep track of logic
+            const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-lg border border-slate-200 hover:bg-slate-50 transition-all flex justify-between items-center group";
+                btn.onclick = () => handleAnswer(opt, btn);
+                btn.innerHTML = `<span class="font-medium text-slate-700">${opt.text}</span>`;
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function toggleHint() {
+            document.getElementById('q-hint-box').classList.toggle('hidden');
+        }
+
+        function handleAnswer(selectedOption, btnElement) {
+            if (questionAnswered) return;
+            questionAnswered = true;
+
+            // Update Progress
+            document.getElementById('quiz-progress-bar').style.width = `${((qIndex + 1) / quizQuestions.length) * 100}%`;
+
+            // Style all buttons based on correctness
+            const buttons = document.getElementById('q-options').children;
+            for (let btn of buttons) {
+                btn.disabled = true;
+                btn.classList.add('opacity-70');
+            }
+            btnElement.classList.remove('opacity-70');
+
+            // Feedback Logic
+            const feedbackEl = document.getElementById('q-feedback');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackText = document.getElementById('feedback-text');
+            const feedbackIcon = document.getElementById('feedback-icon');
+
+            feedbackEl.classList.remove('hidden');
+            feedbackText.textContent = selectedOption.rationale;
+
+            if (selectedOption.isCorrect) {
+                score++;
+                document.getElementById('q-score').textContent = score;
+                
+                btnElement.className = "w-full text-left p-4 rounded-lg border-2 border-green-500 bg-green-50 transition-all flex justify-between items-center";
+                btnElement.innerHTML += '<i class="fas fa-check text-green-600"></i>';
+                
+                feedbackTitle.textContent = "Correct!";
+                feedbackTitle.className = "font-bold text-sm mb-1 text-green-700";
+                feedbackIcon.innerHTML = '<i class="fas fa-check-circle text-green-500 text-xl"></i>';
+                feedbackEl.className = "mt-auto bg-green-50 p-4 rounded-lg border border-green-200 fade-in";
+            } else {
+                btnElement.className = "w-full text-left p-4 rounded-lg border-2 border-red-400 bg-red-50 transition-all flex justify-between items-center";
+                btnElement.innerHTML += '<i class="fas fa-times text-red-500"></i>';
+
+                feedbackTitle.textContent = "Incorrect";
+                feedbackTitle.className = "font-bold text-sm mb-1 text-red-700";
+                feedbackIcon.innerHTML = '<i class="fas fa-times-circle text-red-500 text-xl"></i>';
+                feedbackEl.className = "mt-auto bg-red-50 p-4 rounded-lg border border-red-200 fade-in";
+            }
+        }
+
+        function nextQuestion() {
+            if (qIndex < quizQuestions.length - 1) {
+                qIndex++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-active').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+            
+            const finalScore = document.getElementById('final-score');
+            const finalMsg = document.getElementById('final-msg');
+            
+            finalScore.textContent = `${score}/${quizQuestions.length}`;
+            
+            const percentage = (score / quizQuestions.length) * 100;
+            if (percentage === 100) finalMsg.textContent = "Perfect Score! You're an expert!";
+            else if (percentage >= 80) finalMsg.textContent = "Great job! You know your stuff.";
+            else if (percentage >= 60) finalMsg.textContent = "Good effort! Review the flashcards to improve.";
+            else finalMsg.textContent = "Keep studying! Try the flashcards again.";
+        }
+
+        function restartQuiz() {
+            startQuiz();
+        }
+
+        // Initialize
+        updateCardUI();
+
+    </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Technology: Data Exchange Interactive Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F5F0; /* Warm neutral background */
+            color: #2D3748;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F5F5F0; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E0; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #A0AEC0; 
+        }
+
+        /* Chart Container Utilities */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            height: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Interactive Element Transitions */
+        .interactive-card {
+            transition: all 0.3s ease;
+        }
+        .interactive-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-item.active {
+            background-color: #E2E8F0;
+            border-left: 4px solid #4A5568;
+            font-weight: 600;
+        }
+
+        .code-block {
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* Hiding sections for SPA feel */
+        .spa-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .spa-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals (Stone/Slate) with soft Teal accents for interactivity. -->
+    <!-- Application Structure Plan: Dashboard-style SPA with a sidebar navigation. 
+         Sections:
+         1. Foundations: The "Why" and Analogies (Airport).
+         2. Formats Lab: Interactive comparison of JSON, XML, CSV with a Radar Chart and Code Toggle.
+         3. The Exchange: REST API Simulator (Click methods to see responses) and Protocol details.
+         4. Security Vault: Interactive Encryption and Hashing tools to demonstrate concepts visually.
+         5. Real World: Transformation flow and Career context.
+         Why: Breaks down abstract concepts into tangible, interactive modules. -->
+    <!-- Visualization & Content Choices: 
+         1. Radar Chart: Compare Formats (Readability vs Size vs Speed). Goal: Compare.
+         2. Code Toggle: Show same data in 3 formats. Goal: Inform/Compare.
+         3. Mock API Console: Goal: Change/Interact.
+         4. Crypto Tools: Real-time text manipulation. Goal: Engagement/Understanding. 
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="flex flex-col md:flex-row h-screen overflow-hidden">
+
+    <!-- Mobile Header -->
+    <header class="md:hidden bg-white border-b border-gray-200 p-4 flex justify-between items-center z-20">
+        <h1 class="text-xl font-bold text-slate-700">Data Exchange</h1>
+        <button id="mobile-menu-btn" class="text-slate-600 focus:outline-none">
+            <i class="fas fa-bars fa-lg"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar" class="bg-white w-full md:w-64 flex-shrink-0 border-r border-gray-200 flex flex-col h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300 absolute md:relative z-10">
+        <div class="p-6 border-b border-gray-100 hidden md:block">
+            <h1 class="text-2xl font-bold text-slate-800">Data Exchange</h1>
+            <p class="text-sm text-slate-500 mt-1">Interactive Guide</p>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1">
+                <li><button onclick="navigateTo('foundations')" class="nav-item active w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-3"><i class="fas fa-plane"></i> Foundations</button></li>
+                <li><button onclick="navigateTo('formats')" class="nav-item w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-3"><i class="fas fa-file-code"></i> Data Formats</button></li>
+                <li><button onclick="navigateTo('transport')" class="nav-item w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-3"><i class="fas fa-network-wired"></i> API & Protocols</button></li>
+                <li><button onclick="navigateTo('security')" class="nav-item w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-3"><i class="fas fa-shield-alt"></i> Security</button></li>
+                <li><button onclick="navigateTo('career')" class="nav-item w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-3"><i class="fas fa-briefcase"></i> Real World & Career</button></li>
+            </ul>
+        </div>
+        <div class="p-4 border-t border-gray-100 text-xs text-center text-slate-400">
+            Based on Cyber.SoHo Materials
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 relative scroll-smooth" id="main-content">
+        
+        <!-- SECTION 1: FOUNDATIONS -->
+        <section id="foundations" class="spa-section active max-w-5xl mx-auto">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">The Invisible Language</h2>
+                <p class="text-lg text-slate-600 leading-relaxed max-w-3xl">
+                    Every text message, online purchase, and video stream relies on <strong>Data Exchange</strong>. It is the foundation that enables billions of digital interactions every second across incompatible systems. Without it, the digital world would be chaos.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <!-- Analogy Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 interactive-card">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="bg-sky-100 p-3 rounded-full text-sky-600">
+                            <i class="fas fa-plane-departure fa-2x"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-700">The Airport Analogy</h3>
+                    </div>
+                    <p class="text-slate-600 mb-4">Imagine an international airport without common systems, universal symbols, or currency exchange. It would be chaos. That is the internet without data exchange.</p>
+                    <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                        <h4 class="font-semibold text-slate-700 mb-2">Core Components:</h4>
+                        <ul class="space-y-2 text-sm text-slate-600">
+                            <li class="flex items-center gap-2"><i class="fas fa-box text-orange-400"></i> <strong>Sender:</strong> Packages the data.</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-truck text-blue-400"></i> <strong>Transmission:</strong> Sends via protocol.</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-box-open text-green-400"></i> <strong>Receiver:</strong> Unpacks and processes.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Three Pillars Interactive -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-xl font-bold text-slate-700 mb-4">The Three Pillars</h3>
+                    <p class="text-sm text-slate-500 mb-4">Click a pillar to learn more.</p>
+                    <div class="flex flex-col gap-3">
+                        <button onclick="showPillar('format')" class="pillar-btn w-full text-left p-4 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all group">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-indigo-900 group-hover:text-indigo-600">1. Format</span>
+                                <i class="fas fa-file-alt text-slate-400 group-hover:text-indigo-500"></i>
+                            </div>
+                            <p id="desc-format" class="text-sm text-slate-600 mt-2 hidden">How data is packaged. Like choosing between a letter, postcard, or package.</p>
+                        </button>
+                        <button onclick="showPillar('protocol')" class="pillar-btn w-full text-left p-4 rounded-lg border border-slate-200 hover:border-teal-300 hover:bg-teal-50 transition-all group">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-teal-900 group-hover:text-teal-600">2. Protocol</span>
+                                <i class="fas fa-road text-slate-400 group-hover:text-teal-500"></i>
+                            </div>
+                            <p id="desc-protocol" class="text-sm text-slate-600 mt-2 hidden">The rules for sending & receiving. Like postal regulations or traffic laws.</p>
+                        </button>
+                        <button onclick="showPillar('security')" class="pillar-btn w-full text-left p-4 rounded-lg border border-slate-200 hover:border-red-300 hover:bg-red-50 transition-all group">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-red-900 group-hover:text-red-600">3. Security</span>
+                                <i class="fas fa-lock text-slate-400 group-hover:text-red-500"></i>
+                            </div>
+                            <p id="desc-security" class="text-sm text-slate-600 mt-2 hidden">Ensuring only the right recipient gets the data. Like registered mail.</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: FORMATS -->
+        <section id="formats" class="spa-section max-w-6xl mx-auto">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Speaking the Same Language</h2>
+                <p class="text-lg text-slate-600 leading-relaxed max-w-4xl">
+                    Computers need a common structure to exchange information. Depending on the use case—whether it's a modern web app, a legacy bank system, or a data science project—we choose different formats. This section compares the "Big Three": JSON, XML, and CSV.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                
+                <!-- Format Controls & Display -->
+                <div class="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-slate-700">Format Lab</h3>
+                        <div class="flex bg-slate-100 p-1 rounded-lg">
+                            <button onclick="setFormat('json')" id="btn-json" class="format-toggle px-4 py-1.5 rounded-md text-sm font-medium transition-all bg-white shadow-sm text-slate-800">JSON</button>
+                            <button onclick="setFormat('xml')" id="btn-xml" class="format-toggle px-4 py-1.5 rounded-md text-sm font-medium text-slate-500 hover:text-slate-700 transition-all">XML</button>
+                            <button onclick="setFormat('csv')" id="btn-csv" class="format-toggle px-4 py-1.5 rounded-md text-sm font-medium text-slate-500 hover:text-slate-700 transition-all">CSV</button>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Description -->
+                    <div id="format-description" class="mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-md">
+                        <h4 class="font-bold text-blue-900">JSON (JavaScript Object Notation)</h4>
+                        <p class="text-sm text-blue-800 mt-1">The modern standard. Lightweight, human-readable, and supported by all web languages. Best for APIs and mobile apps.</p>
+                    </div>
+
+                    <!-- Code Block -->
+                    <div class="bg-slate-900 rounded-lg p-4 overflow-x-auto flex-1">
+                        <pre class="code-block text-sm"><code id="code-display" class="text-green-400">
+{
+  "user": {
+    "id": 123,
+    "name": "Alice Smith",
+    "roles": ["admin", "editor"],
+    "active": true
+  }
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Radar Chart Comparison -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center">
+                    <h3 class="text-lg font-bold text-slate-700 mb-2">Format Comparison</h3>
+                    <p class="text-xs text-slate-500 text-center mb-4">Comparison based on standard use-cases</p>
+                    <div class="chart-container">
+                        <canvas id="formatChart"></canvas>
+                    </div>
+                    <div class="mt-4 w-full">
+                         <div class="grid grid-cols-3 gap-2 text-center text-xs text-slate-500">
+                            <div><span class="block w-3 h-3 bg-teal-500 rounded-full mx-auto mb-1"></span>JSON</div>
+                            <div><span class="block w-3 h-3 bg-orange-500 rounded-full mx-auto mb-1"></span>XML</div>
+                            <div><span class="block w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></span>CSV</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Matrix -->
+            <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-700 border-b border-gray-200">
+                            <tr>
+                                <th class="p-4 font-bold">Feature</th>
+                                <th class="p-4 font-bold text-teal-700">JSON</th>
+                                <th class="p-4 font-bold text-orange-700">XML</th>
+                                <th class="p-4 font-bold text-blue-700">CSV</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-4 font-medium text-slate-600">Readability</td>
+                                <td class="p-4">High</td>
+                                <td class="p-4">Medium</td>
+                                <td class="p-4">High (Table)</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-4 font-medium text-slate-600">Nested Data</td>
+                                <td class="p-4 text-green-600"><i class="fas fa-check"></i> Yes</td>
+                                <td class="p-4 text-green-600"><i class="fas fa-check"></i> Yes</td>
+                                <td class="p-4 text-red-500"><i class="fas fa-times"></i> No</td>
+                            </tr>
+                             <tr class="hover:bg-slate-50">
+                                <td class="p-4 font-medium text-slate-600">Validation</td>
+                                <td class="p-4">Optional</td>
+                                <td class="p-4">Built-in (XSD)</td>
+                                <td class="p-4">None</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-4 font-medium text-slate-600">Best For</td>
+                                <td class="p-4"><strong>Web APIs</strong></td>
+                                <td class="p-4"><strong>Enterprise/Legacy</strong></td>
+                                <td class="p-4"><strong>Data Analysis</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: TRANSPORT (API) -->
+        <section id="transport" class="spa-section max-w-5xl mx-auto">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">APIs: The Digital Doorways</h2>
+                <p class="text-lg text-slate-600 leading-relaxed max-w-3xl">
+                    APIs (Application Programming Interfaces) are how programs talk to each other. Think of a restaurant menu: You order (Request), the kitchen cooks (Process), and the waiter brings food (Response). You don't need to know how the kitchen works.
+                </p>
+            </div>
+
+            <!-- REST API Simulator -->
+            <div class="bg-slate-800 rounded-xl shadow-lg p-6 mb-12 text-white font-mono">
+                <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+                    <h3 class="text-lg text-green-400"><i class="fas fa-terminal mr-2"></i>REST API Simulator</h3>
+                    <span class="text-xs text-slate-400">api.example.com</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <!-- Controls -->
+                    <div class="md:col-span-4 space-y-3">
+                        <p class="text-xs text-slate-400 uppercase tracking-widest mb-2">Select Method</p>
+                        <button onclick="apiReq('GET')" class="w-full text-left px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded border-l-4 border-blue-500 transition-colors flex justify-between items-center">
+                            <span>GET</span> <span class="text-xs text-slate-400">Read</span>
+                        </button>
+                        <button onclick="apiReq('POST')" class="w-full text-left px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded border-l-4 border-green-500 transition-colors flex justify-between items-center">
+                            <span>POST</span> <span class="text-xs text-slate-400">Create</span>
+                        </button>
+                        <button onclick="apiReq('PUT')" class="w-full text-left px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded border-l-4 border-yellow-500 transition-colors flex justify-between items-center">
+                            <span>PUT</span> <span class="text-xs text-slate-400">Update</span>
+                        </button>
+                        <button onclick="apiReq('DELETE')" class="w-full text-left px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded border-l-4 border-red-500 transition-colors flex justify-between items-center">
+                            <span>DELETE</span> <span class="text-xs text-slate-400">Remove</span>
+                        </button>
+                    </div>
+
+                    <!-- Screen -->
+                    <div class="md:col-span-8 bg-black rounded p-4 border border-slate-700 min-h-[250px] relative">
+                        <div id="api-request-line" class="text-yellow-300 mb-2">> Waiting for input...</div>
+                        <div id="api-loading" class="hidden text-slate-500 mb-2">Processing...</div>
+                        <div id="api-response" class="text-green-400 text-sm whitespace-pre-wrap opacity-0 transition-opacity duration-300"></div>
+                        <div id="api-status" class="absolute top-4 right-4 text-xs bg-slate-800 px-2 py-1 rounded hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Protocols: HTTP vs HTTPS -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-xl font-bold text-slate-700 mb-6">Protocols: The Rules of the Road</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="border border-red-200 bg-red-50 rounded-lg p-6 text-center">
+                        <i class="fas fa-lock-open text-red-400 text-4xl mb-4"></i>
+                        <h4 class="font-bold text-red-800 mb-2">HTTP</h4>
+                        <p class="text-sm text-red-700">Unencrypted. Data is sent as plain text. Anyone on the network can read it. Good for public info, bad for logins.</p>
+                        <div class="mt-4 text-xs font-mono bg-white p-2 border border-red-100 rounded text-red-600">User: Alice | Pass: 12345</div>
+                    </div>
+                    <div class="border border-green-200 bg-green-50 rounded-lg p-6 text-center relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-green-500 text-white text-xs px-2 py-1 rounded-bl">Standard</div>
+                        <i class="fas fa-lock text-green-500 text-4xl mb-4"></i>
+                        <h4 class="font-bold text-green-800 mb-2">HTTPS (SSL/TLS)</h4>
+                        <p class="text-sm text-green-700">Encrypted. Data is scrambled. Even if intercepted, it cannot be read without the key.</p>
+                        <div class="mt-4 text-xs font-mono bg-white p-2 border border-green-100 rounded text-green-600">a8f93... (Unreadable)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: SECURITY -->
+        <section id="security" class="spa-section max-w-5xl mx-auto">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">The Security Vault</h2>
+                <p class="text-lg text-slate-600 leading-relaxed max-w-3xl">
+                    Security in data exchange relies on three pillars: Confidentiality (Encryption), Integrity (Hashing), and Authentication (Signatures). Use the tools below to see how they work.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Encryption Tool -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center gap-3 mb-4 text-indigo-700">
+                        <i class="fas fa-user-secret fa-lg"></i>
+                        <h3 class="text-xl font-bold">Encryption (Confidentiality)</h3>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-4">Type a secret message. See how it looks "Encrypted" (simulated via Base64).</p>
+                    
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Plaintext Input</label>
+                    <input type="text" id="encrypt-input" placeholder="Enter secret..." class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-indigo-200 outline-none" oninput="updateEncryption()">
+                    
+                    <div class="flex justify-center mb-4">
+                        <i class="fas fa-arrow-down text-slate-300"></i>
+                    </div>
+
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Ciphertext (Simulated)</label>
+                    <div id="encrypt-output" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-lg font-mono text-sm break-all min-h-[3rem] text-slate-600"></div>
+                </div>
+
+                <!-- Hashing Tool -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center gap-3 mb-4 text-teal-700">
+                        <i class="fas fa-fingerprint fa-lg"></i>
+                        <h3 class="text-xl font-bold">Hashing (Integrity)</h3>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-4">Hashing creates a unique fingerprint. Change <strong>one character</strong>, and the hash changes completely.</p>
+                    
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data Input</label>
+                    <input type="text" id="hash-input" placeholder="Type anything..." class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-teal-200 outline-none" oninput="updateHash()">
+                    
+                    <div class="flex justify-center mb-4">
+                        <i class="fas fa-arrow-down text-slate-300"></i>
+                    </div>
+
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Simulated Hash Value</label>
+                    <div id="hash-output" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-lg font-mono text-sm break-all min-h-[3rem] text-teal-600"></div>
+                </div>
+            </div>
+
+            <!-- Digital Signature Flow -->
+            <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-xl font-bold text-slate-700 mb-4">Digital Signatures</h3>
+                <p class="text-sm text-slate-600 mb-6">Combines Hashing + Encryption to prove <strong>who</strong> sent the data and that it hasn't been touched.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-center text-center">
+                    <div class="p-4 bg-slate-50 rounded border border-slate-200">
+                        <i class="fas fa-file-alt text-slate-400 mb-2"></i>
+                        <div class="text-xs font-bold">1. Data</div>
+                    </div>
+                    <div class="text-slate-300"><i class="fas fa-arrow-right"></i></div>
+                    <div class="p-4 bg-teal-50 rounded border border-teal-200">
+                        <i class="fas fa-fingerprint text-teal-500 mb-2"></i>
+                        <div class="text-xs font-bold">2. Hash</div>
+                    </div>
+                    <div class="text-slate-300"><i class="fas fa-plus"></i></div>
+                    <div class="p-4 bg-indigo-50 rounded border border-indigo-200">
+                        <i class="fas fa-key text-indigo-500 mb-2"></i>
+                        <div class="text-xs font-bold">3. Private Key</div>
+                    </div>
+                    <div class="text-slate-300"><i class="fas fa-equals"></i></div>
+                    <div class="p-4 bg-green-50 rounded border border-green-200 shadow-sm">
+                        <i class="fas fa-stamp text-green-500 mb-2"></i>
+                        <div class="text-xs font-bold">Digital Signature</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: CAREER & SUMMARY -->
+        <section id="career" class="spa-section max-w-5xl mx-auto">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Real World & Your Future</h2>
+                <p class="text-lg text-slate-600 leading-relaxed max-w-3xl">
+                    In the real world, systems rarely speak the same language. Data must be transformed as it flows through pipelines. Understanding these concepts is critical for almost every tech role.
+                </p>
+            </div>
+
+            <!-- Transformation Flow -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-12">
+                <h3 class="text-xl font-bold text-slate-700 mb-6">The Journey of an E-Commerce Order</h3>
+                <div class="relative">
+                    <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-100 -z-10 transform -translate-y-1/2 hidden md:block"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="bg-white p-4 border border-gray-200 rounded-lg text-center shadow-sm relative group hover:border-blue-400 transition-colors">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 text-blue-600 font-bold">1</div>
+                            <h4 class="font-bold text-slate-700">Website</h4>
+                            <p class="text-xs text-slate-500 mt-1">Sends order as <strong>JSON</strong></p>
+                        </div>
+                        <div class="bg-white p-4 border border-gray-200 rounded-lg text-center shadow-sm relative group hover:border-purple-400 transition-colors">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3 text-purple-600 font-bold">2</div>
+                            <h4 class="font-bold text-slate-700">Payment</h4>
+                            <p class="text-xs text-slate-500 mt-1">Bank system needs <strong>XML</strong></p>
+                        </div>
+                        <div class="bg-white p-4 border border-gray-200 rounded-lg text-center shadow-sm relative group hover:border-green-400 transition-colors">
+                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 text-green-600 font-bold">3</div>
+                            <h4 class="font-bold text-slate-700">Inventory</h4>
+                            <p class="text-xs text-slate-500 mt-1">Database export to <strong>CSV</strong></p>
+                        </div>
+                        <div class="bg-white p-4 border border-gray-200 rounded-lg text-center shadow-sm relative group hover:border-red-400 transition-colors">
+                            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 text-red-600 font-bold">4</div>
+                            <h4 class="font-bold text-slate-700">Customer</h4>
+                            <p class="text-xs text-slate-500 mt-1">Receives receipt as <strong>HTML/PDF</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Career Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div class="bg-slate-800 text-white rounded-xl p-8 shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4">Why This Matters</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-code mt-1 text-green-400"></i>
+                            <div>
+                                <strong class="block">Software Engineers</strong>
+                                <span class="text-sm text-slate-300">Build APIs, integrate services, design microservices.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-chart-line mt-1 text-blue-400"></i>
+                            <div>
+                                <strong class="block">Data Scientists</strong>
+                                <span class="text-sm text-slate-300">Clean data (ETL), convert CSVs, consume public APIs.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-shield-alt mt-1 text-red-400"></i>
+                            <div>
+                                <strong class="block">Cybersecurity</strong>
+                                <span class="text-sm text-slate-300">Implement encryption, secure APIs, audit data flows.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl p-8">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Next Steps</h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 p-3 rounded hover:bg-slate-50 cursor-pointer">
+                            <input type="checkbox" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">Build a simple REST API (Flask/Express)</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 rounded hover:bg-slate-50 cursor-pointer">
+                            <input type="checkbox" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">Practice with a Public API (e.g., PokeAPI)</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 rounded hover:bg-slate-50 cursor-pointer">
+                            <input type="checkbox" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">Convert a JSON file to CSV</span>
+                        </label>
+                         <label class="flex items-center gap-3 p-3 rounded hover:bg-slate-50 cursor-pointer">
+                            <input type="checkbox" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">Learn basics of AES Encryption</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="text-center text-slate-400 text-sm pb-8">
+                <p>&copy; 2026 Cyber.SoHo. Educational Use Only.</p>
+            </footer>
+        </section>
+
+    </main>
+
+    <script>
+        // --- NAVIGATION LOGIC ---
+        function navigateTo(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.spa-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Remove active class from nav items
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show target section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Set active nav item (simple match)
+            const navBtns = document.querySelectorAll('.nav-item');
+            // Logic to find the specific button based on onclick attribute text
+            // Alternatively, loop and match index. Simplified here:
+            // In a real app, use data-attributes for cleaner selection.
+            // Re-adding active style to the clicked button context would be ideal, 
+            // but simply scrolling to top is good for this SPA feel.
+            document.getElementById('main-content').scrollTop = 0;
+
+            // Update sidebar highlighting manually for simplicity
+            navBtns.forEach(btn => {
+                if(btn.getAttribute('onclick').includes(sectionId)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Mobile menu close
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        });
+
+
+        // --- SECTION 1: FOUNDATIONS INTERACTION ---
+        function showPillar(pillar) {
+            // Reset descriptions
+            ['format', 'protocol', 'security'].forEach(p => {
+                document.getElementById(`desc-${p}`).classList.add('hidden');
+            });
+            // Show selected
+            document.getElementById(`desc-${pillar}`).classList.remove('hidden');
+        }
+
+
+        // --- SECTION 2: FORMATS LOGIC ---
+        const formatData = {
+            json: {
+                text: `{\n  "user": {\n    "id": 123,\n    "name": "Alice Smith",\n    "roles": ["admin", "editor"],\n    "active": true\n  }\n}`,
+                title: "JSON (JavaScript Object Notation)",
+                desc: "The modern standard. Lightweight, human-readable, and supported by all web languages. Best for APIs and mobile apps.",
+                color: "text-green-400"
+            },
+            xml: {
+                text: `<?xml version="1.0" encoding="UTF-8"?>\n<user>\n  <id>123</id>\n  <name>Alice Smith</name>\n  <roles>\n    <role>admin</role>\n    <role>editor</role>\n  </roles>\n  <active>true</active>\n</user>`,
+                title: "XML (eXtensible Markup Language)",
+                desc: "The legacy enterprise standard. Verbose, but supports strict validation (XSD) and metadata. Common in banking and healthcare.",
+                color: "text-orange-400"
+            },
+            csv: {
+                text: `id,name,role_1,role_2,active\n123,"Alice Smith",admin,editor,true`,
+                title: "CSV (Comma-Separated Values)",
+                desc: "The analyst's favorite. Simple rows and columns. Perfect for spreadsheets and bulk data, but cannot handle nested data well.",
+                color: "text-blue-400"
+            }
+        };
+
+        function setFormat(type) {
+            // Update Text
+            const display = document.getElementById('code-display');
+            const container = document.getElementById('format-description');
+            
+            display.textContent = formatData[type].text;
+            display.className = formatData[type].color; // Change syntax color
+            
+            container.innerHTML = `<h4 class="font-bold text-slate-800">${formatData[type].title}</h4><p class="text-sm text-slate-600 mt-1">${formatData[type].desc}</p>`;
+
+            // Update Buttons
+            document.querySelectorAll('.format-toggle').forEach(btn => {
+                btn.className = "format-toggle px-4 py-1.5 rounded-md text-sm font-medium text-slate-500 hover:text-slate-700 transition-all";
+            });
+            document.getElementById(`btn-${type}`).className = "format-toggle px-4 py-1.5 rounded-md text-sm font-medium transition-all bg-white shadow-sm text-slate-800 border border-gray-200";
+        }
+
+
+        // --- SECTION 3: API SIMULATOR ---
+        function apiReq(method) {
+            const line = document.getElementById('api-request-line');
+            const loading = document.getElementById('api-loading');
+            const response = document.getElementById('api-response');
+            const status = document.getElementById('api-status');
+
+            // Reset UI
+            response.style.opacity = '0';
+            status.classList.add('hidden');
+            line.innerHTML = `<span class="text-white">${method}</span> <span class="text-slate-400">/api/users/123</span>`;
+            
+            // Show loading
+            loading.classList.remove('hidden');
+
+            setTimeout(() => {
+                loading.classList.add('hidden');
+                response.style.opacity = '1';
+                status.classList.remove('hidden');
+
+                let resData = "";
+                let statusInfo = "";
+                let colorClass = "bg-green-600 text-white";
+
+                switch(method) {
+                    case 'GET':
+                        statusInfo = "200 OK";
+                        resData = `{\n  "id": 123,\n  "name": "Alice",\n  "email": "alice@example.com"\n}`;
+                        break;
+                    case 'POST':
+                        statusInfo = "201 CREATED";
+                        resData = `{\n  "id": 456,\n  "status": "User created successfully"\n}`;
+                        break;
+                    case 'PUT':
+                        statusInfo = "200 OK";
+                        resData = `{\n  "id": 123,\n  "updated": true,\n  "name": "Alice Cooper"\n}`;
+                        colorClass = "bg-yellow-600 text-white";
+                        break;
+                    case 'DELETE':
+                        statusInfo = "204 NO CONTENT";
+                        resData = `(No content returned)`;
+                        colorClass = "bg-red-600 text-white";
+                        break;
+                }
+
+                status.textContent = statusInfo;
+                status.className = `absolute top-4 right-4 text-xs px-2 py-1 rounded font-bold ${colorClass}`;
+                response.textContent = resData;
+            }, 600);
+        }
+
+
+        // --- SECTION 4: SECURITY TOOLS ---
+        
+        // Simple Base64 "Encryption" for demo
+        function updateEncryption() {
+            const input = document.getElementById('encrypt-input').value;
+            const output = document.getElementById('encrypt-output');
+            
+            if(input.length === 0) {
+                output.textContent = "";
+                return;
+            }
+            try {
+                output.textContent = btoa(input); // Base64 encode
+            } catch(e) {
+                output.textContent = "Error encoding...";
+            }
+        }
+
+        // Fake Hash Function (Dumb Checksum style for visual demo)
+        // We want it to change dramatically on small edits
+        function simpleHash(str) {
+            let hash = 0;
+            if (str.length === 0) return "";
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            // Convert to hex-like string and make it look long/complex
+            return Math.abs(hash).toString(16).repeat(4).substring(0, 32);
+        }
+
+        function updateHash() {
+            const input = document.getElementById('hash-input').value;
+            const output = document.getElementById('hash-output');
+            
+            if(input.length === 0) {
+                output.textContent = "";
+            } else {
+                output.textContent = simpleHash(input);
+            }
+        }
+
+
+        // --- CHART INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('formatChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Readability', 'Compact Size', 'Nested Data', 'Web Support', 'Validation', 'Analyst Friendly'],
+                    datasets: [
+                        {
+                            label: 'JSON',
+                            data: [9, 8, 10, 10, 5, 4],
+                            fill: true,
+                            backgroundColor: 'rgba(20, 184, 166, 0.2)', // Teal
+                            borderColor: 'rgb(20, 184, 166)',
+                            pointBackgroundColor: 'rgb(20, 184, 166)',
+                        },
+                        {
+                            label: 'XML',
+                            data: [5, 4, 10, 6, 10, 3],
+                            fill: true,
+                            backgroundColor: 'rgba(249, 115, 22, 0.2)', // Orange
+                            borderColor: 'rgb(249, 115, 22)',
+                            pointBackgroundColor: 'rgb(249, 115, 22)',
+                        },
+                        {
+                            label: 'CSV',
+                            data: [8, 10, 1, 4, 1, 10],
+                            fill: true,
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)', // Blue
+                            borderColor: 'rgb(59, 130, 246)',
+                            pointBackgroundColor: 'rgb(59, 130, 246)',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#E2E8F0' },
+                            grid: { color: '#E2E8F0' },
+                            pointLabels: {
+                                font: { size: 11, family: 'Inter' },
+                                color: '#64748B'
+                            },
+                            ticks: { display: false, max: 10 }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
+
+
+
