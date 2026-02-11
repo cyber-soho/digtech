@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Technology: Week 01 Foundations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #fdfbf7; color: #1f2937; }
+        
+        /* Chart Container Styling - Critical for responsiveness */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom scrollbar for code blocks */
+        .code-scroll::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .code-scroll::-webkit-scrollbar-track {
+            background: #e5e7eb;
+        }
+        .code-scroll::-webkit-scrollbar-thumb {
+            background: #9ca3af;
+            border-radius: 4px;
+        }
+
+        /* Timeline Connector */
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 15px;
+            width: 2px;
+            background: #e5e7eb;
+            z-index: 0;
+        }
+        
+        .active-tab {
+            border-bottom: 2px solid #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .inactive-tab {
+            color: #6b7280;
+        }
+        .inactive-tab:hover {
+            color: #374151;
+        }
+
+        /* Card Hover Effects */
+        .hover-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .hover-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals with Indigo/Slate Accents. 
+         Background: #fdfbf7 (Warm White), Text: #1f2937 (Slate 800), Accent: #4f46e5 (Indigo 600) -->
+    
+    <!-- Application Structure Plan:
+         The app is designed as a "Course Module Dashboard" simulating a learning management system view of the Week 01 project.
+         1. Header: Course context, progress, and Disclaimer.
+         2. Navigation: Tab-based interface representing the 4 Days of the curriculum. This allows focused exploration of distinct topics without scrolling fatigue.
+         3. Content Sections (Dynamic):
+            - Day 1 (Evolution): Interactive vertical timeline and a "Definition Switcher" to clarify terminology.
+            - Day 2 (Machine Learning): A "Virtual Lab" simulating the hands-on experiment required in the report, allowing users to "Train" models and see charted results.
+            - Day 3 (Data Exchange): A Protocol Comparison Matrix (filterable) and an "API Simulator" that visualizes the Request/Response cycle.
+            - Day 4 (AI & Synthesis): A conceptual hierarchy view (ANI/AGI/ASI) and a flow diagram connecting all week's topics.
+         This structure transforms static reading assignments into interactive simulations, reinforcing the "learning by doing" ethos of the source report.
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. Timeline (Day 1): HTML/CSS Vertical List. Goal: Trace evolution. Interaction: Simple scroll/read. Justification: Linear history is best consumed chronologically.
+         2. ML Performance (Day 2): Chart.js Bar Chart. Goal: Visualize accuracy metrics. Interaction: "Train Model" button updates data. Justification: Simulates the output of the Python/Scikit-learn task.
+         3. Protocol Matrix (Day 3): HTML Grid/Table. Goal: Compare HTTP, MQTT, etc. Interaction: Filter by "Use Case". Justification: Tabular comparison is efficient for technical specs.
+         4. API Simulator (Day 3): JS/HTML dynamic text. Goal: Show JSON/XML structure. Interaction: "Fetch Data" button. Justification: Demystifies the abstract concept of APIs.
+         5. AI Scale (Day 4): HTML/CSS Progress Bar/Badges. Goal: Distinguish ANI/AGI. Interaction: Hover for definitions.
+         
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header / Disclaimer Section -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl mr-2">🎓</span>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900 tracking-tight">Digital Technology <span class="text-indigo-600">Week 01</span></h1>
+                        <p class="text-xs text-gray-500">Foundations of the Digital Era • Semester Project</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-xs font-semibold text-gray-500 uppercase">Est. Workload</p>
+                        <p class="text-sm font-bold text-gray-900">6 Hours</p>
+                    </div>
+                    <div class="h-8 w-px bg-gray-300"></div>
+                    <div class="text-right">
+                        <p class="text-xs font-semibold text-gray-500 uppercase">Status</p>
+                        <p class="text-sm font-bold text-green-600">In Progress</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Navigation Tabs -->
+            <div class="flex space-x-8 overflow-x-auto mt-2 no-scrollbar">
+                <button onclick="switchTab('day1')" id="tab-day1" class="active-tab pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors">
+                    Day 1: Evolution
+                </button>
+                <button onclick="switchTab('day2')" id="tab-day2" class="inactive-tab pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors">
+                    Day 2: Machine Learning
+                </button>
+                <button onclick="switchTab('day3')" id="tab-day3" class="inactive-tab pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors">
+                    Day 3: Data Exchange
+                </button>
+                <button onclick="switchTab('day4')" id="tab-day4" class="inactive-tab pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors">
+                    Day 4: AI & Future
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow bg-[#fdfbf7] p-4 sm:p-6 lg:p-8">
+        <div class="max-w-7xl mx-auto">
+            
+            <!-- Global Ethical Notice -->
+            <div class="mb-8 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-md shadow-sm">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <span class="text-amber-500 text-xl">⚠️</span>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-amber-700 font-medium">
+                            Ethical & Legal Disclaimer: 
+                            <span class="font-normal text-amber-800">Tools and techniques are for academic use only. Unauthorized malicious use is prohibited.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: DAY 1 -->
+            <div id="content-day1" class="space-y-8 animate-fade-in">
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">The Digital Evolution</h2>
+                    <p class="text-gray-600 mb-4">
+                        Day 1 establishes the historical context of our digital world. Use this section to trace the timeline of major technological milestones and clarify the often-confused terminology of the digital shift.
+                    </p>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                        <!-- Timeline Widget -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                <span class="bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 flex items-center justify-center mr-2 text-sm">1.1</span>
+                                Evolution Timeline
+                            </h3>
+                            <div class="relative timeline-line pl-2 space-y-6">
+                                <!-- Timeline Items -->
+                                <div class="relative pl-8 group">
+                                    <div class="absolute left-0 top-1 w-8 h-8 bg-white border-2 border-indigo-500 rounded-full z-10 text-center text-xs font-bold leading-7 text-indigo-700">70s</div>
+                                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                                        <h4 class="font-bold text-gray-900">Personal Computing</h4>
+                                        <p class="text-sm text-gray-600 mt-1">Shift from mainframes to individual workstations. The democratization of computing power begins.</p>
+                                    </div>
+                                </div>
+                                <div class="relative pl-8 group">
+                                    <div class="absolute left-0 top-1 w-8 h-8 bg-white border-2 border-indigo-500 rounded-full z-10 text-center text-xs font-bold leading-7 text-indigo-700">90s</div>
+                                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                                        <h4 class="font-bold text-gray-900">World Wide Web</h4>
+                                        <p class="text-sm text-gray-600 mt-1">Information becomes globally accessible. Connectivity redefines business and communication.</p>
+                                    </div>
+                                </div>
+                                <div class="relative pl-8 group">
+                                    <div class="absolute left-0 top-1 w-8 h-8 bg-white border-2 border-indigo-500 rounded-full z-10 text-center text-xs font-bold leading-7 text-indigo-700">00s</div>
+                                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                                        <h4 class="font-bold text-gray-900">Mobile & Cloud</h4>
+                                        <p class="text-sm text-gray-600 mt-1">Computing becomes ubiquitous (smartphones) and infrastructure becomes a utility (AWS, Azure).</p>
+                                    </div>
+                                </div>
+                                <div class="relative pl-8 group">
+                                    <div class="absolute left-0 top-1 w-8 h-8 bg-white border-2 border-indigo-500 rounded-full z-10 text-center text-xs font-bold leading-7 text-indigo-700">Now</div>
+                                    <div class="bg-indigo-50 p-4 rounded-lg shadow-sm border border-indigo-100">
+                                        <h4 class="font-bold text-indigo-900">Industry X.0</h4>
+                                        <p class="text-sm text-indigo-700 mt-1">Cyber-physical systems, AI integration, and total automation. The intelligent edge.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Definitions & Case Study -->
+                        <div class="space-y-8">
+                            <!-- Definition Switcher -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <span class="bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 flex items-center justify-center mr-2 text-sm">1.2</span>
+                                    Core Definitions
+                                </h3>
+                                <div class="bg-gray-50 p-1 rounded-lg flex mb-4">
+                                    <button onclick="setDef('digitization')" id="btn-digitization" class="flex-1 py-2 text-sm font-medium rounded-md shadow-sm bg-white text-gray-900 transition-all">Digitization</button>
+                                    <button onclick="setDef('digitalization')" id="btn-digitalization" class="flex-1 py-2 text-sm font-medium rounded-md text-gray-500 hover:text-gray-900 transition-all">Digitalization</button>
+                                    <button onclick="setDef('transformation')" id="btn-transformation" class="flex-1 py-2 text-sm font-medium rounded-md text-gray-500 hover:text-gray-900 transition-all">Transformation</button>
+                                </div>
+                                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm h-40 flex flex-col justify-center">
+                                    <h4 id="def-title" class="font-bold text-lg text-gray-900 mb-2">Digitization</h4>
+                                    <p id="def-text" class="text-gray-600">The technical process of converting analogue information (paper, sound, light) into digital binary format (0s and 1s).</p>
+                                    <p class="text-xs text-gray-400 mt-2 italic">Example: Scanning a paper invoice into a PDF.</p>
+                                </div>
+                            </div>
+
+                            <!-- Automation Case Study -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <span class="bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 flex items-center justify-center mr-2 text-sm">1.3</span>
+                                    Automation Impact
+                                </h3>
+                                <div class="bg-slate-800 text-white rounded-lg p-6 hover-card cursor-pointer" onclick="toggleCaseStudy()">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h4 class="font-bold text-lg">Case Study: Logistics</h4>
+                                        <span class="text-xs bg-slate-600 px-2 py-1 rounded">Click to expand</span>
+                                    </div>
+                                    <div id="case-study-content" class="text-slate-300 text-sm">
+                                        <p class="mb-2"><span class="text-white font-semibold">Before:</span> Manual inventory checks, slow picking, high error rates.</p>
+                                        <p class="mb-2"><span class="text-white font-semibold">Tech:</span> Autonomous Mobile Robots (AMRs) & RFID.</p>
+                                        <p><span class="text-white font-semibold">Outcome:</span> 99.9% inventory accuracy and 3x throughput increase.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: DAY 2 -->
+            <div id="content-day2" class="hidden space-y-8 animate-fade-in">
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900 mb-2">Machine Learning Lab</h2>
+                            <p class="text-gray-600">
+                                Explore the three paradigms of ML and perform a simulated hands-on experiment.
+                            </p>
+                        </div>
+                        <div class="mt-4 md:mt-0">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                Active Module
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 3 Paradigms -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 hover:border-blue-300 transition-colors">
+                            <h3 class="font-bold text-blue-900 mb-2">Supervised</h3>
+                            <p class="text-xs text-blue-800 mb-2">Learning with labeled data (Input -> Output).</p>
+                            <div class="text-xs bg-white p-2 rounded text-gray-600 border border-blue-100">Ex: Spam Filtering</div>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg border border-purple-100 hover:border-purple-300 transition-colors">
+                            <h3 class="font-bold text-purple-900 mb-2">Unsupervised</h3>
+                            <p class="text-xs text-purple-800 mb-2">Finding patterns in unlabeled data.</p>
+                            <div class="text-xs bg-white p-2 rounded text-gray-600 border border-purple-100">Ex: Customer Segmentation</div>
+                        </div>
+                        <div class="bg-orange-50 p-4 rounded-lg border border-orange-100 hover:border-orange-300 transition-colors">
+                            <h3 class="font-bold text-orange-900 mb-2">Reinforcement</h3>
+                            <p class="text-xs text-orange-800 mb-2">Learning via trial, error, and reward.</p>
+                            <div class="text-xs bg-white p-2 rounded text-gray-600 border border-orange-100">Ex: Game Playing (Chess)</div>
+                        </div>
+                    </div>
+
+                    <!-- Hands-on Simulator -->
+                    <div class="border-t border-gray-200 pt-8">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <span class="bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 flex items-center justify-center mr-2 text-sm">2.2</span>
+                            Hands-On Experiment Simulator
+                        </h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <!-- Controls -->
+                            <div class="bg-gray-50 p-6 rounded-lg h-full flex flex-col">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Dataset</label>
+                                <select id="ml-dataset" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 mb-4 bg-white border">
+                                    <option value="iris">Iris Flowers (Classification)</option>
+                                    <option value="housing">Housing Prices (Regression)</option>
+                                    <option value="heart">Heart Disease (Classification)</option>
+                                </select>
+
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Algorithm</label>
+                                <select id="ml-algo" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 mb-6 bg-white border">
+                                    <option>Decision Tree</option>
+                                    <option>K-Nearest Neighbors</option>
+                                    <option>Linear Regression</option>
+                                </select>
+
+                                <button onclick="runMLSimulation()" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded hover:bg-indigo-700 transition-colors shadow-md mt-auto flex items-center justify-center">
+                                    <span class="mr-2">⚙️</span> Run Model
+                                </button>
+                                <p class="text-xs text-gray-500 mt-2 text-center">Simulates processing and metrics calculation.</p>
+                            </div>
+
+                            <!-- Visualization -->
+                            <div class="lg:col-span-2">
+                                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h4 class="font-bold text-sm text-gray-700">Model Performance Metrics</h4>
+                                        <span id="ml-status" class="text-xs font-mono text-gray-400">Status: Ready</span>
+                                    </div>
+                                    <div class="chart-container">
+                                        <canvas id="mlChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                     <!-- Ethical Reflection -->
+                     <div class="mt-8 bg-red-50 p-6 rounded-lg border border-red-100">
+                        <h3 class="font-bold text-red-900 mb-2">Ethical Reflection Point</h3>
+                        <p class="text-sm text-red-800">
+                            <strong>Bias in Data:</strong> If training data is historical, it often contains historical prejudices. A hiring algorithm trained on past successful resumes (mostly male) may downgrade female candidates. <br><span class="italic text-xs mt-1 block">Ref: OECD AI Policy Observatory</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: DAY 3 -->
+            <div id="content-day3" class="hidden space-y-8 animate-fade-in">
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Data Exchange Hub</h2>
+                    <p class="text-gray-600 mb-6">
+                        Understanding how systems talk. Compare protocols, visualize data formats, and build a conceptual data pipeline.
+                    </p>
+
+                    <!-- Protocol Comparison -->
+                    <div class="mb-10">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <span class="bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 flex items-center justify-center mr-2 text-sm">3.1</span>
+                                Protocol Standards
+                            </h3>
+                            <div class="flex space-x-2">
+                                <button onclick="filterProtocols('all')" class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded">All</button>
+                                <button onclick="filterProtocols('web')" class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded">Web</button>
+                                <button onclick="filterProtocols('iot')" class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded">IoT</button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Protocol</th>
+                                        <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                        <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Strength</th>
+                                        <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Limitation</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="protocol-body" class="bg-white divide-y divide-gray-200">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- API Simulator & Formats -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 border-t border-gray-200 pt-8">
+                        <!-- Data Formats -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                <span class="bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 flex items-center justify-center mr-2 text-sm">3.2</span>
+                                Data Formats
+                            </h3>
+                            <div class="bg-gray-900 rounded-lg overflow-hidden shadow-lg">
+                                <div class="flex border-b border-gray-700 bg-gray-800">
+                                    <button onclick="showFormat('json')" class="flex-1 py-2 text-xs text-white font-mono hover:bg-gray-700 focus:bg-gray-700 focus:outline-none">JSON</button>
+                                    <button onclick="showFormat('xml')" class="flex-1 py-2 text-xs text-gray-400 font-mono hover:bg-gray-700 focus:bg-gray-700 focus:outline-none">XML</button>
+                                    <button onclick="showFormat('csv')" class="flex-1 py-2 text-xs text-gray-400 font-mono hover:bg-gray-700 focus:bg-gray-700 focus:outline-none">CSV</button>
+                                </div>
+                                <div class="p-4 h-48 overflow-y-auto code-scroll">
+                                    <pre id="code-display" class="font-mono text-xs text-green-400"></pre>
+                                </div>
+                                <div class="bg-gray-800 p-2 text-xs text-gray-400 text-center" id="format-desc">
+                                    Lightweight, easy for humans and machines. The web standard.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- API Interaction -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                <span class="bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 flex items-center justify-center mr-2 text-sm">3.3</span>
+                                API Request Simulator
+                            </h3>
+                            <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                <div class="flex items-center space-x-2 mb-4">
+                                    <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded">GET</span>
+                                    <code class="bg-gray-100 text-gray-800 text-xs p-1 rounded flex-grow">https://api.mockweather.org/london</code>
+                                    <button onclick="fetchApiData()" class="bg-indigo-600 text-white text-xs px-3 py-1 rounded hover:bg-indigo-700">Send</button>
+                                </div>
+                                
+                                <div id="api-result-container" class="hidden">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-xs font-bold text-gray-500">Response Data</span>
+                                        <span class="text-xs text-green-600 font-mono">Status: 200 OK</span>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                                        <div class="grid grid-cols-2 gap-2 text-sm">
+                                            <div>
+                                                <span class="text-gray-500 text-xs block">Location</span>
+                                                <span class="font-medium">London, UK</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500 text-xs block">Temp</span>
+                                                <span class="font-medium">15°C</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500 text-xs block">Condition</span>
+                                                <span class="font-medium">Cloudy</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500 text-xs block">Humidity</span>
+                                                <span class="font-medium">82%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 text-xs text-gray-400">
+                                        <span class="text-indigo-600 font-bold">Security Note:</span> In production, use TLS (HTTPS) to encrypt this payload.
+                                    </div>
+                                </div>
+                                <div id="api-placeholder" class="text-center py-8 text-gray-400 text-sm">
+                                    Click "Send" to simulate a request.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: DAY 4 -->
+            <div id="content-day4" class="hidden space-y-8 animate-fade-in">
+                <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Artificial Intelligence & The Future</h2>
+                    <p class="text-gray-600 mb-6">
+                        Synthesizing the week: From data to intelligence. Understanding the scope of AI and its current industry applications.
+                    </p>
+
+                    <!-- AI Hierarchy -->
+                    <div class="mb-10">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <span class="bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 flex items-center justify-center mr-2 text-sm">4.1</span>
+                            The Intelligence Spectrum
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-indigo-50 p-5 rounded-lg border-t-4 border-indigo-500">
+                                <div class="font-bold text-xl text-indigo-900 mb-1">ANI</div>
+                                <div class="text-xs font-semibold text-indigo-400 uppercase tracking-wide mb-3">Artificial Narrow Intelligence</div>
+                                <p class="text-sm text-gray-700">Specific tasks. Beats humans at chess, but can't cook.</p>
+                                <div class="mt-3 text-xs bg-white inline-block px-2 py-1 rounded border border-indigo-100">Current Reality</div>
+                            </div>
+                            <div class="bg-gray-50 p-5 rounded-lg border-t-4 border-gray-400 opacity-75">
+                                <div class="font-bold text-xl text-gray-800 mb-1">AGI</div>
+                                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Artificial General Intelligence</div>
+                                <p class="text-sm text-gray-600">Human-level intellect across all domains.</p>
+                                <div class="mt-3 text-xs bg-white inline-block px-2 py-1 rounded border border-gray-200">Hypothetical</div>
+                            </div>
+                            <div class="bg-gray-50 p-5 rounded-lg border-t-4 border-gray-400 opacity-75">
+                                <div class="font-bold text-xl text-gray-800 mb-1">ASI</div>
+                                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Artificial Super Intelligence</div>
+                                <p class="text-sm text-gray-600">Surpasses human intellect in every field.</p>
+                                <div class="mt-3 text-xs bg-white inline-block px-2 py-1 rounded border border-gray-200">Future?</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Synthesis Flow -->
+                    <div class="border-t border-gray-200 pt-8">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6 flex items-center">
+                            <span class="bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 flex items-center justify-center mr-2 text-sm">4.3</span>
+                            The Week 01 Connection
+                        </h3>
+                        <!-- CSS Flowchart -->
+                        <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                            <!-- Step 1 -->
+                            <div class="w-full md:w-1/4 bg-white p-4 rounded shadow-sm border border-gray-200 text-center">
+                                <div class="text-2xl mb-2">🖥️</div>
+                                <h4 class="font-bold text-gray-800">Digitalization</h4>
+                                <p class="text-xs text-gray-500 mt-1">Creates the environment & data.</p>
+                            </div>
+                            <!-- Arrow -->
+                            <div class="text-gray-400 text-xl transform md:rotate-0 rotate-90">➔</div>
+                            <!-- Step 2 -->
+                            <div class="w-full md:w-1/4 bg-white p-4 rounded shadow-sm border border-gray-200 text-center">
+                                <div class="text-2xl mb-2">🤖</div>
+                                <h4 class="font-bold text-gray-800">Automation</h4>
+                                <p class="text-xs text-gray-500 mt-1">Generates massive datasets.</p>
+                            </div>
+                            <!-- Arrow -->
+                            <div class="text-gray-400 text-xl transform md:rotate-0 rotate-90">➔</div>
+                            <!-- Step 3 -->
+                            <div class="w-full md:w-1/4 bg-white p-4 rounded shadow-sm border border-gray-200 text-center">
+                                <div class="text-2xl mb-2">🧠</div>
+                                <h4 class="font-bold text-gray-800">Machine Learning</h4>
+                                <p class="text-xs text-gray-500 mt-1">Finds patterns in the data.</p>
+                            </div>
+                             <!-- Arrow -->
+                             <div class="text-gray-400 text-xl transform md:rotate-0 rotate-90">➔</div>
+                             <!-- Step 4 -->
+                             <div class="w-full md:w-1/4 bg-indigo-600 p-4 rounded shadow-lg text-center text-white">
+                                 <div class="text-2xl mb-2">✨</div>
+                                 <h4 class="font-bold">Artificial Intelligence</h4>
+                                 <p class="text-xs text-indigo-200 mt-1">The overarching goal.</p>
+                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Resources -->
+                    <div class="mt-8 p-4 bg-gray-50 rounded border border-gray-200">
+                        <h4 class="font-bold text-gray-700 mb-2 text-sm">Recommended Reading</h4>
+                        <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside">
+                            <li>Schwab, K. The Fourth Industrial Revolution.</li>
+                            <li>Goodfellow, I. et al. Deep Learning.</li>
+                            <li>Russell, S. & Norvig, P. AI: A Modern Approach.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <p class="text-center text-xs text-gray-400">
+                Course Module: Digital Technology &bull; Week 01
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Navigation Logic ---
+        function switchTab(dayId) {
+            // Hide all contents
+            ['day1', 'day2', 'day3', 'day4'].forEach(id => {
+                document.getElementById(`content-${id}`).classList.add('hidden');
+                document.getElementById(`tab-${id}`).classList.remove('active-tab', 'text-indigo-600');
+                document.getElementById(`tab-${id}`).classList.add('inactive-tab');
+            });
+
+            // Show selected
+            document.getElementById(`content-${dayId}`).classList.remove('hidden');
+            const activeTab = document.getElementById(`tab-${dayId}`);
+            activeTab.classList.add('active-tab', 'text-indigo-600');
+            activeTab.classList.remove('inactive-tab');
+        }
+
+        // --- Day 1: Definitions Logic ---
+        const definitions = {
+            digitization: {
+                title: "Digitization",
+                text: "The technical process of converting analogue information (paper, sound, light) into digital binary format (0s and 1s).",
+                ex: "Example: Scanning a paper invoice into a PDF."
+            },
+            digitalization: {
+                title: "Digitalization",
+                text: "The use of digital technologies to change a business model and provide new revenue and value-producing opportunities.",
+                ex: "Example: Uploading that PDF to a cloud system so a team can access it remotely."
+            },
+            transformation: {
+                title: "Digital Transformation",
+                text: "The profound transformation of business and organizational activities, processes, competencies, and models to fully leverage digital technologies.",
+                ex: "Example: Using AI to analyze the invoices and automate purchasing, removing the manual team entirely."
+            }
+        };
+
+        function setDef(key) {
+            document.getElementById('def-title').innerText = definitions[key].title;
+            document.getElementById('def-text').innerText = definitions[key].text;
+            document.querySelector('#def-text + p').innerText = definitions[key].ex;
+            
+            // Button Styles
+            ['digitization', 'digitalization', 'transformation'].forEach(k => {
+                const btn = document.getElementById(`btn-${k}`);
+                if(k === key) {
+                    btn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+                    btn.classList.remove('text-gray-500');
+                } else {
+                    btn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+                    btn.classList.add('text-gray-500');
+                }
+            });
+        }
+
+        function toggleCaseStudy() {
+            // Simple visual toggle indication via CSS classes or manual JS if needed
+            // currently handled by design, but could add expand animation here
+        }
+
+        // --- Day 2: ML Chart Logic ---
+        let mlChartInstance = null;
+
+        function initMLChart() {
+            const ctx = document.getElementById('mlChart').getContext('2d');
+            mlChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Accuracy', 'Precision', 'Recall'],
+                    datasets: [{
+                        label: 'Model Metrics',
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(79, 70, 229, 0.2)',
+                            'rgba(16, 185, 129, 0.2)',
+                            'rgba(245, 158, 11, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(79, 70, 229, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(245, 158, 11, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function runMLSimulation() {
+            const btn = document.querySelector('button[onclick="runMLSimulation()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Running...';
+            btn.disabled = true;
+            document.getElementById('ml-status').innerText = 'Status: Training...';
+
+            setTimeout(() => {
+                // Generate random realistic metrics
+                const acc = (0.75 + Math.random() * 0.20).toFixed(2);
+                const prec = (0.70 + Math.random() * 0.25).toFixed(2);
+                const rec = (0.65 + Math.random() * 0.30).toFixed(2);
+
+                mlChartInstance.data.datasets[0].data = [acc, prec, rec];
+                mlChartInstance.update();
+
+                const algo = document.getElementById('ml-algo').value;
+                const ds = document.getElementById('ml-dataset').value;
+                
+                document.getElementById('ml-status').innerText = `Result: ${algo} on ${ds}`;
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1000);
+        }
+
+        // --- Day 3: Protocols & Formats ---
+        const protocols = [
+            { name: "HTTP/S", type: "Web", strength: "Universal, scalable", limit: "Overhead (headers)" },
+            { name: "FTP", type: "Web", strength: "Large file transfer", limit: "Security (if not SFTP)" },
+            { name: "MQTT", type: "IoT", strength: "Lightweight, low power", limit: "Requires broker" },
+            { name: "REST", type: "Web", strength: "Stateless, flexible", limit: "Over-fetching data" },
+            { name: "SOAP", type: "Web", strength: "Strict standards, security", limit: "Complex, verbose" }
+        ];
+
+        function renderProtocols(filter) {
+            const tbody = document.getElementById('protocol-body');
+            tbody.innerHTML = '';
+            protocols.filter(p => filter === 'all' || p.type.toLowerCase() === filter).forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">${p.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-500"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${p.type === 'IoT' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'}">${p.type}</span></td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-500 text-xs">${p.strength}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-500 text-xs">${p.limit}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterProtocols(type) {
+            renderProtocols(type);
+        }
+
+        const formats = {
+            json: {
+                text: '{\n  "city": "London",\n  "temp": 15,\n  "unit": "C"\n}',
+                desc: "JSON: The de-facto standard for web APIs. Lightweight and readable."
+            },
+            xml: {
+                text: '<weather>\n  <city>London</city>\n  <temp unit="C">15</temp>\n</weather>',
+                desc: "XML: Verbose, but strictly structured. Used in enterprise/legacy systems."
+            },
+            csv: {
+                text: 'City,Temp,Unit\nLondon,15,C',
+                desc: "CSV: Best for flat tabular data and spreadsheet imports."
+            }
+        };
+
+        function showFormat(fmt) {
+            document.getElementById('code-display').innerText = formats[fmt].text;
+            document.getElementById('format-desc').innerText = formats[fmt].desc;
+        }
+
+        function fetchApiData() {
+            const placeholder = document.getElementById('api-placeholder');
+            const result = document.getElementById('api-result-container');
+            
+            placeholder.innerText = "Connecting...";
+            
+            setTimeout(() => {
+                placeholder.classList.add('hidden');
+                result.classList.remove('hidden');
+            }, 600);
+        }
+
+        // --- Initialization ---
+        window.addEventListener('load', () => {
+            initMLChart();
+            renderProtocols('all');
+            showFormat('json');
+        });
+
+    </script>
+</body>
+</html>
+
+
+
+
