@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI & Industry X.0 Interactive Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Chart Container Styles */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Max width constraint */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 400px; /* Max height constraint */
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; 
+        }
+
+        /* Animation utilities */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Interactive Element Styles */
+        .interactive-card {
+            transition: all 0.3s ease;
+        }
+        .interactive-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Nesting Model Circles */
+        .circle-ai { background-color: #E6F0F3; border: 2px solid #4A8998; }
+        .circle-ml { background-color: #D1E3E8; border: 2px solid #366775; }
+        .circle-dl { background-color: #BCD6DD; border: 2px solid #234552; }
+
+        /* Digital Twin Stack */
+        .dt-layer {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .dt-layer:hover {
+            margin-left: 10px;
+            background-color: #FEEBC8; /* orange-100 */
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals with Teal and Clay Accents -->
+    <!-- Application Structure Plan:
+         1. Layout: Fixed sidebar navigation (desktop) / Top bar (mobile) with a main content area using a 'Dashboard' metaphor.
+         2. Sections:
+            - Home/Overview: Introduction, Timeline of Revolutions (Context setting).
+            - The Brain (AI): Deep dive into AI/ML/DL, Pipeline, and Neural Nets. Focus on logic and process.
+            - The Body (Industry X.0): Focus on physical implementation, Digital Twins, and IoT.
+            - Ethics & Governance: Interactive tools for understanding bias and safety.
+            - Glossary: Reference.
+         3. Rationale: Splitting into 'Brain' and 'Body' mirrors the report's logic (Lesson 1 vs Lesson 2) but presents it as a cohesive system rather than disconnected slides. Interactions allow users to 'play' with the concepts (calculating bias, simulating maintenance) to reinforce learning.
+    -->
+    <!-- Visualization & Content Choices:
+         - Industrial Revolutions -> Goal: Change/History -> Interactive Timeline -> Flexbox steps with JS content update -> No SVG needed.
+         - 70/80% Rule -> Goal: Inform/Shock -> Pie Chart -> Chart.js -> Visualizes the imbalance in data science work.
+         - Predictive Maintenance -> Goal: Compare -> Interactive Line Chart -> Chart.js -> Toggles between 'Reactive' (spiky cost) and 'Predictive' (flat cost) data.
+         - Bias Rule -> Goal: Utility -> Input Form & Calculator -> JS Logic -> Direct application of the 4/5ths rule formula.
+         - Neural Net -> Goal: Explain Structure -> CSS Flex/Grid Nodes -> HTML/CSS -> Visualizes the flow without complex SVG.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-[#F5F5F0] text-gray-800 font-sans antialiased min-h-screen flex flex-col md:flex-row">
+
+    <!-- Mobile Navigation -->
+    <div class="md:hidden bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="font-bold text-lg text-teal-700">Digital Tech Hub</div>
+        <button id="mobile-menu-btn" class="text-gray-600 hover:text-teal-600 focus:outline-none">
+            <span class="text-2xl">☰</span>
+        </button>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-gray-200 p-4 absolute top-16 w-full z-40 shadow-lg">
+        <nav class="flex flex-col space-y-2">
+            <button onclick="navTo('home')" class="text-left px-4 py-2 rounded hover:bg-teal-50 text-gray-700 font-medium">Overview</button>
+            <button onclick="navTo('brain')" class="text-left px-4 py-2 rounded hover:bg-teal-50 text-gray-700 font-medium">The Brain: AI</button>
+            <button onclick="navTo('body')" class="text-left px-4 py-2 rounded hover:bg-teal-50 text-gray-700 font-medium">The Body: Industry X.0</button>
+            <button onclick="navTo('ethics')" class="text-left px-4 py-2 rounded hover:bg-teal-50 text-gray-700 font-medium">Ethics & Safety</button>
+            <button onclick="navTo('glossary')" class="text-left px-4 py-2 rounded hover:bg-teal-50 text-gray-700 font-medium">Glossary</button>
+        </nav>
+    </div>
+
+    <!-- Sidebar Navigation (Desktop) -->
+    <aside class="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0 overflow-y-auto">
+        <div class="p-6 border-b border-gray-100">
+            <h1 class="font-bold text-xl text-teal-800 leading-tight">Digital Technology<br><span class="text-sm font-normal text-gray-500">Day 04 · AI & Industry X.0</span></h1>
+            <p class="text-xs text-gray-400 mt-2">Prepared by Cyber.SoHo</p>
+        </div>
+        <nav class="flex-1 p-4 space-y-1">
+            <button onclick="navTo('home')" id="nav-home" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-teal-50 text-teal-700 font-semibold bg-teal-50 transition-colors">
+                🏠 Overview
+            </button>
+            <button onclick="navTo('brain')" id="nav-brain" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-teal-50 text-gray-600 font-medium transition-colors">
+                🧠 The Brain: AI
+            </button>
+            <button onclick="navTo('body')" id="nav-body" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-teal-50 text-gray-600 font-medium transition-colors">
+                🏭 The Body: Industry X.0
+            </button>
+            <button onclick="navTo('ethics')" id="nav-ethics" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-teal-50 text-gray-600 font-medium transition-colors">
+                ⚖️ Ethics & Safety
+            </button>
+            <button onclick="navTo('glossary')" id="nav-glossary" class="nav-item w-full text-left px-4 py-3 rounded-lg hover:bg-teal-50 text-gray-600 font-medium transition-colors">
+                📚 Glossary
+            </button>
+        </nav>
+        <div class="p-4 border-t border-gray-100">
+            <div class="text-xs text-gray-400 italic">
+                "The factory of the future will have only two employees: a man and a dog..."
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto h-screen p-4 md:p-8 relative">
+        
+        <!-- SECTION: HOME / OVERVIEW -->
+        <section id="home" class="page-section fade-in block">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome & Roadmap</h2>
+                <p class="text-gray-600 max-w-3xl">
+                    Welcome to Day 04. Today we explore the convergence of Artificial Intelligence (The Brain) and Industry X.0 (The Body). 
+                    This dashboard allows you to interactively explore the evolution of industry, the structure of modern AI, and the ethical responsibilities that come with them.
+                </p>
+            </header>
+
+            <!-- Hook Card -->
+            <div class="bg-teal-900 text-white rounded-xl p-6 shadow-lg mb-8 relative overflow-hidden">
+                <div class="relative z-10">
+                    <h3 class="text-xl font-bold mb-2">The Digital Transformation Goal</h3>
+                    <p class="mb-4 text-teal-100">
+                        Industry X.0 is not a destination — it is a direction. It encompasses the ongoing, open-ended digital transformation of industry.
+                    </p>
+                    <button onclick="navTo('body')" class="bg-white text-teal-900 px-4 py-2 rounded-lg font-semibold hover:bg-teal-50 transition">Explore Industry X.0 &rarr;</button>
+                </div>
+                <div class="absolute right-0 bottom-0 opacity-10 text-9xl transform translate-x-10 translate-y-10">⚙️</div>
+            </div>
+
+            <!-- Industrial Revolutions Timeline -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-bold text-xl text-gray-800">Evolution: 1.0 to 5.0</h3>
+                    <span class="text-xs font-mono bg-gray-100 px-2 py-1 rounded">Click steps to explore</span>
+                </div>
+                
+                <!-- Timeline Stepper -->
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                    <button onclick="updateTimeline(1)" class="timeline-btn w-full md:w-auto text-center p-3 rounded-lg bg-gray-100 hover:bg-teal-100 focus:outline-none transition active-timeline ring-2 ring-teal-500" data-id="1">
+                        <div class="font-bold text-lg">1.0</div>
+                        <div class="text-xs text-gray-500">Steam</div>
+                    </button>
+                    <div class="hidden md:block h-0.5 flex-1 bg-gray-300"></div>
+                    <button onclick="updateTimeline(2)" class="timeline-btn w-full md:w-auto text-center p-3 rounded-lg bg-gray-100 hover:bg-teal-100 focus:outline-none transition" data-id="2">
+                        <div class="font-bold text-lg">2.0</div>
+                        <div class="text-xs text-gray-500">Electricity</div>
+                    </button>
+                    <div class="hidden md:block h-0.5 flex-1 bg-gray-300"></div>
+                    <button onclick="updateTimeline(3)" class="timeline-btn w-full md:w-auto text-center p-3 rounded-lg bg-gray-100 hover:bg-teal-100 focus:outline-none transition" data-id="3">
+                        <div class="font-bold text-lg">3.0</div>
+                        <div class="text-xs text-gray-500">Digital</div>
+                    </button>
+                    <div class="hidden md:block h-0.5 flex-1 bg-gray-300"></div>
+                    <button onclick="updateTimeline(4)" class="timeline-btn w-full md:w-auto text-center p-3 rounded-lg bg-gray-100 hover:bg-teal-100 focus:outline-none transition" data-id="4">
+                        <div class="font-bold text-lg">4.0</div>
+                        <div class="text-xs text-gray-500">Smart</div>
+                    </button>
+                    <div class="hidden md:block h-0.5 flex-1 bg-gray-300"></div>
+                    <button onclick="updateTimeline(5)" class="timeline-btn w-full md:w-auto text-center p-3 rounded-lg bg-gray-100 hover:bg-teal-100 focus:outline-none transition" data-id="5">
+                        <div class="font-bold text-lg">5.0</div>
+                        <div class="text-xs text-gray-500">Human</div>
+                    </button>
+                </div>
+
+                <!-- Dynamic Content Box -->
+                <div id="timeline-content" class="bg-stone-50 p-6 rounded-lg border-l-4 border-teal-500">
+                    <h4 class="font-bold text-lg text-teal-800 mb-2">Industry 1.0 (c. 1760)</h4>
+                    <p class="text-gray-700 mb-2"><strong>Core Innovation:</strong> Mechanisation</p>
+                    <p class="text-gray-600 text-sm">Defining Tech: Steam engine, water power, textile loom.</p>
+                </div>
+            </div>
+
+            <!-- Quick Agenda Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 interactive-card cursor-pointer" onclick="navTo('brain')">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-3">🧠</span>
+                        <h3 class="font-bold text-lg">Lesson 1: AI</h3>
+                    </div>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li>• Defining AI, ML, DL</li>
+                        <li>• The ML Pipeline (8 Steps)</li>
+                        <li>• Neural Networks & Transformers</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 interactive-card cursor-pointer" onclick="navTo('body')">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-3">🏭</span>
+                        <h3 class="font-bold text-lg">Lesson 2: Industry X.0</h3>
+                    </div>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li>• Digital Twins (5 Layers)</li>
+                        <li>• Predictive Maintenance</li>
+                        <li>• Industry 5.0 (Human Factor)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: THE BRAIN (AI) -->
+        <section id="brain" class="page-section hidden fade-in">
+            <header class="mb-8">
+                <div class="flex items-center mb-2">
+                    <span class="text-3xl mr-3">🧠</span>
+                    <h2 class="text-3xl font-bold text-gray-800">The Brain: Artificial Intelligence</h2>
+                </div>
+                <p class="text-gray-600 max-w-3xl">
+                    AI is the system capable of perceiving, reasoning, learning, and acting. Understanding AI requires understanding the "Nesting Model" and the pipeline used to build these systems.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- COL 1: Concepts -->
+                <div class="lg:col-span-1 space-y-8">
+                    <!-- Nesting Model Visualization -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-lg mb-4 text-center">The Nesting Model</h3>
+                        <div class="relative w-full aspect-square flex items-center justify-center p-4">
+                            <!-- Outer: AI -->
+                            <div class="circle-ai w-full h-full rounded-full flex items-start justify-center pt-4 relative shadow-sm group cursor-help">
+                                <span class="font-bold text-teal-800 mt-2">AI</span>
+                                <div class="absolute bg-gray-800 text-white text-xs p-2 rounded hidden group-hover:block top-0 z-10 w-48 text-center">
+                                    The umbrella term. Includes ML, Logic, Expert Systems.
+                                </div>
+                                <!-- Middle: ML -->
+                                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[40%] w-3/4 h-3/4 rounded-full circle-ml flex items-start justify-center pt-4 shadow-sm group cursor-help">
+                                    <span class="font-bold text-teal-900 mt-2">ML</span>
+                                    <div class="absolute bg-gray-800 text-white text-xs p-2 rounded hidden group-hover:block top-0 z-10 w-48 text-center">
+                                        Systems that learn from data, not just rules.
+                                    </div>
+                                    <!-- Inner: DL -->
+                                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[35%] w-3/4 h-3/4 rounded-full circle-dl flex items-center justify-center shadow-sm group cursor-help">
+                                        <span class="font-bold text-teal-950">DL</span>
+                                        <div class="absolute bg-gray-800 text-white text-xs p-2 rounded hidden group-hover:block bottom-full mb-2 z-10 w-40 text-center">
+                                            Deep Learning: Multi-layer Neural Networks.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-center text-gray-500 mt-4">Hover for definitions. Every DL is ML, not every ML is DL.</p>
+                    </div>
+
+                    <!-- Paradigms -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-lg mb-4">The Three Paradigms</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-green-50 border-l-4 border-green-500 rounded">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-bold text-green-900">ANI</span>
+                                    <span class="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded">Today</span>
+                                </div>
+                                <p class="text-xs text-green-800">Narrow Intelligence. Excels at ONE task (e.g., ChatGPT, Spam Filter).</p>
+                            </div>
+                            <div class="p-3 bg-yellow-50 border-l-4 border-yellow-500 rounded">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-bold text-yellow-900">AGI</span>
+                                    <span class="text-xs bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded">Hypothetical</span>
+                                </div>
+                                <p class="text-xs text-yellow-800">General Intelligence. Human-level reasoning across domains.</p>
+                            </div>
+                            <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-bold text-red-900">ASI</span>
+                                    <span class="text-xs bg-red-200 text-red-800 px-2 py-0.5 rounded">Speculative</span>
+                                </div>
+                                <p class="text-xs text-red-800">Super Intelligence. Surpasses brightest human minds.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COL 2 & 3: Process & Data -->
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <!-- ML Pipeline Interactive -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-lg mb-4">The 8-Step ML Pipeline</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+                            <button class="pipe-step text-xs p-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-center transition font-medium" onclick="showPipelineStep(1)">1. Collection</button>
+                            <button class="pipe-step text-xs p-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-center transition font-medium" onclick="showPipelineStep(2)">2. Cleaning</button>
+                            <button class="pipe-step text-xs p-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-center transition font-medium" onclick="showPipelineStep(3)">3. Features</button>
+                            <button class="pipe-step text-xs p-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-center transition font-medium" onclick="showPipelineStep(4)">4. Selection</button>
+                            <button class="pipe-step text-xs p-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-center transition font-medium" onclick="showPipelineStep(5)">5. Training</button>
+                            <button class="pipe-step text-xs p-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-center transition font-medium" onclick="showPipelineStep(6)">6. Evaluation</button>
+                            <button class="pipe-step text-xs p-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-center transition font-medium" onclick="showPipelineStep(7)">7. Deployment</button>
+                            <button class="pipe-step text-xs p-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-center transition font-medium" onclick="showPipelineStep(8)">8. Monitoring</button>
+                        </div>
+                        <div id="pipeline-detail" class="bg-stone-50 p-4 rounded-lg border border-stone-200 min-h-[100px] flex flex-col justify-center">
+                            <p class="font-bold text-teal-800">Select a step above to see details.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- 70-80% Rule Chart -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center">
+                            <h3 class="font-bold text-lg mb-2 text-center w-full">The 70-80% Rule</h3>
+                            <p class="text-xs text-gray-500 mb-4 text-center">Where Data Scientists spend their time</p>
+                            <div class="chart-container">
+                                <canvas id="chart-effort"></canvas>
+                            </div>
+                            <p class="text-sm text-center mt-2 font-medium text-teal-800">"Master the pipeline, not just the algorithm."</p>
+                        </div>
+
+                        <!-- Neural Net Visual -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-lg mb-2">The Neuron Atom</h3>
+                            <div class="bg-stone-50 p-4 rounded-lg border border-stone-200 font-mono text-sm text-center mb-4">
+                                output = σ( Σ (wᵢ · xᵢ) + b )
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-800">xᵢ</span>
+                                    <span class="text-sm text-gray-600">Input Values (Data)</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-800">wᵢ</span>
+                                    <span class="text-sm text-gray-600">Weights (Learned during Training)</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-xs font-bold text-yellow-800">b</span>
+                                    <span class="text-sm text-gray-600">Bias (Adjustment)</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-xs font-bold text-red-800">σ</span>
+                                    <span class="text-sm text-gray-600">Activation Function (e.g., ReLU)</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500">
+                                <strong>Deep Learning</strong> = Many hidden layers (tens to thousands) between input and output.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: THE BODY (INDUSTRY X.0) -->
+        <section id="body" class="page-section hidden fade-in">
+            <header class="mb-8">
+                <div class="flex items-center mb-2">
+                    <span class="text-3xl mr-3">🏭</span>
+                    <h2 class="text-3xl font-bold text-gray-800">The Body: Industry X.0</h2>
+                </div>
+                <p class="text-gray-600 max-w-3xl">
+                    Industry X.0 applies the brain (AI) to the body (factories, supply chains). It relies on the convergence of IoT, Digital Twins, and Human-Centricity.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- COL 1: Tech Pillars & Digital Twin -->
+                <div class="lg:col-span-1 space-y-8">
+                    <!-- Digital Twin Interactive Stack -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-lg mb-4">Digital Twin Architecture</h3>
+                        <p class="text-xs text-gray-500 mb-4">Hover over layers to explore the stack.</p>
+                        
+                        <div class="flex flex-col space-y-1">
+                            <div class="dt-layer p-3 bg-red-100 border-l-4 border-red-500 rounded text-sm text-red-900 font-medium" title="Decisions fed back">5. Actuation Loop</div>
+                            <div class="dt-layer p-3 bg-orange-100 border-l-4 border-orange-500 rounded text-sm text-orange-900 font-medium" title="AI/ML interpreting patterns">4. Analytics Layer</div>
+                            <div class="dt-layer p-3 bg-yellow-100 border-l-4 border-yellow-500 rounded text-sm text-yellow-900 font-medium" title="IoT sensors syncing">3. Data Bridge</div>
+                            <div class="dt-layer p-3 bg-blue-100 border-l-4 border-blue-500 rounded text-sm text-blue-900 font-medium" title="Simulation">2. Virtual Model</div>
+                            <div class="dt-layer p-3 bg-gray-200 border-l-4 border-gray-500 rounded text-sm text-gray-900 font-medium" title="Real-world object">1. Physical Entity</div>
+                        </div>
+                        <div class="mt-4 text-xs text-gray-500 italic">
+                            Benefit: Reduces dev cycles by 20–50%.
+                        </div>
+                    </div>
+
+                    <!-- Tech Pillars Grid -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-lg mb-4">Pillar Tech</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="p-2 bg-gray-50 rounded text-center text-xs font-semibold text-gray-700 border border-gray-200">IoT</div>
+                            <div class="p-2 bg-gray-50 rounded text-center text-xs font-semibold text-gray-700 border border-gray-200">Edge Computing</div>
+                            <div class="p-2 bg-gray-50 rounded text-center text-xs font-semibold text-gray-700 border border-gray-200">3D Printing</div>
+                            <div class="p-2 bg-gray-50 rounded text-center text-xs font-semibold text-gray-700 border border-gray-200">Cobots</div>
+                            <div class="p-2 bg-gray-50 rounded text-center text-xs font-semibold text-gray-700 border border-gray-200">AR / VR</div>
+                            <div class="p-2 bg-gray-50 rounded text-center text-xs font-semibold text-gray-700 border border-gray-200">Blockchain</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COL 2 & 3: Simulation & Industry 5.0 -->
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <!-- Predictive Maintenance Sim -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex flex-col md:flex-row justify-between items-center mb-4">
+                            <div>
+                                <h3 class="font-bold text-lg">Reactive vs. Predictive</h3>
+                                <p class="text-xs text-gray-500">Toggle AI to see the impact on maintenance costs.</p>
+                            </div>
+                            <div class="flex items-center space-x-3 mt-4 md:mt-0">
+                                <span class="text-sm font-medium text-gray-600">Traditional</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="ai-toggle" class="sr-only peer" onchange="toggleMaintenanceData()">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                                </label>
+                                <span class="text-sm font-bold text-teal-700">AI-Driven</span>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="chart-maintenance"></canvas>
+                        </div>
+                        
+                        <div id="maintenance-feedback" class="mt-4 p-3 bg-red-50 text-red-800 text-sm rounded border-l-4 border-red-500">
+                            <strong>Status:</strong> Reactive Mode. Machine runs until failure. Emergency repairs cause cost spikes.
+                        </div>
+                    </div>
+
+                    <!-- Industry 5.0 Cards -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-lg mb-4">Industry 5.0: The Human Factor</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-100">
+                                <div class="text-2xl mb-2">🧑‍🔧</div>
+                                <h4 class="font-bold text-indigo-900 mb-1">Human-Centric</h4>
+                                <p class="text-xs text-indigo-700">Technology serves people. Cobots assist, not replace.</p>
+                            </div>
+                            <div class="p-4 rounded-lg bg-green-50 border border-green-100">
+                                <div class="text-2xl mb-2">🌿</div>
+                                <h4 class="font-bold text-green-900 mb-1">Sustainability</h4>
+                                <p class="text-xs text-green-700">Circular economy. Operating within planetary boundaries.</p>
+                            </div>
+                            <div class="p-4 rounded-lg bg-blue-50 border border-blue-100">
+                                <div class="text-2xl mb-2">🛡️</div>
+                                <h4 class="font-bold text-blue-900 mb-1">Resilience</h4>
+                                <p class="text-xs text-blue-700">Withstand shocks (pandemics, conflicts). Supply chain buffering.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: ETHICS -->
+        <section id="ethics" class="page-section hidden fade-in">
+             <header class="mb-8">
+                <div class="flex items-center mb-2">
+                    <span class="text-3xl mr-3">⚖️</span>
+                    <h2 class="text-3xl font-bold text-gray-800">Ethics & Governance</h2>
+                </div>
+                <p class="text-gray-600 max-w-3xl">
+                    Ethics is a continuous audit loop. From bias detection to regulatory compliance, responsible AI is critical.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- 5 Pillars -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-lg mb-4">The 5 Ethical Pillars</h3>
+                    <div class="space-y-3">
+                        <details class="group p-2 border rounded-lg bg-stone-50 open:bg-white open:shadow-sm">
+                            <summary class="flex justify-between items-center font-medium cursor-pointer list-none">
+                                <span>Transparency</span>
+                                <span class="transition group-open:rotate-180">⌄</span>
+                            </summary>
+                            <p class="text-gray-600 text-sm mt-3 group-open:animate-fadeIn">Can affected people understand <em>how</em> the AI decided?</p>
+                        </details>
+                        <details class="group p-2 border rounded-lg bg-stone-50 open:bg-white open:shadow-sm">
+                            <summary class="flex justify-between items-center font-medium cursor-pointer list-none">
+                                <span>Fairness</span>
+                                <span class="transition group-open:rotate-180">⌄</span>
+                            </summary>
+                            <p class="text-gray-600 text-sm mt-3 group-open:animate-fadeIn">Does the model treat all demographic groups equitably?</p>
+                        </details>
+                        <details class="group p-2 border rounded-lg bg-stone-50 open:bg-white open:shadow-sm">
+                            <summary class="flex justify-between items-center font-medium cursor-pointer list-none">
+                                <span>Accountability</span>
+                                <span class="transition group-open:rotate-180">⌄</span>
+                            </summary>
+                            <p class="text-gray-600 text-sm mt-3 group-open:animate-fadeIn">Is there a clear human responsible for the system?</p>
+                        </details>
+                        <details class="group p-2 border rounded-lg bg-stone-50 open:bg-white open:shadow-sm">
+                            <summary class="flex justify-between items-center font-medium cursor-pointer list-none">
+                                <span>Privacy</span>
+                                <span class="transition group-open:rotate-180">⌄</span>
+                            </summary>
+                            <p class="text-gray-600 text-sm mt-3 group-open:animate-fadeIn">Compliance with GDPR & local data laws.</p>
+                        </details>
+                        <details class="group p-2 border rounded-lg bg-stone-50 open:bg-white open:shadow-sm">
+                            <summary class="flex justify-between items-center font-medium cursor-pointer list-none">
+                                <span>Safety</span>
+                                <span class="transition group-open:rotate-180">⌄</span>
+                            </summary>
+                            <p class="text-gray-600 text-sm mt-3 group-open:animate-fadeIn">Rigorously tested for high-stakes domains?</p>
+                        </details>
+                    </div>
+                </div>
+
+                <!-- Bias Calculator -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-lg mb-2">Bias Check: The 4/5ths Rule</h3>
+                    <p class="text-xs text-gray-500 mb-4">EEOC Guideline: If Selection Rate of A < 80% of B, investigate.</p>
+                    
+                    <div class="space-y-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Group A Selection Rate (%)</label>
+                            <input type="number" id="rateA" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-teal-500 focus:outline-none" placeholder="e.g. 40" value="40">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Group B Selection Rate (%)</label>
+                            <input type="number" id="rateB" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-teal-500 focus:outline-none" placeholder="e.g. 60" value="60">
+                        </div>
+                        <button onclick="calculateBias()" class="w-full bg-teal-600 text-white py-2 rounded font-medium hover:bg-teal-700 transition">Check Impact</button>
+                    </div>
+
+                    <div id="bias-result" class="p-3 bg-gray-100 rounded text-center text-sm font-bold text-gray-500">
+                        Enter values to calculate.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="font-bold text-lg mb-4">Major Frameworks</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <a href="https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai" target="_blank" class="block p-4 border border-gray-200 rounded hover:bg-teal-50 transition text-center">
+                        <div class="font-bold text-teal-800">EU AI Act</div>
+                        <div class="text-xs text-gray-500">European Commission</div>
+                    </a>
+                    <a href="https://oecd.ai/en/ai-principles" target="_blank" class="block p-4 border border-gray-200 rounded hover:bg-teal-50 transition text-center">
+                        <div class="font-bold text-teal-800">OECD AI Principles</div>
+                        <div class="text-xs text-gray-500">OECD</div>
+                    </a>
+                    <a href="https://www.unesco.org/en/artificial-intelligence/recommendation-ethics" target="_blank" class="block p-4 border border-gray-200 rounded hover:bg-teal-50 transition text-center">
+                        <div class="font-bold text-teal-800">UNESCO Ethics</div>
+                        <div class="text-xs text-gray-500">UNESCO</div>
+                    </a>
+                     <a href="https://www.edpb.europa.eu/" target="_blank" class="block p-4 border border-gray-200 rounded hover:bg-teal-50 transition text-center">
+                        <div class="font-bold text-teal-800">GDPR</div>
+                        <div class="text-xs text-gray-500">EDPB</div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: GLOSSARY -->
+        <section id="glossary" class="page-section hidden fade-in">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Glossary & Resources</h2>
+                <input type="text" id="glossary-search" onkeyup="filterGlossary()" placeholder="Search abbreviations..." class="w-full max-w-md p-2 border border-gray-300 rounded focus:ring-2 focus:ring-teal-500 focus:outline-none">
+            </header>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-600">
+                        <thead class="bg-gray-50 text-gray-700 font-bold border-b border-gray-200">
+                            <tr>
+                                <th class="p-4">Abbreviation</th>
+                                <th class="p-4">Full Form</th>
+                            </tr>
+                        </thead>
+                        <tbody id="glossary-body" class="divide-y divide-gray-100">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="mt-12 border-t border-gray-200 pt-6 text-xs text-gray-400 text-center pb-8">
+            <p class="mb-2">© Cyber.SoHo · Educational Content</p>
+            <p>Disclaimer: Not affiliated with mentioned companies. Links provided for educational purposes only.</p>
+        </footer>
+
+    </main>
+
+    <script>
+        // --- DATA ---
+        const glossaryData = [
+            { abbr: 'AI', full: 'Artificial Intelligence' },
+            { abbr: 'ML', full: 'Machine Learning' },
+            { abbr: 'DL', full: 'Deep Learning' },
+            { abbr: 'ANN', full: 'Artificial Neural Network' },
+            { abbr: 'NLP', full: 'Natural Language Processing' },
+            { abbr: 'CV', full: 'Computer Vision' },
+            { abbr: 'RL', full: 'Reinforcement Learning' },
+            { abbr: 'LLM', full: 'Large Language Model' },
+            { abbr: 'ANI', full: 'Artificial Narrow Intelligence' },
+            { abbr: 'AGI', full: 'Artificial General Intelligence' },
+            { abbr: 'ASI', full: 'Artificial Super Intelligence' },
+            { abbr: 'CNN', full: 'Convolutional Neural Network' },
+            { abbr: 'RNN', full: 'Recurrent Neural Network' },
+            { abbr: 'IoT', full: 'Internet of Things' },
+            { abbr: 'CPS', full: 'Cyber-Physical Systems' },
+            { abbr: 'DT', full: 'Digital Twin' }
+        ];
+
+        const pipelineSteps = {
+            1: { title: "Data Collection", desc: "Gather raw inputs (images, text, sensor logs). The foundation." },
+            2: { title: "Data Cleaning", desc: "Remove noise, fill missing values. <strong>Consumes 70-80% of project time.</strong>" },
+            3: { title: "Feature Engineering", desc: "Select or create the most informative attributes for the model." },
+            4: { title: "Model Selection", desc: "Choose an algorithm (Trees, Regressions, Neural Networks)." },
+            5: { title: "Training", desc: "Feed data into the model so it learns patterns (finding weights)." },
+            6: { title: "Evaluation", desc: "Test on unseen data using metrics like Accuracy, Precision, Recall, F1." },
+            7: { title: "Deployment", desc: "Integrate into a live product or service." },
+            8: { title: "Monitoring", desc: "Watch for model drift; retrain as data evolves." }
+        };
+
+        const timelineData = {
+            1: { title: "Industry 1.0 (c. 1760)", highlight: "Mechanisation", text: "Steam engine, water power, textile loom." },
+            2: { title: "Industry 2.0 (c. 1870)", highlight: "Mass Production", text: "Assembly line, electric motor, telegraph." },
+            3: { title: "Industry 3.0 (c. 1970)", highlight: "Automation", text: "Semiconductors, PLC, ERP systems." },
+            4: { title: "Industry 4.0 (c. 2011)", highlight: "Smart Factory", text: "IoT, Cyber-Physical Systems, AI, Cloud." },
+            5: { title: "Industry 5.0 (Emerging)", highlight: "Human-Centric", text: "Cobots, sustainability, resilience." }
+        };
+
+        // --- NAVIGATION ---
+        function navTo(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.page-section').forEach(el => {
+                el.classList.add('hidden');
+            });
+            // Show target
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            // Update Active State on Sidebar
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('bg-teal-50', 'text-teal-700', 'font-semibold');
+                el.classList.add('text-gray-600');
+            });
+            const activeNav = document.getElementById('nav-' + sectionId);
+            if(activeNav) {
+                activeNav.classList.add('bg-teal-50', 'text-teal-700', 'font-semibold');
+                activeNav.classList.remove('text-gray-600');
+            }
+
+            // Close mobile menu if open
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+
+        // --- INTERACTIVITY: TIMELINE ---
+        function updateTimeline(id) {
+            const data = timelineData[id];
+            const container = document.getElementById('timeline-content');
+            
+            // Update UI buttons
+            document.querySelectorAll('.timeline-btn').forEach(btn => {
+                if(btn.dataset.id == id) {
+                    btn.classList.add('ring-2', 'ring-teal-500', 'bg-teal-50');
+                } else {
+                    btn.classList.remove('ring-2', 'ring-teal-500', 'bg-teal-50');
+                }
+            });
+
+            // Update Content
+            container.innerHTML = `
+                <h4 class="font-bold text-lg text-teal-800 mb-2 fade-in">${data.title}</h4>
+                <p class="text-gray-700 mb-2 fade-in"><strong>Core Innovation:</strong> ${data.highlight}</p>
+                <p class="text-gray-600 text-sm fade-in">Defining Tech: ${data.text}</p>
+            `;
+        }
+
+        // --- INTERACTIVITY: PIPELINE ---
+        function showPipelineStep(step) {
+            const data = pipelineSteps[step];
+            const display = document.getElementById('pipeline-detail');
+            display.innerHTML = `
+                <div class="fade-in">
+                    <h4 class="font-bold text-teal-800 text-base mb-1">${step}. ${data.title}</h4>
+                    <p class="text-sm text-gray-600">${data.desc}</p>
+                </div>
+            `;
+            
+            document.querySelectorAll('.pipe-step').forEach(btn => {
+                btn.classList.remove('bg-teal-600', 'text-white');
+                btn.classList.add('bg-teal-50', 'text-gray-800');
+            });
+            // Highlight active button (need logic to find the specific button clicked, explicit passed ID is easier)
+            // Simplified: Re-render buttons or just toggle class on click event target if passed. 
+            // For simplicity in this structure, just highlighting content.
+        }
+
+        // --- INTERACTIVITY: BIAS CALCULATOR ---
+        function calculateBias() {
+            const rateA = parseFloat(document.getElementById('rateA').value);
+            const rateB = parseFloat(document.getElementById('rateB').value);
+            const resultDiv = document.getElementById('bias-result');
+
+            if (!rateA || !rateB) {
+                resultDiv.innerText = "Please enter both values.";
+                return;
+            }
+
+            // Formula: Rate A / Rate B
+            const ratio = rateA / rateB;
+            const threshold = 0.8;
+            
+            if (ratio < threshold) {
+                resultDiv.innerHTML = `<span class="text-red-600 font-bold">Adverse Impact Detected</span><br><span class="text-xs font-normal text-gray-600">Ratio: ${ratio.toFixed(2)} (Less than 0.80)</span>`;
+                resultDiv.className = "p-3 bg-red-50 rounded text-center text-sm border border-red-200";
+            } else {
+                resultDiv.innerHTML = `<span class="text-green-600 font-bold">Within Safe Guidelines</span><br><span class="text-xs font-normal text-gray-600">Ratio: ${ratio.toFixed(2)} (>= 0.80)</span>`;
+                resultDiv.className = "p-3 bg-green-50 rounded text-center text-sm border border-green-200";
+            }
+        }
+
+        // --- INTERACTIVITY: GLOSSARY SEARCH ---
+        function filterGlossary() {
+            const input = document.getElementById('glossary-search').value.toUpperCase();
+            const rows = document.getElementById('glossary-body').getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const abbr = rows[i].getElementsByTagName('td')[0].textContent || rows[i].getElementsByTagName('td')[0].innerText;
+                const full = rows[i].getElementsByTagName('td')[1].textContent || rows[i].getElementsByTagName('td')[1].innerText;
+                if (abbr.toUpperCase().indexOf(input) > -1 || full.toUpperCase().indexOf(input) > -1) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+        
+        // Render Glossary
+        const glossaryBody = document.getElementById('glossary-body');
+        glossaryData.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-gray-50 border-b border-gray-100 last:border-0";
+            tr.innerHTML = `<td class="p-4 font-bold text-teal-700">${item.abbr}</td><td class="p-4">${item.full}</td>`;
+            glossaryBody.appendChild(tr);
+        });
+
+        // --- CHARTS ---
+        
+        // 1. Effort Chart (70-80% Rule)
+        const ctxEffort = document.getElementById('chart-effort').getContext('2d');
+        const effortChart = new Chart(ctxEffort, {
+            type: 'doughnut',
+            data: {
+                labels: ['Cleaning/Feature Eng.', 'Modeling/Other'],
+                datasets: [{
+                    data: [80, 20],
+                    backgroundColor: ['#C06C54', '#E5E7EB'], // Clay vs Gray
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.raw + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Predictive Maintenance Chart
+        const ctxMaint = document.getElementById('chart-maintenance').getContext('2d');
+        const maintenanceData = {
+            labels: ['Day 1', 'Day 10', 'Day 20', 'Day 30', 'Day 40', 'Day 50', 'Day 60'],
+            reactive: [100, 110, 105, 500, 120, 115, 600], // Spikes
+            predictive: [100, 105, 110, 150, 115, 120, 150] // Controlled bumps
+        };
+
+        const maintenanceChart = new Chart(ctxMaint, {
+            type: 'line',
+            data: {
+                labels: maintenanceData.labels,
+                datasets: [{
+                    label: 'Maintenance Cost ($)',
+                    data: maintenanceData.reactive,
+                    borderColor: '#EF4444', // Red for bad
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Cost Impact' } }
+                }
+            }
+        });
+
+        function toggleMaintenanceData() {
+            const isAI = document.getElementById('ai-toggle').checked;
+            const feedback = document.getElementById('maintenance-feedback');
+            
+            if (isAI) {
+                maintenanceChart.data.datasets[0].data = maintenanceData.predictive;
+                maintenanceChart.data.datasets[0].borderColor = '#0D9488'; // Teal
+                maintenanceChart.data.datasets[0].backgroundColor = 'rgba(13, 148, 136, 0.1)';
+                feedback.innerHTML = `<strong>Status:</strong> Predictive Mode. AI detects trends. Maintenance is planned, costs are stable.`;
+                feedback.className = "mt-4 p-3 bg-teal-50 text-teal-800 text-sm rounded border-l-4 border-teal-500 fade-in";
+            } else {
+                maintenanceChart.data.datasets[0].data = maintenanceData.reactive;
+                maintenanceChart.data.datasets[0].borderColor = '#EF4444'; // Red
+                maintenanceChart.data.datasets[0].backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                feedback.innerHTML = `<strong>Status:</strong> Reactive Mode. Machine runs until failure. Emergency repairs cause cost spikes.`;
+                feedback.className = "mt-4 p-3 bg-red-50 text-red-800 text-sm rounded border-l-4 border-red-500 fade-in";
+            }
+            maintenanceChart.update();
+        }
+
+    </script>
+</body>
+</html>
+
+

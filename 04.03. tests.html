@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI & Industry X.0 Study Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- MathJax for rendering LaTeX formulas -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        /* Custom 3D Flip Card Utilities */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-preserve-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        /* Custom scrollbar for flashcard back if text is long */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                AI & Industry X.0 Study Guide
+            </h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        
+        <!-- Tab Navigation -->
+        <div class="flex space-x-2 border-b border-slate-200 mb-8">
+            <button id="btn-flashcards" onclick="switchTab('flashcards')" class="px-6 py-3 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600 transition-colors">
+                Flashcards
+            </button>
+            <button id="btn-quiz" onclick="switchTab('quiz')" class="px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 border-b-2 border-transparent transition-colors">
+                Practice Quiz
+            </button>
+        </div>
+
+        <!-- Flashcards Tab -->
+        <div id="tab-flashcards" class="block">
+            <div class="mb-6 flex justify-between items-end">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Concept Flashcards</h2>
+                    <p class="text-slate-600 mt-1">Click any card to flip it and reveal the definition or formula.</p>
+                </div>
+                <div class="text-sm text-slate-500 font-medium bg-white px-3 py-1 rounded-full shadow-sm border border-slate-100">
+                    25 Cards
+                </div>
+            </div>
+            
+            <div id="flashcards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Flashcards injected via JS -->
+            </div>
+        </div>
+
+        <!-- Quiz Tab -->
+        <div id="tab-quiz" class="hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Knowledge Check</h2>
+                <p class="text-slate-600 mt-1">Test your understanding of AI paradigms, models, and Industry X.0 concepts.</p>
+            </div>
+
+            <div id="quiz-container" class="space-y-8 max-w-4xl mx-auto">
+                <!-- Quiz questions injected via JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12">
+        <div class="max-w-6xl mx-auto px-4 text-center text-sm text-slate-500">
+            Digital Technology for Digital Science
+        </div>
+    </footer>
+
+    <!-- Script for Data and Logic -->
+    <script>
+        // Data Models
+        const flashcardsData = [
+            { front: "Four core capabilities of AI systems", back: "Perceiving, Reasoning, Learning, and Acting" },
+            { front: "The Nesting Model of AI", back: "AI is the umbrella term; Machine Learning (ML) sits inside AI; Deep Learning (DL) sits inside ML." },
+            { front: "Artificial Narrow Intelligence (ANI)", back: "AI that excels at one specific task (e.g., chess, spam filtering) but cannot generalize. This is the only type of AI that exists today." },
+            { front: "Artificial General Intelligence (AGI)", back: "Hypothetical AI capable of human-level reasoning across all intellectual domains." },
+            { front: "Machine Learning (ML)", back: "Systems that learn from data instead of explicit rules." },
+            { front: "Deep Learning (DL)", back: "A subset of ML that uses multi-layer Artificial Neural Networks (ANNs)." },
+            { front: "The 70-80% Rule in Data Science", back: "Data cleaning and feature engineering consume 70–80% of total project time." },
+            { front: "Formula for Precision", back: "$\\frac{TP}{TP + FP}$ (Use when the cost of false positives is high)." },
+            { front: "Formula for Recall", back: "$\\frac{TP}{TP + FN}$ (Use when the cost of false negatives is high)." },
+            { front: "Formula for a Single Neuron", back: "$\\text{output} = \\sigma(\\Sigma (w_i \\cdot x_i) + b)$" },
+            { front: "Key innovation of the Transformer architecture", back: "Self-attention mechanisms and parallel processing of data tokens (foundation of modern LLMs)." },
+            { front: "The Five Ethical Pillars of AI", back: "Transparency, Fairness, Accountability, Privacy, and Safety." },
+            { front: "The Four-Fifths Rule for Bias", back: "Investigate if $\\text{Selection Rate A} < 0.80 \\times \\text{Selection Rate B}$." },
+            { front: "Industry X.0", back: "The ongoing, open-ended digital transformation of industry, encompassing Industry 4.0, 5.0, and future evolutions." },
+            { front: "Industry 4.0 defining technologies", back: "IoT, Cyber-Physical Systems (CPS), Cloud computing, and AI." },
+            { front: "Industry 5.0 Three Pillars", back: "Human-Centricity, Sustainability, and Resilience." },
+            { front: "Digital Twin", back: "A virtual replica of a physical entity continuously updated with live sensor data for simulation and optimization." },
+            { front: "Five Layers of a Digital Twin", back: "Physical Entity, Virtual Model, Data Bridge, Analytics Layer, and Actuation Loop." },
+            { front: "Predictive vs. Reactive Maintenance", back: "Predictive uses AI to detect trends and alert before failure; Reactive waits for machines to break causing unplanned downtime." },
+            { front: "Cobots", back: "Collaborative Robots designed to work safely alongside humans without safety cages." },
+            { front: "Edge Computing", back: "Processing data at the source (milliseconds latency) rather than sending it on a round-trip to the cloud." },
+            { front: "Reinforcement Learning (RL)", back: "A type of learning where an agent learns via rewards and penalties from its environment." },
+            { front: "Actuation Loop (Digital Twin)", back: "The layer where decisions from the digital model are fed back to control the physical entity." },
+            { front: "F1 Score", back: "The harmonic mean of Precision and Recall ($2 \\times \\frac{P \\times R}{P + R}$), used when a single balanced metric is needed." },
+            { front: "Data Cleaning", back: "The process of removing noise, filling missing values, and normalizing scales in raw data." }
+        ];
+
+        const quizData = [
+            {
+                question: "According to the course material, which of the following is NOT one of the four core capabilities that define an Artificial Intelligence system?",
+                hint: "Review the definition of AI provided in Lesson 1, which focuses on functional cognitive processes rather than biological or emotional states.",
+                answerOptions: [
+                    { text: "Feeling emotions", rationale: "The four core capabilities listed are Perceiving, Reasoning, Learning, and Acting; emotional capacity is not currently a defining feature of AI systems.", isCorrect: true },
+                    { text: "Reasoning", rationale: "Reasoning about what is perceived is one of the four core capabilities of AI.", isCorrect: false },
+                    { text: "Acting", rationale: "Acting to maximize a measure of success is one of the four core capabilities of AI.", isCorrect: false },
+                    { text: "Perceiving", rationale: "Perceiving an environment is one of the four core capabilities of AI.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Which statement accurately describes the 'Nesting Model' relationship between AI, Machine Learning (ML), and Deep Learning (DL)?",
+                hint: "Visualize the diagram where one field sits entirely inside another, similar to how 'Golden Retrievers' sit inside 'Dogs', which sit inside 'Animals'.",
+                answerOptions: [
+                    { text: "AI is the broad umbrella, ML is a subset of AI, and DL is a specialized subset of ML.", rationale: "This correctly follows the nesting logic: every DL system is ML, and every ML system is AI, but not vice versa.", isCorrect: true },
+                    { text: "DL is the broad umbrella, containing both ML and AI.", rationale: "This reverses the relationship; Deep Learning is the most specialized subset, not the overarching category.", isCorrect: false },
+                    { text: "AI and ML are separate fields that occasionally overlap with DL.", rationale: "The model describes a containment relationship (subsets), not merely overlapping independent fields.", isCorrect: false },
+                    { text: "ML is the umbrella term, and AI is a specific subset of ML dealing with neural networks.", rationale: "AI is the broader discipline; ML is a subset of AI, not the other way around.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Which AI paradigm represents the current state of technology, including advanced systems like ChatGPT and self-driving cars?",
+                hint: "Think about whether today's AI can perform any intellectual task a human can do, or if it is specialized for specific tasks.",
+                answerOptions: [
+                    { text: "Artificial Narrow Intelligence (ANI)", rationale: "ANI refers to systems that excel at specific tasks but cannot generalize; this covers all AI currently in existence.", isCorrect: true },
+                    { text: "Artificial General Intelligence (AGI)", rationale: "AGI refers to human-level reasoning across all domains, which is currently hypothetical and not yet achieved.", isCorrect: false },
+                    { text: "Artificial Super Intelligence (ASI)", rationale: "ASI refers to intelligence surpassing the brightest human minds, which is currently speculative science fiction.", isCorrect: false },
+                    { text: "Artificial Broad Intelligence (ABI)", rationale: "This is not one of the three standard paradigms (ANI, AGI, ASI) defined in the course material.", isCorrect: false }
+                ]
+            },
+            {
+                question: "In the Machine Learning pipeline, which phase is reported to consume 70-80% of a data scientist's time?",
+                hint: "Consider the phrase 'garbage in, garbage out' and which part of the process ensures the input is not 'garbage'.",
+                answerOptions: [
+                    { text: "Data Cleaning and Feature Engineering", rationale: "The '70-80% Rule' states that preparing the data (steps 2 and 3) takes the vast majority of project time.", isCorrect: true },
+                    { text: "Model Training", rationale: "While computationally intensive, the actual training phase is often automated and takes less human time than data preparation.", isCorrect: false },
+                    { text: "Deployment", rationale: "Deployment is a critical step but does not typically consume the majority of the project lifecycle compared to data prep.", isCorrect: false },
+                    { text: "Evaluation", rationale: "Evaluation is done after training to test metrics, but the bulk of the effort is spent beforehand on the data.", isCorrect: false }
+                ]
+            },
+            {
+                question: "You are building an AI model to screen for a highly contagious and dangerous disease. Which evaluation metric should you prioritize?",
+                hint: "Ask yourself: What is the cost of a False Negative (telling a sick person they are healthy) versus a False Positive?",
+                answerOptions: [
+                    { text: "Recall", rationale: "Recall minimizes False Negatives; missing a positive case (a sick person) is the most dangerous outcome in this scenario.", isCorrect: true },
+                    { text: "Precision", rationale: "Precision prioritizes minimizing False Positives, which is less critical here than missing a highly contagious carrier.", isCorrect: false },
+                    { text: "Accuracy", rationale: "Accuracy can be misleading if the classes are imbalanced (e.g., very few sick people), potentially hiding poor performance on the critical positive class.", isCorrect: false },
+                    { text: "Specificity", rationale: "While relevant, Specificity focuses on correctly identifying negatives (healthy people), whereas the priority is catching all positive cases.", isCorrect: false }
+                ]
+            },
+            {
+                question: "What is the primary architectural difference between a standard Neural Network and Deep Learning?",
+                hint: "The word 'Deep' in Deep Learning refers specifically to the depth of the network structure.",
+                answerOptions: [
+                    { text: "The number of hidden layers", rationale: "Deep Learning is defined by having 'deep' architectures with many hidden layers (tens to thousands) compared to shallow networks.", isCorrect: true },
+                    { text: "The use of supervised learning", rationale: "Both standard neural networks and deep learning can use supervised learning; this is not the distinguishing feature.", isCorrect: false },
+                    { text: "The presence of an input layer", rationale: "All neural networks, regardless of depth, must have an input layer to receive data.", isCorrect: false },
+                    { text: "The type of data used", rationale: "While DL is good for complex data, the definition lies in the architecture (depth), not just the data type.", isCorrect: false }
+                ]
+            },
+            {
+                question: "According to the 'Four-Fifths Rule' for bias detection, when should you investigate a model for adverse impact?",
+                hint: "The rule is named 'Four-Fifths', which corresponds to a specific percentage calculation between group outcomes.",
+                answerOptions: [
+                    { text: "When the selection rate of one group is less than 80% of the selection rate of another group", rationale: "This is the standard EEOC guideline: Selection Rate A < 0.80 × Selection Rate B indicates potential bias.", isCorrect: true },
+                    { text: "When the selection rate of one group is less than 50% of the selection rate of another group", rationale: "The threshold is 80% (4/5ths), not 50%.", isCorrect: false },
+                    { text: "When the model accuracy differs by more than 5% between groups", rationale: "While accuracy disparity is a metric, the specific 'Four-Fifths Rule' refers to selection rates, not accuracy percentages.", isCorrect: false },
+                    { text: "When the dataset contains unequal numbers of samples for each group", rationale: "Dataset imbalance is a cause of bias, but the Four-Fifths Rule is a metric for measuring the *outcome* (selection rate).", isCorrect: false }
+                ]
+            },
+            {
+                question: "What is the core concept behind the term 'Industry X.0'?",
+                hint: "Think of algebra where 'X' acts as a placeholder or variable that can change.",
+                answerOptions: [
+                    { text: "It represents an ongoing, open-ended digital transformation rather than a static destination.", rationale: "The 'X' is a variable, implying that every organization defines its own next step and the process is continuous.", isCorrect: true },
+                    { text: "It is a specific standard developed solely by the European Commission.", rationale: "Industry X.0 is a term popularized by Accenture; the EU focuses on Industry 5.0.", isCorrect: false },
+                    { text: "It strictly refers to the replacement of human workers with fully autonomous robots.", rationale: "Industry X.0 includes concepts like Cobots (collaborative robots) and human-centricity, not just replacement.", isCorrect: false },
+                    { text: "It is the phase that comes exclusively after Industry 5.0 is completed.", rationale: "Industry X.0 encompasses Industry 4.0, 5.0, and future evolutions simultaneously, not just sequentially.", isCorrect: false }
+                ]
+            },
+            {
+                question: "In the 5-layer architecture of a Digital Twin, what is the function of the 'Data Bridge'?",
+                hint: "This layer acts as the connector or communication link between the hard metal of the machine and the software model.",
+                answerOptions: [
+                    { text: "To sync the physical entity with the virtual model using IoT sensors.", rationale: "The Data Bridge layer connects the real world (Layer 1) to the simulation (Layer 2) via live telemetry.", isCorrect: true },
+                    { text: "To make predictions about the remaining useful life of the asset.", rationale: "Predictions and pattern interpretation happen in the Analytics Layer (Layer 4).", isCorrect: false },
+                    { text: "To feed decisions back to the physical entity to control it.", rationale: "Feeding decisions back to the asset is the function of the Actuation Loop (Layer 5).", isCorrect: false },
+                    { text: "To act as the mathematical simulation of the physics.", rationale: "The mathematical simulation itself is the Virtual Model (Layer 2).", isCorrect: false }
+                ]
+            },
+            {
+                question: "How does Industry 5.0 fundamentally differ from or extend Industry 4.0?",
+                hint: "Industry 4.0 was about efficiency and automation; Industry 5.0 asks 'efficiency for whom?' and 'at what cost to the planet?'",
+                answerOptions: [
+                    { text: "It adds a focus on Human-Centricity, Sustainability, and Resilience.", rationale: "Industry 5.0 extends the efficiency of 4.0 by ensuring technology serves people and operates within planetary boundaries.", isCorrect: true },
+                    { text: "It focuses exclusively on increasing the speed of mass production.", rationale: "Speed and efficiency were the primary drivers of Industry 4.0; 5.0 balances this with human and environmental needs.", isCorrect: false },
+                    { text: "It removes the need for internet connectivity in factories.", rationale: "Industry 5.0 still relies on the connectivity of 4.0 (IoT, Cloud) but changes the end goal.", isCorrect: false },
+                    { text: "It returns to mechanical steam power to reduce electricity use.", rationale: "Industry 5.0 is high-tech and forward-looking, not a regression to Industry 1.0 technologies.", isCorrect: false }
+                ]
+            }
+        ];
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFlashcards();
+            renderQuiz();
+            // Trigger MathJax rendering once DOM is populated
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        });
+
+        // Tab Logic
+        function switchTab(tab) {
+            const fcTab = document.getElementById('tab-flashcards');
+            const qzTab = document.getElementById('tab-quiz');
+            const btnFc = document.getElementById('btn-flashcards');
+            const btnQz = document.getElementById('btn-quiz');
+
+            if (tab === 'flashcards') {
+                fcTab.classList.remove('hidden');
+                fcTab.classList.add('block');
+                qzTab.classList.remove('block');
+                qzTab.classList.add('hidden');
+                
+                btnFc.className = "px-6 py-3 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600 transition-colors";
+                btnQz.className = "px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 border-b-2 border-transparent transition-colors";
+            } else {
+                qzTab.classList.remove('hidden');
+                qzTab.classList.add('block');
+                fcTab.classList.remove('block');
+                fcTab.classList.add('hidden');
+
+                btnQz.className = "px-6 py-3 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600 transition-colors";
+                btnFc.className = "px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 border-b-2 border-transparent transition-colors";
+            }
+        }
+
+        // Render Flashcards
+        function renderFlashcards() {
+            const container = document.getElementById('flashcards-grid');
+            let html = '';
+            
+            flashcardsData.forEach((card, index) => {
+                html += `
+                <div class="h-64 cursor-pointer perspective-1000 group" onclick="this.querySelector('.flip-card-inner').classList.toggle('rotate-y-180')">
+                    <div class="flip-card-inner relative w-full h-full transition-transform duration-500 transform-style-preserve-3d shadow-sm hover:shadow-md rounded-2xl">
+                        <!-- Front -->
+                        <div class="flip-card-front absolute w-full h-full backface-hidden bg-white border border-slate-200 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 absolute top-4 left-4">Card ${index + 1}</span>
+                            <div class="text-lg font-semibold text-slate-800 leading-snug">
+                                ${card.front}
+                            </div>
+                            <div class="absolute bottom-4 text-slate-300 flex items-center gap-1 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                                Click to flip
+                            </div>
+                        </div>
+                        <!-- Back -->
+                        <div class="flip-card-back absolute w-full h-full backface-hidden bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center p-6 text-center rotate-y-180 overflow-y-auto custom-scroll">
+                            <div class="text-base text-slate-700 leading-relaxed font-medium">
+                                ${card.back}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // Render Quiz
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            let html = '';
+
+            quizData.forEach((q, qIndex) => {
+                // Shuffle options for rendering (keeping original order intact in data structure)
+                let optionIndices = [0, 1, 2, 3];
+                optionIndices = optionIndices.sort(() => Math.random() - 0.5);
+
+                let optionsHtml = '';
+                optionIndices.forEach(oIndex => {
+                    const opt = q.answerOptions[oIndex];
+                    optionsHtml += `
+                        <button id="btn-opt-${qIndex}-${oIndex}" onclick="selectOption(${qIndex}, ${oIndex}, this)" class="w-full text-left p-4 mb-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-indigo-300 transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 text-slate-700">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                html += `
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-6 md:p-8">
+                        <div class="flex items-start justify-between mb-4 gap-4">
+                            <h3 class="text-lg font-semibold text-slate-800 leading-snug">
+                                <span class="text-indigo-600 mr-2">${qIndex + 1}.</span>${q.question}
+                            </h3>
+                            <button onclick="toggleHint(${qIndex})" class="shrink-0 text-slate-400 hover:text-amber-500 transition-colors" title="Show Hint">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Hint Container -->
+                        <div id="hint-${qIndex}" class="hidden mb-6 p-4 bg-amber-50 border-l-4 border-amber-400 text-amber-800 text-sm rounded-r-lg">
+                            <strong>Hint:</strong> ${q.hint}
+                        </div>
+
+                        <div class="options-container" id="options-${qIndex}">
+                            ${optionsHtml}
+                        </div>
+
+                        <!-- Rationale Container -->
+                        <div id="rationale-${qIndex}" class="hidden mt-4 p-4 rounded-lg text-sm leading-relaxed border">
+                        </div>
+                    </div>
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Quiz Interaction Logic
+        function selectOption(qIdx, oIdx, clickedBtn) {
+            const q = quizData[qIdx];
+            const isCorrect = q.answerOptions[oIdx].isCorrect;
+            const container = document.getElementById(`options-${qIdx}`);
+            const buttons = container.querySelectorAll('button');
+            
+            // Disable all buttons in this question to lock the answer
+            buttons.forEach(b => {
+                b.disabled = true;
+                b.classList.remove('hover:bg-slate-50', 'hover:border-indigo-300', 'cursor-pointer');
+                b.classList.add('cursor-not-allowed', 'opacity-60');
+                
+                // Identify the actual option index from the button's ID
+                const idParts = b.id.split('-');
+                const buttonOIdx = parseInt(idParts[idParts.length - 1]);
+                
+                // Always highlight the correct answer in green
+                if (q.answerOptions[buttonOIdx].isCorrect) {
+                    b.classList.remove('border-slate-200', 'bg-white', 'text-slate-700', 'opacity-60');
+                    b.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-900', 'font-medium', 'shadow-sm', 'opacity-100');
+                }
+            });
+            
+            // If the user clicked the wrong answer, highlight it in red
+            if (!isCorrect) {
+                clickedBtn.classList.remove('border-slate-200', 'bg-white', 'text-slate-700', 'opacity-60');
+                clickedBtn.classList.add('bg-rose-50', 'border-rose-400', 'text-rose-900', 'opacity-100');
+            }
+            
+            // Show rationale
+            const rationaleDiv = document.getElementById(`rationale-${qIdx}`);
+            
+            // Re-render MathJax inside the rationale string if any equations exist
+            const rationaleText = q.answerOptions[oIdx].rationale;
+            
+            if (isCorrect) {
+                rationaleDiv.innerHTML = `<div class="flex gap-2 items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-600 mt-0.5 shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+                    <div><strong>Correct!</strong> ${rationaleText}</div>
+                </div>`;
+                rationaleDiv.className = "mt-4 p-4 rounded-lg text-sm leading-relaxed border bg-emerald-50 text-emerald-900 border-emerald-200 block";
+            } else {
+                rationaleDiv.innerHTML = `<div class="flex gap-2 items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-600 mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                    <div><strong>Incorrect.</strong> ${rationaleText}</div>
+                </div>`;
+                rationaleDiv.className = "mt-4 p-4 rounded-lg text-sm leading-relaxed border bg-rose-50 text-rose-900 border-rose-200 block";
+            }
+
+            // Ensure MathJax processes any newly injected math in the rationale
+            if (window.MathJax) {
+                MathJax.typesetPromise([rationaleDiv]);
+            }
+        }
+
+        // Toggle Hint Visibility
+        function toggleHint(qIdx) {
+            const hintDiv = document.getElementById(`hint-${qIdx}`);
+            if (hintDiv.classList.contains('hidden')) {
+                hintDiv.classList.remove('hidden');
+            } else {
+                hintDiv.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+
