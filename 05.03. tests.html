@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Architecture Study Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: { 50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4', 300: '#d6d3d1', 400: '#a8a29e', 500: '#78716c', 600: '#57534e', 700: '#44403c', 800: '#292524', 900: '#1c1917' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Animations */
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        /* 3D Flip Card Styles */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .flip-card-inner { transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); }
+        /* Fixed selector: applied directly to the inner element */
+        .flip-card-inner.flipped { transform: rotateY(180deg); }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200 p-6">
+        <div class="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="font-bold text-2xl text-stone-800 tracking-tight">
+                    <span class="text-orange-600">Net</span>Arch <span class="text-stone-400 font-normal">| Study Center</span>
+                </h1>
+            </div>
+            
+            <!-- Tab Navigation -->
+            <nav class="flex p-1 bg-stone-100 rounded-lg">
+                <button onclick="switchTab('flashcards')" id="tab-flashcards" class="px-6 py-2 rounded-md text-sm font-bold transition-all shadow-sm bg-white text-orange-600">
+                    <i class="fas fa-clone mr-2"></i>Flashcards
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="px-6 py-2 rounded-md text-sm font-bold text-stone-500 hover:text-stone-700 transition-all">
+                    <i class="fas fa-graduation-cap mr-2"></i>Quiz
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-4xl mx-auto w-full p-6">
+
+        <!-- TAB 1: FLASHCARDS -->
+        <section id="flashcards" class="view-section flex flex-col items-center justify-center min-h-[60vh] fade-in">
+            <header class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Flashcards</h2>
+                <p class="text-stone-500">25 Key Concepts. Tap card to flip.</p>
+            </header>
+            
+            <div class="w-full max-w-lg perspective-1000 group cursor-pointer select-none" onclick="flipCard()">
+                <div id="flashcard-inner" class="flip-card-inner relative w-full h-80 text-center shadow-xl rounded-2xl transform-style-3d bg-white border border-stone-200">
+                    <!-- Front -->
+                    <div class="absolute w-full h-full backface-hidden flex flex-col items-center justify-center p-10 bg-white rounded-2xl">
+                        <span class="text-xs font-bold text-orange-600 uppercase tracking-widest mb-6">Concept</span>
+                        <h3 id="card-front" class="text-2xl font-bold text-stone-800 leading-tight">Definition of a Computer Network</h3>
+                        <div class="absolute bottom-6 text-stone-300 text-sm"><i class="fas fa-sync-alt mr-1"></i> Tap to flip</div>
+                    </div>
+                    <!-- Back -->
+                    <div class="absolute w-full h-full backface-hidden rotate-y-180 flex flex-col items-center justify-center p-10 bg-stone-800 text-white rounded-2xl">
+                        <span class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-6">Answer</span>
+                        <p id="card-back" class="text-lg leading-relaxed">Two or more devices sharing a communication channel and agreeing on a protocol to exchange information.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-8 mt-10">
+                <button onclick="changeCard(-1)" class="p-4 rounded-full bg-white border border-stone-200 shadow hover:bg-stone-50 text-stone-600 transition-all active:scale-95"><i class="fas fa-arrow-left"></i></button>
+                <span id="card-counter" class="font-mono text-stone-500 font-bold">1 / 25</span>
+                <button onclick="changeCard(1)" class="p-4 rounded-full bg-stone-800 shadow hover:bg-stone-700 text-white transition-all active:scale-95"><i class="fas fa-arrow-right"></i></button>
+            </div>
+        </section>
+
+        <!-- TAB 2: QUIZ -->
+        <section id="quiz" class="view-section hidden max-w-2xl mx-auto fade-in">
+            <header class="mb-8 flex justify-between items-end border-b border-stone-200 pb-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-stone-800 mb-1">Knowledge Check</h2>
+                    <p class="text-stone-600">Test your understanding.</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs text-stone-400 uppercase tracking-wider">Score</div>
+                    <div class="text-3xl font-bold text-emerald-600 leading-none" id="score-display">0</div>
+                </div>
+            </header>
+
+            <div id="quiz-container" class="bg-white rounded-xl shadow-lg border border-stone-200 p-8 min-h-[400px]">
+                <div class="flex justify-between text-xs font-bold text-stone-400 uppercase tracking-widest mb-6">
+                    <span id="q-num">Question 1 of 10</span>
+                    <span id="q-progress">10%</span>
+                </div>
+                
+                <h3 id="q-text" class="text-xl font-bold text-stone-800 mb-8 leading-relaxed">
+                    Question text goes here...
+                </h3>
+
+                <div id="q-options" class="space-y-3">
+                    <!-- Options injected via JS -->
+                </div>
+
+                <div id="q-feedback" class="hidden mt-6 p-4 rounded-lg bg-stone-50 border border-stone-200 flex gap-3 items-start animate-fade-in">
+                    <div id="fb-icon" class="mt-0.5 text-lg"></div>
+                    <div>
+                        <div id="fb-title" class="font-bold text-sm"></div>
+                        <div id="fb-text" class="text-sm text-stone-600 mt-1"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-between items-center border-t border-stone-100 pt-6">
+                    <button onclick="toggleHint()" class="text-sm text-stone-400 hover:text-orange-600 transition-colors flex items-center gap-2">
+                        <i class="far fa-lightbulb"></i> <span id="hint-label">Show Hint</span>
+                    </button>
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden bg-stone-800 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-stone-700 transition-colors shadow-lg shadow-stone-200">
+                        Next <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+                <div id="hint-box" class="hidden mt-3 text-sm text-orange-800 bg-orange-50 p-3 rounded border border-orange-100 italic"></div>
+            </div>
+
+            <div id="quiz-end" class="hidden text-center py-16 bg-white rounded-xl shadow border border-stone-200">
+                <div class="text-6xl text-emerald-500 mb-6"><i class="fas fa-award"></i></div>
+                <h3 class="text-3xl font-bold text-stone-800 mb-2">Quiz Complete!</h3>
+                <p class="text-xl text-stone-600 mb-8">You scored <span id="final-score" class="font-bold text-stone-900"></span> out of 10.</p>
+                <button onclick="restartQuiz()" class="bg-stone-800 text-white px-8 py-3 rounded-lg font-bold hover:bg-stone-700 transition-colors">Retake Quiz</button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- DATA SETS ---
+        const flashcards = [
+            {f: "Definition of a Computer Network", b: "Two or more devices sharing a communication channel and agreeing on a protocol to exchange information."},
+            {f: "Bandwidth", b: "Maximum data transfer rate (e.g., 1 Gbps). The 'speed limit' of the channel."},
+            {f: "Latency", b: "Delay between sending and receiving (measured in ms). The 'distance'."},
+            {f: "Packet", b: "A chunk of data wrapped with addressing information."},
+            {f: "DHCP (Dynamic Host Configuration Protocol)", b: "A protocol that automatically assigns IP addresses to devices when they join a network."},
+            {f: "Network Topology", b: "The physical or logical arrangement of devices (e.g., Star, Mesh, Bus)."},
+            {f: "Primary Weakness of Bus Topology", b: "One break in the shared cable kills the entire network."},
+            {f: "Primary Weakness of Star Topology", b: "The central switch is a single point of failure."},
+            {f: "Primary Strength of Mesh Topology", b: "Maximum redundancy; every device connects to every other."},
+            {f: "OSI Layer 7: Application", b: "User-facing services (HTTP, DNS, SMTP). The top layer."},
+            {f: "OSI Layer 4: Transport", b: "End-to-end delivery & error checking (TCP, UDP)."},
+            {f: "OSI Layer 3: Network", b: "Logical addressing & routing (IP)."},
+            {f: "OSI Layer 1: Physical", b: "Raw bits on the wire/air (Cables, radio waves)."},
+            {f: "TCP/IP Stack", b: "A 4-layer practical model (Application, Transport, Internet, Network Access)."},
+            {f: "Network Switch", b: "Layer 2 device that forwards frames by MAC address to specific ports."},
+            {f: "Router", b: "Layer 3 device that routes packets between different subnets/networks."},
+            {f: "TCP Handshake Steps", b: "SYN → SYN-ACK → ACK."},
+            {f: "IPv4 Address Space", b: "32-bit (~4.3 billion addresses). Exhausted."},
+            {f: "Usable Hosts Formula (CIDR)", b: "2^(32 - prefix) - 2."},
+            {f: "TCP vs UDP Reliability", b: "TCP = Reliable/Ordered. UDP = Unreliable/Fast."},
+            {f: "DNS (Domain Name System)", b: "Translates human-readable names to IP addresses."},
+            {f: "DNS TTL (Time To Live)", b: "How long a resolver caches a DNS answer."},
+            {f: "HTTP 429 Error", b: "Too Many Requests (Rate Limited)."},
+            {f: "REST Stateless Constraint", b: "Server stores no session context; each request is self-contained."},
+            {f: "Anycast Transmission", b: "Routes to the nearest server in a group (used by CDNs)."}
+        ];
+
+        const quizData = [
+            {q: "Which topology offers maximum redundancy for critical systems?", opts: ["Mesh", "Star", "Bus", "Ring"], ans: 0, why: "Mesh connects every device to every other device.", hint: "Used in the Internet backbone."},
+            {q: "Which OSI layer handles encryption (TLS) and data formatting?", opts: ["Layer 6 (Presentation)", "Layer 4 (Transport)", "Layer 3 (Network)", "Layer 7 (Application)"], ans: 0, why: "Layer 6 formats and encrypts data before the application sees it.", hint: "It 'presents' the data."},
+            {q: "What is the key difference between a Switch and a Router?", opts: ["Switch uses MAC (L2), Router uses IP (L3)", "Switch uses IP (L3), Router uses MAC (L2)", "Router is only for wireless", "Switch broadcasts everything"], ans: 0, why: "Switches handle local frames; Routers connect different networks.", hint: "Think LAN vs WAN."},
+            {q: "Which protocol is 'connectionless' and preferred for streaming?", opts: ["UDP", "TCP", "HTTP", "FTP"], ans: 0, why: "UDP does not require a handshake and drops lost packets to maintain speed.", hint: "Fire and forget."},
+            {q: "How many usable hosts are in a /24 subnet?", opts: ["254", "256", "65,534", "16"], ans: 0, why: "2^(32-24) - 2 = 256 - 2 = 254.", hint: "2^8 minus network & broadcast."},
+            {q: "Which DNS record maps a hostname to an IPv4 address?", opts: ["A Record", "AAAA Record", "CNAME", "MX Record"], ans: 0, why: "A stands for Address (IPv4).", hint: "First letter of alphabet."},
+            {q: "Which HTTP method is used to FULLY replace a resource?", opts: ["PUT", "POST", "PATCH", "GET"], ans: 0, why: "PUT replaces the entire resource; PATCH updates partially.", hint: "Put it there."},
+            {q: "What does HTTP Status 404 mean?", opts: ["Not Found", "Unauthorized", "Server Error", "Bad Request"], ans: 0, why: "Standard code for a missing resource.", hint: "Page missing."},
+            {q: "Which transmission mode routes a user to the 'nearest' CDN server?", opts: ["Anycast", "Unicast", "Multicast", "Broadcast"], ans: 0, why: "Anycast routes to the closest node sharing an IP.", hint: "Any one will do."},
+            {q: "What happens during a TCP Handshake?", opts: ["SYN, SYN-ACK, ACK", "ACK, SYN, FIN", "HELLO, HI, OK", "CONNECT, ACCEPT, SEND"], ans: 0, why: "Synchronize, Synchronize-Acknowledge, Acknowledge.", hint: "Syn... Syn-Ack..."}
+        ];
+
+        // --- APP LOGIC ---
+        let state = {
+            cardIdx: 0,
+            cardFlipped: false,
+            quizIdx: 0,
+            score: 0,
+            quizAnswered: false
+        };
+
+        // Tab Switching
+        function switchTab(id) {
+            // Hide all sections
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('fade-in');
+            });
+            // Show target section
+            const target = document.getElementById(id);
+            target.classList.remove('hidden');
+            void target.offsetWidth; // trigger reflow
+            target.classList.add('fade-in');
+            
+            // Update Tab Styles
+            const activeClass = ['bg-white', 'text-orange-600', 'shadow-sm'];
+            const inactiveClass = ['text-stone-500', 'hover:text-stone-700'];
+            
+            ['flashcards', 'quiz'].forEach(tab => {
+                const btn = document.getElementById(`tab-${tab}`);
+                if (tab === id) {
+                    btn.classList.remove(...inactiveClass);
+                    btn.classList.add(...activeClass);
+                } else {
+                    btn.classList.remove(...activeClass);
+                    btn.classList.add(...inactiveClass);
+                }
+            });
+
+            // Initialize content
+            if(id === 'flashcards') loadCard(state.cardIdx);
+            if(id === 'quiz' && state.quizIdx === 0 && !state.quizAnswered) loadQuestion(0);
+        }
+
+        // --- FLASHCARDS LOGIC ---
+        function loadCard(idx) {
+            const c = flashcards[idx];
+            document.getElementById('card-front').innerText = c.f;
+            document.getElementById('card-back').innerText = c.b;
+            document.getElementById('card-counter').innerText = `${idx + 1} / ${flashcards.length}`;
+            state.cardFlipped = false;
+            document.getElementById('flashcard-inner').classList.remove('flipped');
+        }
+
+        function flipCard() {
+            state.cardFlipped = !state.cardFlipped;
+            const el = document.getElementById('flashcard-inner');
+            state.cardFlipped ? el.classList.add('flipped') : el.classList.remove('flipped');
+        }
+
+        function changeCard(dir) {
+            state.cardIdx = (state.cardIdx + dir + flashcards.length) % flashcards.length;
+            loadCard(state.cardIdx);
+            event.stopPropagation();
+        }
+
+        // --- QUIZ LOGIC ---
+        function loadQuestion(idx) {
+            if(idx >= quizData.length) { showQuizEnd(); return; }
+            
+            const q = quizData[idx];
+            state.quizAnswered = false;
+            
+            document.getElementById('q-num').innerText = `Question ${idx + 1} of ${quizData.length}`;
+            document.getElementById('q-progress').innerText = `${Math.round((idx/quizData.length)*100)}%`;
+            document.getElementById('q-text').innerText = q.q;
+            
+            const optsDiv = document.getElementById('q-options');
+            optsDiv.innerHTML = '';
+            q.opts.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors bg-white opt-btn";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(i, btn);
+                optsDiv.appendChild(btn);
+            });
+
+            document.getElementById('q-feedback').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('hint-box').classList.add('hidden');
+            document.getElementById('hint-label').innerText = "Show Hint";
+        }
+
+        function checkAnswer(choice, btn) {
+            if(state.quizAnswered) return;
+            state.quizAnswered = true;
+            
+            const q = quizData[state.quizIdx];
+            const isCorrect = choice === q.ans;
+            
+            // UI Updates
+            const allBtns = document.querySelectorAll('.opt-btn');
+            allBtns.forEach((b, i) => {
+                b.disabled = true;
+                if(i === q.ans) b.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+                else if(i === choice && !isCorrect) b.classList.add('bg-red-100', 'border-red-500', 'text-red-900');
+                else b.classList.add('opacity-50');
+            });
+
+            // Score & Feedback
+            if(isCorrect) state.score++;
+            document.getElementById('score-display').innerText = state.score;
+            
+            const fb = document.getElementById('q-feedback');
+            fb.classList.remove('hidden');
+            if(isCorrect) {
+                fb.className = "mt-6 p-4 rounded-lg bg-emerald-50 border border-emerald-200 flex gap-3 items-start animate-fade-in";
+                document.getElementById('fb-icon').innerHTML = '<i class="fas fa-check-circle text-emerald-600"></i>';
+                document.getElementById('fb-title').innerText = "Correct!";
+                document.getElementById('fb-title').className = "font-bold text-sm text-emerald-800";
+            } else {
+                fb.className = "mt-6 p-4 rounded-lg bg-red-50 border border-red-200 flex gap-3 items-start animate-fade-in";
+                document.getElementById('fb-icon').innerHTML = '<i class="fas fa-times-circle text-red-600"></i>';
+                document.getElementById('fb-title').innerText = "Incorrect";
+                document.getElementById('fb-title').className = "font-bold text-sm text-red-800";
+            }
+            document.getElementById('fb-text').innerText = q.why;
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            state.quizIdx++;
+            loadQuestion(state.quizIdx);
+        }
+
+        function showQuizEnd() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('quiz-end').classList.remove('hidden');
+            document.getElementById('final-score').innerText = state.score;
+        }
+
+        function restartQuiz() {
+            state.quizIdx = 0; state.score = 0;
+            document.getElementById('score-display').innerText = 0;
+            document.getElementById('quiz-end').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            loadQuestion(0);
+        }
+
+        function toggleHint() {
+            const box = document.getElementById('hint-box');
+            if(box.classList.contains('hidden')) {
+                box.innerText = quizData[state.quizIdx].hint;
+                box.classList.remove('hidden');
+                document.getElementById('hint-label').innerText = "Hide Hint";
+            } else {
+                box.classList.add('hidden');
+                document.getElementById('hint-label').innerText = "Show Hint";
+            }
+        }
+
+        // Initialize first tab
+        window.onload = function() {
+            switchTab('flashcards');
+        };
+    </script>
+</body>
+</html>

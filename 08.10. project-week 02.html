@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Tech: Networks, Protocols & Cloud | Interactive Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d6d3d1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e;
+        }
+
+        /* Chart Container Specifics */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        
+        .tab-active {
+            border-bottom: 2px solid #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        .layer-card:hover {
+            transform: translateX(5px);
+            transition: transform 0.2s ease;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Stone & Indigo (Minimalist, Academic) -->
+    <!-- Application Structure Plan: 
+         The app is divided into 4 thematic "Modules" corresponding to the report's progression but structured for random access:
+         1. Network Architecture (Visualizing Topologies & OSI)
+         2. Protocols & Addressing (Interactive Card Grid & Comparisons)
+         3. Web Mechanisms (Cookies & Privacy Simulator)
+         4. Cloud Ecosystems (Responsibility Model Visualization)
+         
+         Reasoning: The linear "Day 1-4" structure is converted into a dashboard-style navigation to allow users to compare concepts (e.g., Cloud vs Network) easily. 
+         Interactive charts allow for "What if" exploration (e.g., changing topology).
+    -->
+    <!-- Visualization & Content Choices:
+         - Topologies: Chart.js Line Chart with specific point paths to draw shapes (Star, Bus, Ring) dynamically. Goal: Visualize abstract connections.
+         - OSI Model: Interactive HTML Stack. Goal: Show hierarchy without clutter.
+         - Cloud Responsibility: Chart.js Stacked Horizontal Bar. Goal: Compare "User vs Provider" management across IaaS/PaaS/SaaS.
+         - Protocols: Filterable Grid. Goal: Rapid lookup of port/function/risk.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans leading-relaxed">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-sm border-b border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="switchTab('intro')">
+                    <span class="text-2xl text-indigo-600">❖</span>
+                    <span class="font-bold text-xl tracking-tight text-stone-900">DigiTech Week 02</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="switchTab('networks')" class="nav-btn px-3 py-2 text-sm font-medium text-stone-500 hover:text-indigo-600 transition-colors" id="nav-networks">Networks</button>
+                    <button onclick="switchTab('protocols')" class="nav-btn px-3 py-2 text-sm font-medium text-stone-500 hover:text-indigo-600 transition-colors" id="nav-protocols">Protocols & IPs</button>
+                    <button onclick="switchTab('cookies')" class="nav-btn px-3 py-2 text-sm font-medium text-stone-500 hover:text-indigo-600 transition-colors" id="nav-cookies">Cookies & Privacy</button>
+                    <button onclick="switchTab('cloud')" class="nav-btn px-3 py-2 text-sm font-medium text-stone-500 hover:text-indigo-600 transition-colors" id="nav-cloud">Cloud Ecosystems</button>
+                </div>
+                <!-- Mobile menu button placeholder -->
+                <div class="md:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-stone-500 hover:text-indigo-600">☰</button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-stone-200">
+            <button onclick="switchTab('networks')" class="block w-full text-left px-4 py-2 text-stone-600 hover:bg-stone-50">Networks</button>
+            <button onclick="switchTab('protocols')" class="block w-full text-left px-4 py-2 text-stone-600 hover:bg-stone-50">Protocols & IPs</button>
+            <button onclick="switchTab('cookies')" class="block w-full text-left px-4 py-2 text-stone-600 hover:bg-stone-50">Cookies & Privacy</button>
+            <button onclick="switchTab('cloud')" class="block w-full text-left px-4 py-2 text-stone-600 hover:bg-stone-50">Cloud Ecosystems</button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
+
+        <!-- INTRO SECTION -->
+        <section id="intro-section" class="space-y-8 animate-fade-in">
+            <div class="text-center py-12">
+                <h1 class="text-4xl md:text-5xl font-extrabold text-stone-900 mb-4">Networks, Protocols & Cloud</h1>
+                <p class="text-lg text-stone-600 max-w-2xl mx-auto">
+                    A comprehensive interactive exploration of digital infrastructure. From the physical cables of LANs to the virtualized services of the Cloud.
+                </p>
+                <div class="mt-8 flex justify-center gap-4">
+                    <button onclick="switchTab('networks')" class="px-6 py-3 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition transform hover:-translate-y-0.5">Start Exploration</button>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 hover:shadow-md transition">
+                    <div class="text-indigo-500 text-3xl mb-3">☊</div>
+                    <h3 class="font-bold text-lg mb-2">Network Architecture</h3>
+                    <p class="text-sm text-stone-500">LAN, WAN, Topologies (Star, Mesh, Ring), and the OSI Model layers.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 hover:shadow-md transition">
+                    <div class="text-indigo-500 text-3xl mb-3">⇄</div>
+                    <h3 class="font-bold text-lg mb-2">Protocols & IPs</h3>
+                    <p class="text-sm text-stone-500">The rules of communication (HTTP, DNS), and how we address devices (IPv4 vs IPv6).</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 hover:shadow-md transition">
+                    <div class="text-indigo-500 text-3xl mb-3">🍪</div>
+                    <h3 class="font-bold text-lg mb-2">Web Mechanisms</h3>
+                    <p class="text-sm text-stone-500">Cookies, session management, tracking, and the GDPR privacy landscape.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 hover:shadow-md transition">
+                    <div class="text-indigo-500 text-3xl mb-3">☁</div>
+                    <h3 class="font-bold text-lg mb-2">Cloud Computing</h3>
+                    <p class="text-sm text-stone-500">IaaS, PaaS, SaaS models and the shared responsibility of security.</p>
+                </div>
+            </div>
+            
+            <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mt-8 rounded-r-lg">
+                <h4 class="font-bold text-amber-800">Academic Integrity & Disclaimer</h4>
+                <p class="text-sm text-amber-800/80 mt-1">
+                    The tools and concepts visualized here are for educational analysis within a controlled academic setting. 
+                    Misuse of scanning or probing tools on networks you do not own is prohibited.
+                </p>
+            </div>
+        </section>
+
+        <!-- NETWORKS SECTION -->
+        <section id="networks-section" class="hidden space-y-10 animate-fade-in">
+            <div class="border-b border-stone-200 pb-4">
+                <h2 class="text-3xl font-bold text-stone-900">Network Architecture</h2>
+                <p class="mt-2 text-stone-600">Understanding the physical and logical layout of digital systems. This section visualizes how devices connect (Topologies) and how data is structured for transport (OSI/TCP Models).</p>
+            </div>
+
+            <!-- Topologies Interactive -->
+            <div class="grid lg:grid-cols-3 gap-8 items-start">
+                <div class="lg:col-span-1 space-y-4">
+                    <h3 class="text-xl font-semibold text-stone-800">Network Topologies</h3>
+                    <p class="text-sm text-stone-500 mb-4">Select a topology to see its structure and security implications.</p>
+                    
+                    <div class="flex flex-col gap-2">
+                        <button onclick="updateTopology('star')" class="topo-btn text-left px-4 py-3 rounded-lg border border-stone-200 hover:bg-indigo-50 hover:border-indigo-200 transition focus:outline-none focus:ring-2 focus:ring-indigo-500" data-topo="star">
+                            <span class="font-bold block">Star Topology</span>
+                            <span class="text-xs text-stone-500">Central hub, most common.</span>
+                        </button>
+                        <button onclick="updateTopology('bus')" class="topo-btn text-left px-4 py-3 rounded-lg border border-stone-200 hover:bg-indigo-50 hover:border-indigo-200 transition focus:outline-none focus:ring-2 focus:ring-indigo-500" data-topo="bus">
+                            <span class="font-bold block">Bus Topology</span>
+                            <span class="text-xs text-stone-500">Single cable backbone.</span>
+                        </button>
+                        <button onclick="updateTopology('ring')" class="topo-btn text-left px-4 py-3 rounded-lg border border-stone-200 hover:bg-indigo-50 hover:border-indigo-200 transition focus:outline-none focus:ring-2 focus:ring-indigo-500" data-topo="ring">
+                            <span class="font-bold block">Ring Topology</span>
+                            <span class="text-xs text-stone-500">Closed loop, token passing.</span>
+                        </button>
+                        <button onclick="updateTopology('mesh')" class="topo-btn text-left px-4 py-3 rounded-lg border border-stone-200 hover:bg-indigo-50 hover:border-indigo-200 transition focus:outline-none focus:ring-2 focus:ring-indigo-500" data-topo="mesh">
+                            <span class="font-bold block">Mesh Topology</span>
+                            <span class="text-xs text-stone-500">High redundancy, resilient.</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-stone-100">
+                    <div class="chart-container">
+                        <canvas id="topologyChart"></canvas>
+                    </div>
+                    <div id="topo-details" class="mt-6 p-4 bg-stone-50 rounded-lg border border-stone-200">
+                        <h4 class="font-bold text-indigo-700" id="topo-title">Select a Topology</h4>
+                        <p class="text-sm text-stone-700 mt-2" id="topo-desc">Interact with the buttons on the left to visualize different network configurations.</p>
+                        <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                            <span id="topo-pro" class="px-2 py-1 bg-green-100 text-green-800 rounded hidden"></span>
+                            <span id="topo-con" class="px-2 py-1 bg-red-100 text-red-800 rounded hidden"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Models Interaction -->
+            <div class="mt-12">
+                <h3 class="text-xl font-semibold text-stone-800 mb-6">The Layered Models: OSI vs TCP/IP</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- OSI Stack -->
+                    <div>
+                        <h4 class="font-bold text-stone-600 mb-2">OSI Model (7 Layers)</h4>
+                        <div class="space-y-1">
+                            <div class="layer-card p-3 bg-indigo-100 border-l-4 border-indigo-500 text-sm cursor-help" onmouseenter="showLayerInfo(7)">7. Application <span class="text-stone-500 float-right text-xs">HTTP, FTP</span></div>
+                            <div class="layer-card p-3 bg-indigo-50 border-l-4 border-indigo-400 text-sm cursor-help" onmouseenter="showLayerInfo(6)">6. Presentation <span class="text-stone-500 float-right text-xs">Encryption, ASCII</span></div>
+                            <div class="layer-card p-3 bg-indigo-50 border-l-4 border-indigo-400 text-sm cursor-help" onmouseenter="showLayerInfo(5)">5. Session <span class="text-stone-500 float-right text-xs">Sync, Ports</span></div>
+                            <div class="layer-card p-3 bg-indigo-50 border-l-4 border-indigo-300 text-sm cursor-help" onmouseenter="showLayerInfo(4)">4. Transport <span class="text-stone-500 float-right text-xs">TCP, UDP</span></div>
+                            <div class="layer-card p-3 bg-indigo-50 border-l-4 border-indigo-300 text-sm cursor-help" onmouseenter="showLayerInfo(3)">3. Network <span class="text-stone-500 float-right text-xs">IP, Routing</span></div>
+                            <div class="layer-card p-3 bg-indigo-50 border-l-4 border-indigo-200 text-sm cursor-help" onmouseenter="showLayerInfo(2)">2. Data Link <span class="text-stone-500 float-right text-xs">MAC, Switches</span></div>
+                            <div class="layer-card p-3 bg-indigo-50 border-l-4 border-indigo-200 text-sm cursor-help" onmouseenter="showLayerInfo(1)">1. Physical <span class="text-stone-500 float-right text-xs">Cables, Hubs</span></div>
+                        </div>
+                    </div>
+                    <!-- Info Panel -->
+                    <div class="bg-stone-800 text-stone-100 p-6 rounded-xl flex flex-col justify-center shadow-inner">
+                        <div id="layer-info-display">
+                            <h5 class="text-amber-400 font-mono text-sm uppercase tracking-wider mb-2">Hover over a layer</h5>
+                            <h2 class="text-2xl font-bold mb-4">Detailed Inspection</h2>
+                            <p class="text-stone-300 text-sm leading-relaxed">
+                                The OSI (Open Systems Interconnection) model conceptualizes how diverse systems communicate. 
+                                <br><br>
+                                Move your mouse over the layers on the left to see specific functions, security risks, and data unit names (Packets, Frames, Bits).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROTOCOLS SECTION -->
+        <section id="protocols-section" class="hidden space-y-10 animate-fade-in">
+            <div class="border-b border-stone-200 pb-4">
+                <h2 class="text-3xl font-bold text-stone-900">Protocols & Addressing</h2>
+                <p class="mt-2 text-stone-600">The language of the internet. Explore how data finds its way (IPs) and how services speak (Protocols).</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Protocol Grid -->
+                <div class="lg:col-span-2">
+                    <h3 class="text-xl font-semibold text-stone-800 mb-4">Common Internet Protocols</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <button onclick="showProtocol('HTTP')" class="p-4 bg-white border border-stone-200 rounded-lg shadow-sm hover:shadow-md hover:border-indigo-300 transition text-center">
+                            <span class="block font-bold text-indigo-600">HTTP</span>
+                            <span class="text-xs text-stone-400">Port 80</span>
+                        </button>
+                        <button onclick="showProtocol('HTTPS')" class="p-4 bg-white border border-stone-200 rounded-lg shadow-sm hover:shadow-md hover:border-indigo-300 transition text-center">
+                            <span class="block font-bold text-green-600">HTTPS</span>
+                            <span class="text-xs text-stone-400">Port 443</span>
+                        </button>
+                        <button onclick="showProtocol('DNS')" class="p-4 bg-white border border-stone-200 rounded-lg shadow-sm hover:shadow-md hover:border-indigo-300 transition text-center">
+                            <span class="block font-bold text-indigo-600">DNS</span>
+                            <span class="text-xs text-stone-400">Port 53</span>
+                        </button>
+                        <button onclick="showProtocol('FTP')" class="p-4 bg-white border border-stone-200 rounded-lg shadow-sm hover:shadow-md hover:border-indigo-300 transition text-center">
+                            <span class="block font-bold text-stone-600">FTP</span>
+                            <span class="text-xs text-stone-400">Port 21</span>
+                        </button>
+                        <button onclick="showProtocol('SSH')" class="p-4 bg-white border border-stone-200 rounded-lg shadow-sm hover:shadow-md hover:border-indigo-300 transition text-center">
+                            <span class="block font-bold text-indigo-600">SSH</span>
+                            <span class="text-xs text-stone-400">Port 22</span>
+                        </button>
+                        <button onclick="showProtocol('SMTP')" class="p-4 bg-white border border-stone-200 rounded-lg shadow-sm hover:shadow-md hover:border-indigo-300 transition text-center">
+                            <span class="block font-bold text-stone-600">SMTP</span>
+                            <span class="text-xs text-stone-400">Port 25</span>
+                        </button>
+                        <button onclick="showProtocol('DHCP')" class="p-4 bg-white border border-stone-200 rounded-lg shadow-sm hover:shadow-md hover:border-indigo-300 transition text-center">
+                            <span class="block font-bold text-indigo-600">DHCP</span>
+                            <span class="text-xs text-stone-400">UDP 67/68</span>
+                        </button>
+                         <button onclick="showProtocol('TLS')" class="p-4 bg-white border border-stone-200 rounded-lg shadow-sm hover:shadow-md hover:border-indigo-300 transition text-center">
+                            <span class="block font-bold text-green-600">TLS</span>
+                            <span class="text-xs text-stone-400">Security</span>
+                        </button>
+                    </div>
+                    
+                    <div id="protocol-detail" class="mt-6 p-6 bg-white border-l-4 border-indigo-500 rounded-r-lg shadow-sm">
+                        <h4 class="text-xl font-bold text-stone-800" id="proto-name">Select a Protocol</h4>
+                        <div class="mt-2 grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="block text-stone-400 uppercase text-xs font-bold">Full Name</span>
+                                <span id="proto-full" class="text-stone-700">-</span>
+                            </div>
+                            <div>
+                                <span class="block text-stone-400 uppercase text-xs font-bold">Primary Risk</span>
+                                <span id="proto-risk" class="text-red-600 font-medium">-</span>
+                            </div>
+                        </div>
+                        <p id="proto-desc" class="mt-3 text-stone-600">-</p>
+                    </div>
+                </div>
+
+                <!-- IP Comparison -->
+                <div class="lg:col-span-1 bg-stone-100 p-6 rounded-xl">
+                    <h3 class="text-lg font-bold text-stone-800 mb-4">IPv4 vs IPv6</h3>
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-bold text-stone-700 mb-1">IPv4 (Legacy)</h4>
+                            <p class="text-xs font-mono bg-stone-100 p-1 rounded mb-2">192.168.1.1</p>
+                            <p class="text-sm text-stone-600">32-bit addresses. ~4.3 billion total. Exhausted. Relies on NAT (Network Address Translation) to survive.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded shadow-sm border border-indigo-100">
+                            <h4 class="font-bold text-indigo-700 mb-1">IPv6 (Modern)</h4>
+                            <p class="text-xs font-mono bg-stone-100 p-1 rounded mb-2">2001:0db8:85a3::8a2e</p>
+                            <p class="text-sm text-stone-600">128-bit addresses. Undecillion addresses (3.4 × 10^38). No need for NAT. Built-in security features.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COOKIES SECTION -->
+        <section id="cookies-section" class="hidden space-y-10 animate-fade-in">
+            <div class="border-b border-stone-200 pb-4">
+                <h2 class="text-3xl font-bold text-stone-900">Web Mechanisms: Cookies</h2>
+                <p class="mt-2 text-stone-600">Understanding state on the stateless web. How sites remember you, track you, and the regulations (GDPR) protecting you.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Cookie Types Accordion -->
+                <div>
+                    <h3 class="text-xl font-semibold text-stone-800 mb-4">Cookie Classifications</h3>
+                    <div class="space-y-3">
+                        <details class="group bg-white rounded-lg shadow-sm border border-stone-200">
+                            <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-4 text-stone-700 group-open:text-indigo-600 group-open:bg-indigo-50 transition">
+                                <span>Session vs. Persistent</span>
+                                <span class="transition group-open:rotate-180">▼</span>
+                            </summary>
+                            <div class="text-stone-600 text-sm p-4 pt-0 group-open:pt-4 border-t border-transparent group-open:border-indigo-100">
+                                <p><strong>Session:</strong> Temporary. Stored in memory. Deleted when browser closes. Used for shopping carts, login checks.</p>
+                                <p class="mt-2"><strong>Persistent:</strong> Stored on disk. Has an expiration date. Used for "Remember Me" and tracking across visits.</p>
+                            </div>
+                        </details>
+                        
+                        <details class="group bg-white rounded-lg shadow-sm border border-stone-200">
+                            <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-4 text-stone-700 group-open:text-indigo-600 group-open:bg-indigo-50 transition">
+                                <span>First-Party vs. Third-Party</span>
+                                <span class="transition group-open:rotate-180">▼</span>
+                            </summary>
+                            <div class="text-stone-600 text-sm p-4 pt-0 group-open:pt-4 border-t border-transparent group-open:border-indigo-100">
+                                <p><strong>First-Party:</strong> Set by the domain you are visiting (e.g., example.com). Essential for functionality.</p>
+                                <p class="mt-2"><strong>Third-Party:</strong> Set by a different domain (e.g., ad-network.com) via an image or script. The engine of cross-site tracking and targeted ads.</p>
+                            </div>
+                        </details>
+
+                        <details class="group bg-white rounded-lg shadow-sm border border-stone-200">
+                            <summary class="flex justify-between items-center font-medium cursor-pointer list-none p-4 text-stone-700 group-open:text-indigo-600 group-open:bg-indigo-50 transition">
+                                <span>Security Attributes</span>
+                                <span class="transition group-open:rotate-180">▼</span>
+                            </summary>
+                            <div class="text-stone-600 text-sm p-4 pt-0 group-open:pt-4 border-t border-transparent group-open:border-indigo-100">
+                                <ul class="list-disc pl-4 space-y-1">
+                                    <li><strong>HttpOnly:</strong> Cannot be accessed by JavaScript (prevents XSS).</li>
+                                    <li><strong>Secure:</strong> Only sent over HTTPS.</li>
+                                    <li><strong>SameSite:</strong> Controls when cookies are sent with cross-site requests (prevents CSRF).</li>
+                                </ul>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+
+                <!-- Simulation Visualizer -->
+                <div class="bg-stone-900 rounded-xl p-6 text-stone-300 font-mono text-sm shadow-inner relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-4 border-b border-stone-700 pb-2">
+                        <span class="text-green-400">● Browser Simulation</span>
+                        <div class="flex gap-2">
+                            <button onclick="simulateVisit('news')" class="px-2 py-1 bg-stone-700 hover:bg-stone-600 rounded text-xs text-white">Visit News Site</button>
+                            <button onclick="simulateVisit('shop')" class="px-2 py-1 bg-stone-700 hover:bg-stone-600 rounded text-xs text-white">Visit Shop</button>
+                            <button onclick="clearCookies()" class="px-2 py-1 bg-red-900/50 hover:bg-red-900 rounded text-xs text-red-200">Clear Data</button>
+                        </div>
+                    </div>
+                    
+                    <div id="cookie-jar" class="space-y-2 h-48 overflow-y-auto">
+                        <p class="text-stone-500 italic text-center mt-10">No cookies stored yet...</p>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-stone-700 text-xs text-stone-500">
+                        <span class="block mb-1">GDPR Status: <span class="text-amber-400">Active</span></span>
+                        <span>Tracking regulation enforces consent. Third-party cookies are increasingly blocked by modern browsers (Safari ITP, Firefox ETP).</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CLOUD SECTION -->
+        <section id="cloud-section" class="hidden space-y-10 animate-fade-in">
+            <div class="border-b border-stone-200 pb-4">
+                <h2 class="text-3xl font-bold text-stone-900">Cloud Ecosystems</h2>
+                <p class="mt-2 text-stone-600">The shift from "My Server" to "Someone Else's Computer". Visualizing the Shared Responsibility Model.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-10">
+                <!-- Shared Responsibility Chart -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-bold text-stone-800">Shared Responsibility Model</h3>
+                        <p class="text-sm text-stone-500">Who manages what? Security in the cloud is a partnership.</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="cloudChart"></canvas>
+                    </div>
+                    <div class="mt-4 flex gap-4 text-xs justify-center">
+                        <div class="flex items-center gap-1"><span class="w-3 h-3 bg-indigo-600 rounded-full"></span> User Managed</div>
+                        <div class="flex items-center gap-1"><span class="w-3 h-3 bg-stone-300 rounded-full"></span> Provider Managed</div>
+                    </div>
+                </div>
+
+                <!-- Text Content & Models -->
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-xl font-semibold text-stone-800 mb-3">Service Models</h3>
+                        <div class="space-y-3">
+                            <div class="p-4 border-l-4 border-indigo-200 bg-white rounded shadow-sm">
+                                <h4 class="font-bold text-indigo-900">IaaS (Infrastructure)</h4>
+                                <p class="text-sm text-stone-600">Raw compute (EC2, Azure VM). You manage OS, apps, data. Provider gives hardware.</p>
+                            </div>
+                            <div class="p-4 border-l-4 border-indigo-400 bg-white rounded shadow-sm">
+                                <h4 class="font-bold text-indigo-900">PaaS (Platform)</h4>
+                                <p class="text-sm text-stone-600">Dev environment (Heroku, GAE). You manage code & data. Provider handles OS & runtime.</p>
+                            </div>
+                            <div class="p-4 border-l-4 border-indigo-600 bg-white rounded shadow-sm">
+                                <h4 class="font-bold text-indigo-900">SaaS (Software)</h4>
+                                <p class="text-sm text-stone-600">Finished app (Gmail, Salesforce). You just use it. Provider manages everything.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-amber-50 p-4 rounded-lg border border-amber-100">
+                        <h4 class="font-bold text-amber-800 text-sm">Deployment Strategies</h4>
+                        <div class="mt-2 flex gap-2 flex-wrap">
+                            <span class="px-2 py-1 bg-white border border-amber-200 rounded text-xs text-amber-900">Public Cloud (AWS/Azure)</span>
+                            <span class="px-2 py-1 bg-white border border-amber-200 rounded text-xs text-amber-900">Private Cloud (On-Prem)</span>
+                            <span class="px-2 py-1 bg-white border border-amber-200 rounded text-xs text-amber-900">Hybrid (Mixed)</span>
+                            <span class="px-2 py-1 bg-white border border-amber-200 rounded text-xs text-amber-900">Multi-Cloud (Redundancy)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-stone-900 text-stone-400 py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm">
+            <p>&copy; 2026 Digital Technology Course</p>
+            <p class="mt-2">Explore, Interact, Learn</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- State Management ---
+        const state = {
+            currentTab: 'intro',
+            cookies: []
+        };
+
+        // --- Navigation Logic ---
+        function switchTab(tabId) {
+            // Update UI
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(tabId + '-section').classList.remove('hidden');
+            
+            // Update Nav State
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('tab-active', 'text-indigo-600'));
+            const activeBtn = document.getElementById('nav-' + tabId);
+            if(activeBtn) activeBtn.classList.add('tab-active', 'text-indigo-600');
+            
+            // Render specific charts if needed upon visibility
+            if (tabId === 'networks' && !window.topoChartRendered) {
+                initTopologyChart();
+                window.topoChartRendered = true;
+                updateTopology('star'); // Default
+            }
+            if (tabId === 'cloud' && !window.cloudChartRendered) {
+                initCloudChart();
+                window.cloudChartRendered = true;
+            }
+            
+            state.currentTab = tabId;
+            window.scrollTo(0,0);
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- Network Topology Visualization (Chart.js) ---
+        let topoChart;
+        const topoConfigs = {
+            'star': {
+                label: 'Star Topology',
+                desc: 'All nodes connect to a central hub. If the hub fails, the network fails. If a cable fails, only that node is affected.',
+                pro: 'Easy to install/manage',
+                con: 'Single point of failure (Hub)',
+                data: [
+                    {x: 5, y: 5}, // Center
+                    {x: 5, y: 8}, {x: 5, y: 5}, // Spoke 1
+                    {x: 8, y: 5}, {x: 5, y: 5}, // Spoke 2
+                    {x: 5, y: 2}, {x: 5, y: 5}, // Spoke 3
+                    {x: 2, y: 5}, {x: 5, y: 5}, // Spoke 4
+                    {x: 7, y: 7}, {x: 5, y: 5}  // Spoke 5
+                ]
+            },
+            'bus': {
+                label: 'Bus Topology',
+                desc: 'All nodes connect to a single backbone cable. Terminators at ends. Data travels in both directions.',
+                pro: 'Cheap, less cable needed',
+                con: 'Cable break takes down whole network',
+                data: [
+                    {x: 1, y: 5}, {x: 9, y: 5}, // Backbone
+                    null, // Break line
+                    {x: 2, y: 5}, {x: 2, y: 4}, // Node 1 connection
+                    null,
+                    {x: 4, y: 5}, {x: 4, y: 6}, // Node 2 connection
+                    null,
+                    {x: 6, y: 5}, {x: 6, y: 4}, // Node 3 connection
+                    null,
+                    {x: 8, y: 5}, {x: 8, y: 6}  // Node 4 connection
+                ]
+            },
+            'ring': {
+                label: 'Ring Topology',
+                desc: 'Nodes connected in a closed loop. Data travels in one direction (usually). Token passing avoids collisions.',
+                pro: 'Orderly data transmission',
+                con: 'One failed node breaks the ring',
+                data: [
+                    {x: 5, y: 8}, {x: 8, y: 5},
+                    {x: 8, y: 5}, {x: 5, y: 2},
+                    {x: 5, y: 2}, {x: 2, y: 5},
+                    {x: 2, y: 5}, {x: 5, y: 8}
+                ]
+            },
+            'mesh': {
+                label: 'Full Mesh Topology',
+                desc: 'Every node connects to every other node. Maximum redundancy and reliability.',
+                pro: 'No single point of failure',
+                con: 'Expensive, complex cabling',
+                data: [
+                    {x: 3, y: 7}, {x: 7, y: 7}, // Top connection
+                    {x: 7, y: 7}, {x: 7, y: 3}, // Right connection
+                    {x: 7, y: 3}, {x: 3, y: 3}, // Bottom connection
+                    {x: 3, y: 3}, {x: 3, y: 7}, // Left connection
+                    null,
+                    {x: 3, y: 7}, {x: 7, y: 3}, // Cross 1
+                    null,
+                    {x: 7, y: 7}, {x: 3, y: 3}  // Cross 2
+                ]
+            }
+        };
+
+        function initTopologyChart() {
+            const ctx = document.getElementById('topologyChart').getContext('2d');
+            topoChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Connection Path',
+                        data: [],
+                        showLine: true,
+                        borderColor: '#4f46e5', // indigo-600
+                        backgroundColor: '#4f46e5',
+                        borderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        tension: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { min: 0, max: 10, display: false },
+                        y: { min: 0, max: 10, display: false }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    animation: {
+                        duration: 800,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+        }
+
+        function updateTopology(type) {
+            const config = topoConfigs[type];
+            if (!config) return;
+
+            // Update UI Text
+            document.getElementById('topo-title').textContent = config.label;
+            document.getElementById('topo-desc').textContent = config.desc;
+            
+            const proEl = document.getElementById('topo-pro');
+            const conEl = document.getElementById('topo-con');
+            
+            proEl.textContent = "✓ " + config.pro;
+            conEl.textContent = "⚠ " + config.con;
+            
+            proEl.classList.remove('hidden');
+            conEl.classList.remove('hidden');
+
+            // Update Chart
+            topoChart.data.datasets[0].data = config.data;
+            topoChart.update();
+            
+            // Button Styling
+            document.querySelectorAll('.topo-btn').forEach(btn => {
+                if(btn.dataset.topo === type) {
+                    btn.classList.add('bg-indigo-50', 'border-indigo-500', 'ring-2', 'ring-indigo-200');
+                } else {
+                    btn.classList.remove('bg-indigo-50', 'border-indigo-500', 'ring-2', 'ring-indigo-200');
+                }
+            });
+        }
+
+        // --- OSI Layer Info ---
+        const layerInfo = {
+            7: { name: "Application Layer", desc: "Closest to the user. Protocols like HTTP, SMTP, FTP operate here. It's the interface between software and the network.", unit: "Data" },
+            6: { name: "Presentation Layer", desc: "Translates data formats (encryption, compression, ASCII vs EBCDIC). Ensures the application layer can read the data.", unit: "Data" },
+            5: { name: "Session Layer", desc: "Manages sessions (dialogues) between computers. Handles setup, coordination, and termination of connections.", unit: "Data" },
+            4: { name: "Transport Layer", desc: "Reliable transmission (TCP) or fast transmission (UDP). Handles flow control and error correction. Addressing via Ports.", unit: "Segment" },
+            3: { name: "Network Layer", desc: "Logical addressing (IP Addresses). Routers operate here to determine the best path for data to take.", unit: "Packet" },
+            2: { name: "Data Link Layer", desc: "Physical addressing (MAC Addresses). Switches operate here. Handles access to the physical media.", unit: "Frame" },
+            1: { name: "Physical Layer", desc: "Hardware. Cables, voltage, bits, hubs. Transmits raw bit streams over the physical medium.", unit: "Bit" }
+        };
+
+        function showLayerInfo(layerNum) {
+            const data = layerInfo[layerNum];
+            const display = document.getElementById('layer-info-display');
+            display.innerHTML = `
+                <h5 class="text-amber-400 font-mono text-sm uppercase tracking-wider mb-2">Layer ${layerNum}: ${data.unit}</h5>
+                <h2 class="text-2xl font-bold mb-4">${data.name}</h2>
+                <p class="text-stone-300 text-sm leading-relaxed">${data.desc}</p>
+            `;
+        }
+
+        // --- Protocol Details ---
+        const protoDetails = {
+            'HTTP': { full: 'Hypertext Transfer Protocol', risk: 'Unencrypted (Sniffing)', desc: 'The foundation of data communication for the World Wide Web. Sends data in clear text.' },
+            'HTTPS': { full: 'HTTP Secure', risk: 'Cert Validity', desc: 'Secure version of HTTP. Encrypts traffic using TLS/SSL to protect against eavesdropping.' },
+            'DNS': { full: 'Domain Name System', risk: 'DNS Spoofing', desc: 'The phonebook of the internet. Translates human-readable domain names (google.com) to IP addresses.' },
+            'FTP': { full: 'File Transfer Protocol', risk: 'Clear Text Auth', desc: 'Used for the transfer of computer files between a client and server on a computer network.' },
+            'SSH': { full: 'Secure Shell', risk: 'Brute Force', desc: 'Cryptographic network protocol for operating network services securely over an unsecured network.' },
+            'SMTP': { full: 'Simple Mail Transfer Protocol', risk: 'Spam / Phishing', desc: 'Internet standard for email transmission.' },
+            'DHCP': { full: 'Dynamic Host Config Protocol', risk: 'Rogue Servers', desc: 'Dynamically assigns IP addresses to devices on a network so they can communicate.' },
+            'TLS': { full: 'Transport Layer Security', risk: 'Old Versions (SSL)', desc: 'Cryptographic protocol designed to provide communications security over a computer network.' }
+        };
+
+        function showProtocol(key) {
+            const data = protoDetails[key];
+            document.getElementById('proto-name').textContent = key;
+            document.getElementById('proto-full').textContent = data.full;
+            document.getElementById('proto-risk').textContent = data.risk;
+            document.getElementById('proto-desc').textContent = data.desc;
+        }
+
+        // --- Cookie Simulator ---
+        function simulateVisit(siteType) {
+            const jar = document.getElementById('cookie-jar');
+            if(jar.children[0]?.tagName === 'P') jar.innerHTML = ''; // Clear placeholder
+
+            const id = Math.random().toString(36).substr(2, 9);
+            let html = '';
+            
+            if(siteType === 'news') {
+                html = `
+                <div class="bg-stone-800 p-2 rounded border-l-2 border-amber-500 animate-pulse-once">
+                    <div class="flex justify-between text-xs text-stone-400"><span>news-site.com</span> <span>Tracking</span></div>
+                    <div class="font-mono text-amber-200">ad_id: ${id} <span class="text-stone-500">(3rd Party)</span></div>
+                </div>`;
+            } else {
+                html = `
+                <div class="bg-stone-800 p-2 rounded border-l-2 border-green-500 animate-pulse-once">
+                    <div class="flex justify-between text-xs text-stone-400"><span>shop.com</span> <span>Session</span></div>
+                    <div class="font-mono text-green-200">cart_id: ${id} <span class="text-stone-500">(1st Party)</span></div>
+                </div>`;
+            }
+            
+            jar.insertAdjacentHTML('afterbegin', html);
+        }
+
+        function clearCookies() {
+            document.getElementById('cookie-jar').innerHTML = '<p class="text-stone-500 italic text-center mt-10">Cookies cleared.</p>';
+        }
+
+        // --- Cloud Responsibility Chart ---
+        function initCloudChart() {
+            const ctx = document.getElementById('cloudChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['On-Premises', 'IaaS', 'PaaS', 'SaaS'],
+                    datasets: [
+                        {
+                            label: 'User Managed',
+                            data: [100, 50, 25, 5], // Approximate %
+                            backgroundColor: '#4f46e5', // indigo-600
+                        },
+                        {
+                            label: 'Provider Managed',
+                            data: [0, 50, 75, 95], // Approximate %
+                            backgroundColor: '#d6d3d1', // stone-300
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, max: 100, grid: {display: false}, ticks: {display: false} },
+                        y: { stacked: true, grid: {display: false} }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Init ---
+        // Add simple CSS animation class
+        const style = document.createElement('style');
+        style.textContent = `
+            .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+            .animate-pulse-once { animation: pulseOnce 0.3s ease-in-out; }
+            @keyframes pulseOnce { 0% { opacity: 0.5; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1); } }
+        `;
+        document.head.appendChild(style);
+
+    </script>
+</body>
+</html>
+
+
+

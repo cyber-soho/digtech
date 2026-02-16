@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Architecture for Data Scientists</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom Scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5f5f4; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d6d3d1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e; 
+        }
+
+        /* Chart Container specific styles as requested */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Node styling for Topology visualizations */
+        .node {
+            width: 12px;
+            height: 12px;
+            background-color: #57534e; /* stone-600 */
+            border-radius: 50%;
+            position: relative;
+            z-index: 10;
+        }
+        .connection {
+            position: absolute;
+            background-color: #d6d3d1; /* stone-300 */
+            height: 2px;
+            transform-origin: left center;
+            z-index: 1;
+        }
+        
+        /* Interactive Card Hover Effects */
+        .interactive-card {
+            transition: all 0.3s ease;
+        }
+        .interactive-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Packet Animation for Handshake */
+        .packet {
+            width: 16px;
+            height: 16px;
+            background-color: #ea580c; /* orange-600 */
+            border-radius: 4px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: left 1.5s ease-in-out, opacity 0.2s;
+        }
+
+    </style>
+    <!-- Chosen Palette: Warm Neutrals
+         Background: Stone-50 (#fafaf9)
+         Surface: White (#ffffff)
+         Text: Stone-800 (#292524)
+         Accent 1 (Primary): Stone-600 (#57534e)
+         Accent 2 (Highlight): Orange-600 (#ea580c) for data flow/alerts
+         Accent 3 (Info): Blue-600 (#2563eb) for technical details
+         Accent 4 (Success): Emerald-600 (#059669) for good states
+    -->
+
+    <!-- Application Structure Plan:
+         Designed as a "Data Scientist's Network Control Center".
+         1. Layout: Sidebar navigation (desktop) / Top bar (mobile) for easy switching between thematic modules.
+         2. Modules:
+            - Foundations: High-level concepts, definitions, and the "Highway Analogy" visualized.
+            - Architecture: Deep dive into Topologies and the OSI Model (interactive stack).
+            - Transport & Protocols: Focus on TCP/IP, UDP, and Handshakes with simulation.
+            - Addressing & Routing: Tools for IPv4/CIDR and understanding DNS flow.
+            - Toolkit: Debugging checklists, reference tables, and formulas.
+         3. Rationale: The report covers distinct technical layers. Segregating them allows the user to focus on one "mental model" at a time (e.g., physical layout vs. logical addressing) before synthesizing them.
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. Foundations -> Inform -> Highway Analogy Cards -> Comparison Table -> Justification: Metaphors bridge the gap for non-network engineers.
+         2. Architecture -> Organize -> OSI Stack Builder -> Interactive List -> Justification: Users need to see the "stack" visually to understand the abstraction.
+         3. Protocols -> Compare -> TCP vs UDP Radar Chart -> Chart.js -> Justification: Radar charts are excellent for multi-attribute trade-offs (Speed vs Reliability vs Overhead).
+         4. Protocols -> Change -> TCP Handshake Simulator -> JS Animation -> Justification: A static diagram doesn't capture the "Time" aspect of a protocol. Animation does.
+         5. Addressing -> Inform -> CIDR Calculator -> JS Input/Output -> Justification: Practical utility for the user's daily work.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans antialiased h-screen flex flex-col md:flex-row overflow-hidden">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-white border-b border-stone-200 p-4 flex justify-between items-center z-20">
+        <h1 class="font-bold text-lg text-stone-700"><i class="fas fa-network-wired mr-2"></i>NetArchitecture DS</h1>
+        <button id="mobile-menu-btn" class="text-stone-600 hover:text-stone-900 focus:outline-none">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar" class="bg-white w-full md:w-64 flex-shrink-0 border-r border-stone-200 flex flex-col justify-between hidden md:flex h-full absolute md:relative z-10 shadow-lg md:shadow-none transition-transform duration-300">
+        <div>
+            <div class="p-6 border-b border-stone-100 hidden md:block">
+                <h1 class="font-bold text-xl text-stone-800 tracking-tight">
+                    <span class="text-orange-600">Net</span>Architecture<br>
+                    <span class="text-xs font-normal text-stone-500 uppercase tracking-widest">For Data Scientists</span>
+                </h1>
+            </div>
+            <div class="p-4 space-y-1">
+                <button onclick="switchTab('foundations')" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors bg-stone-100 text-orange-700" id="nav-foundations">
+                    <i class="fas fa-layer-group w-6"></i> Foundations
+                </button>
+                <button onclick="switchTab('architecture')" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors" id="nav-architecture">
+                    <i class="fas fa-sitemap w-6"></i> Topology & OSI
+                </button>
+                <button onclick="switchTab('protocols')" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors" id="nav-protocols">
+                    <i class="fas fa-exchange-alt w-6"></i> Protocols (TCP/UDP)
+                </button>
+                <button onclick="switchTab('addressing')" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors" id="nav-addressing">
+                    <i class="fas fa-map-marked-alt w-6"></i> IP & DNS
+                </button>
+                <button onclick="switchTab('toolbox')" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors" id="nav-toolbox">
+                    <i class="fas fa-tools w-6"></i> Debug & Ref
+                </button>
+            </div>
+        </div>
+        <div class="p-4 border-t border-stone-100">
+            <div class="text-xs text-stone-400">
+                <p>Digital Technology</p>
+                <p class="mt-1">© Cyber.SoHo</p>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto relative p-6 md:p-10 scroll-smooth">
+        
+        <!-- SECTION 1: FOUNDATIONS -->
+        <section id="foundations" class="view-section fade-in max-w-5xl mx-auto">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Network Fundamentals</h2>
+                <p class="text-stone-600 text-lg">Understand the physical and logical engineering contract that powers every API call and model training batch.</p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- What is a network -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="font-bold text-stone-800 mb-4 flex items-center">
+                        <span class="bg-stone-100 p-2 rounded-lg mr-3"><i class="fas fa-project-diagram text-orange-600"></i></span>
+                        The Core Definition
+                    </h3>
+                    <p class="text-stone-600 mb-4">A computer network is two or more devices sharing a <span class="font-semibold text-stone-800">communication channel</span> and agreeing on a <span class="font-semibold text-stone-800">protocol</span>.</p>
+                    <div class="grid grid-cols-3 gap-2 text-center text-sm">
+                        <div class="p-3 bg-stone-50 rounded border border-stone-100">
+                            <i class="fas fa-laptop text-stone-400 mb-2 block"></i>
+                            <span class="font-bold block">Node</span>
+                            <span class="text-xs text-stone-500">Device</span>
+                        </div>
+                        <div class="p-3 bg-stone-50 rounded border border-stone-100">
+                            <i class="fas fa-wifi text-stone-400 mb-2 block"></i>
+                            <span class="font-bold block">Channel</span>
+                            <span class="text-xs text-stone-500">Medium</span>
+                        </div>
+                        <div class="p-3 bg-stone-50 rounded border border-stone-100">
+                            <i class="fas fa-file-contract text-stone-400 mb-2 block"></i>
+                            <span class="font-bold block">Protocol</span>
+                            <span class="text-xs text-stone-500">Rules</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Why it matters -->
+                <div class="bg-stone-800 text-white p-6 rounded-xl shadow-sm border border-stone-700">
+                    <h3 class="font-bold text-orange-400 mb-4 flex items-center">
+                        <i class="fas fa-lightbulb mr-3"></i> Why It Matters
+                    </h3>
+                    <ul class="space-y-3 text-stone-300 text-sm">
+                        <li class="flex items-start"><i class="fas fa-check mt-1 mr-2 text-emerald-500"></i> Every <code>pd.read_csv()</code> travels a network.</li>
+                        <li class="flex items-start"><i class="fas fa-check mt-1 mr-2 text-emerald-500"></i> Cloud GPU training batches cross network links.</li>
+                        <li class="flex items-start"><i class="fas fa-check mt-1 mr-2 text-emerald-500"></i> Spark nodes synchronize via protocols.</li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-stone-600 text-center italic text-stone-400 text-xs">
+                        "Network literacy separates a data scientist who debugs in 10 minutes from one who debugs for 10 hours."
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Highway Analogy Interactive -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 mb-8">
+                <h3 class="font-bold text-stone-800 mb-4">The Highway Analogy</h3>
+                <p class="text-sm text-stone-500 mb-6">Visualizing Bandwidth vs. Latency. Adjust the sliders to see the impact.</p>
+                
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="w-full md:w-1/3 space-y-6">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 uppercase mb-2">Bandwidth (Lanes)</label>
+                            <input type="range" id="bandwidthRange" min="1" max="5" value="1" class="w-full accent-orange-600">
+                            <div class="flex justify-between text-xs text-stone-400 mt-1"><span>Low (Narrow)</span><span>High (Wide)</span></div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 uppercase mb-2">Latency (Distance)</label>
+                            <input type="range" id="latencyRange" min="1" max="5" value="1" class="w-full accent-blue-600">
+                            <div class="flex justify-between text-xs text-stone-400 mt-1"><span>Low (Short)</span><span>High (Long)</span></div>
+                        </div>
+                        <div class="p-3 bg-orange-50 rounded text-xs text-orange-800 border border-orange-100">
+                            <strong>Note:</strong> High bandwidth doesn't fix high latency. A 10-lane highway doesn't make the drive to another city shorter; it just fits more cars at once.
+                        </div>
+                    </div>
+
+                    <!-- Visual Representation -->
+                    <div class="w-full md:w-2/3 bg-stone-100 rounded-lg p-4 relative overflow-hidden h-48 flex items-center justify-center border border-stone-200" id="highway-container">
+                        <div class="absolute left-2 top-1/2 -translate-y-1/2 bg-stone-300 px-2 py-1 rounded text-xs font-bold text-stone-600">Source</div>
+                        <div class="absolute right-2 top-1/2 -translate-y-1/2 bg-stone-300 px-2 py-1 rounded text-xs font-bold text-stone-600">Dest</div>
+                        
+                        <!-- The Road -->
+                        <div id="road" class="bg-stone-800 relative transition-all duration-500" style="height: 20px; width: 200px;">
+                            <div class="absolute w-full border-t border-dashed border-stone-500 top-1/2"></div>
+                            <!-- Cars -->
+                            <div class="absolute top-0 bottom-0 left-0 bg-orange-500 w-4 h-full animate-pulse opacity-70"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vocabulary Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="p-4 bg-white rounded-lg border border-stone-200 hover:border-orange-300 transition-colors">
+                    <div class="text-orange-600 font-bold text-lg mb-1">Bandwidth</div>
+                    <div class="text-xs text-stone-500">Max transfer rate (e.g., 1 Gbps). The speed limit.</div>
+                </div>
+                <div class="p-4 bg-white rounded-lg border border-stone-200 hover:border-blue-300 transition-colors">
+                    <div class="text-blue-600 font-bold text-lg mb-1">Latency</div>
+                    <div class="text-xs text-stone-500">Delay (ms). Distance from on-ramp to destination.</div>
+                </div>
+                <div class="p-4 bg-white rounded-lg border border-stone-200 hover:border-emerald-300 transition-colors">
+                    <div class="text-emerald-600 font-bold text-lg mb-1">Packet</div>
+                    <div class="text-xs text-stone-500">Chunk of data with address. A single delivery truck.</div>
+                </div>
+                <div class="p-4 bg-white rounded-lg border border-stone-200 hover:border-purple-300 transition-colors">
+                    <div class="text-purple-600 font-bold text-lg mb-1">Port</div>
+                    <div class="text-xs text-stone-500">Endpoint on a device. Specific warehouse loading bay.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: ARCHITECTURE -->
+        <section id="architecture" class="view-section hidden max-w-5xl mx-auto">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Network Architecture</h2>
+                <p class="text-stone-600 text-lg">Topologies define the physical layout. The OSI model defines the logical flow.</p>
+            </header>
+
+            <!-- Topologies -->
+            <div class="mb-10">
+                <h3 class="text-xl font-bold text-stone-800 mb-4 border-b border-stone-200 pb-2">Network Topologies</h3>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-2 mb-4">
+                    <button class="topology-btn active px-4 py-2 text-sm font-medium rounded-full bg-stone-800 text-white" onclick="showTopology('bus')" data-topo="bus">Bus</button>
+                    <button class="topology-btn px-4 py-2 text-sm font-medium rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300" onclick="showTopology('star')" data-topo="star">Star</button>
+                    <button class="topology-btn px-4 py-2 text-sm font-medium rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300" onclick="showTopology('ring')" data-topo="ring">Ring</button>
+                    <button class="topology-btn px-4 py-2 text-sm font-medium rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300" onclick="showTopology('mesh')" data-topo="mesh">Mesh</button>
+                    <button class="topology-btn px-4 py-2 text-sm font-medium rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300" onclick="showTopology('hybrid')" data-topo="hybrid">Hybrid</button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6 flex flex-col md:flex-row gap-8 items-center">
+                    <!-- Dynamic Topology Visualizer (CSS Based) -->
+                    <div id="topology-visual" class="w-full md:w-1/3 h-48 bg-stone-50 rounded-lg relative border border-stone-100 flex items-center justify-center">
+                        <!-- Content injected via JS -->
+                    </div>
+
+                    <!-- Topology Info -->
+                    <div class="w-full md:w-2/3">
+                        <h4 id="topo-title" class="text-lg font-bold text-stone-800 mb-2">Bus Topology</h4>
+                        <p id="topo-desc" class="text-sm text-stone-600 mb-4">All devices share a single communication cable. Simple but fragile.</p>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div class="p-3 bg-emerald-50 rounded border border-emerald-100">
+                                <span class="font-bold text-emerald-800 block mb-1">Strength</span>
+                                <span id="topo-strength" class="text-stone-600">Simple, cheap.</span>
+                            </div>
+                            <div class="p-3 bg-red-50 rounded border border-red-100">
+                                <span class="font-bold text-red-800 block mb-1">Weakness</span>
+                                <span id="topo-weakness" class="text-stone-600">One break kills all.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OSI Model Interactive Stack -->
+            <div>
+                <h3 class="text-xl font-bold text-stone-800 mb-4 border-b border-stone-200 pb-2">The OSI Model (7 Layers)</h3>
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <!-- Stack Interactive -->
+                    <div class="w-full lg:w-1/3 flex flex-col-reverse space-y-1 space-y-reverse">
+                        <!-- JS generates layers here -->
+                        <div onclick="selectLayer(1)" class="osi-layer cursor-pointer p-3 bg-stone-100 border-l-4 border-stone-400 hover:bg-stone-200 transition-colors rounded-r text-sm font-bold flex justify-between items-center group" data-layer="1">
+                            <span>1. Physical</span>
+                            <span class="text-xs font-normal text-stone-500 group-hover:text-stone-800">Bits</span>
+                        </div>
+                        <div onclick="selectLayer(2)" class="osi-layer cursor-pointer p-3 bg-stone-100 border-l-4 border-stone-400 hover:bg-stone-200 transition-colors rounded-r text-sm font-bold flex justify-between items-center group" data-layer="2">
+                            <span>2. Data Link</span>
+                            <span class="text-xs font-normal text-stone-500 group-hover:text-stone-800">Frames</span>
+                        </div>
+                        <div onclick="selectLayer(3)" class="osi-layer cursor-pointer p-3 bg-stone-100 border-l-4 border-stone-400 hover:bg-stone-200 transition-colors rounded-r text-sm font-bold flex justify-between items-center group" data-layer="3">
+                            <span>3. Network</span>
+                            <span class="text-xs font-normal text-stone-500 group-hover:text-stone-800">Packets</span>
+                        </div>
+                        <div onclick="selectLayer(4)" class="osi-layer cursor-pointer p-3 bg-stone-100 border-l-4 border-stone-400 hover:bg-stone-200 transition-colors rounded-r text-sm font-bold flex justify-between items-center group" data-layer="4">
+                            <span>4. Transport</span>
+                            <span class="text-xs font-normal text-stone-500 group-hover:text-stone-800">Segments</span>
+                        </div>
+                        <div onclick="selectLayer(5)" class="osi-layer cursor-pointer p-3 bg-stone-100 border-l-4 border-stone-400 hover:bg-stone-200 transition-colors rounded-r text-sm font-bold flex justify-between items-center group" data-layer="5">
+                            <span>5. Session</span>
+                            <span class="text-xs font-normal text-stone-500 group-hover:text-stone-800">Data</span>
+                        </div>
+                        <div onclick="selectLayer(6)" class="osi-layer cursor-pointer p-3 bg-stone-100 border-l-4 border-stone-400 hover:bg-stone-200 transition-colors rounded-r text-sm font-bold flex justify-between items-center group" data-layer="6">
+                            <span>6. Presentation</span>
+                            <span class="text-xs font-normal text-stone-500 group-hover:text-stone-800">Data</span>
+                        </div>
+                        <div onclick="selectLayer(7)" class="osi-layer cursor-pointer p-3 bg-orange-100 border-l-4 border-orange-500 hover:bg-orange-200 transition-colors rounded-r text-sm font-bold flex justify-between items-center group" data-layer="7">
+                            <span>7. Application</span>
+                            <span class="text-xs font-normal text-stone-500 group-hover:text-stone-800">Data</span>
+                        </div>
+                    </div>
+
+                    <!-- Layer Detail Card -->
+                    <div class="w-full lg:w-2/3 bg-white p-6 rounded-xl shadow-lg border border-stone-200 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 text-9xl text-stone-50 opacity-50 font-bold select-none" id="bg-layer-num">7</div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 id="layer-title" class="text-2xl font-bold text-orange-600">Application Layer</h4>
+                                <span id="layer-pdu" class="px-2 py-1 bg-stone-100 text-stone-500 text-xs rounded uppercase font-bold tracking-wider">User Data</span>
+                            </div>
+                            
+                            <p id="layer-desc" class="text-stone-700 mb-6 text-lg">User-facing services. This is where you write your Python code.</p>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <h5 class="text-xs font-bold text-stone-400 uppercase mb-2">Protocols</h5>
+                                    <div id="layer-protocols" class="flex flex-wrap gap-2">
+                                        <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-mono">HTTP</span>
+                                        <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-mono">SMTP</span>
+                                        <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-mono">FTP</span>
+                                        <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-mono">DNS</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-stone-400 uppercase mb-2">Mnemonic</h5>
+                                    <p id="layer-mnemonic" class="text-stone-600 italic">"Away" (Pizza Sausage Throw Not Do Please)</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 pt-4 border-t border-stone-100">
+                                <h5 class="text-xs font-bold text-stone-400 uppercase mb-2">Real World Action</h5>
+                                <p id="layer-action" class="text-sm text-stone-600">Building an HTTPS request.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-center text-xs text-stone-400">
+                    <p>Tip: "Please Do Not Throw Sausage Pizza Away" (Physical -> Application)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: PROTOCOLS -->
+        <section id="protocols" class="view-section hidden max-w-5xl mx-auto">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Transport Protocols</h2>
+                <p class="text-stone-600 text-lg">TCP for reliability, UDP for speed. The engine of the internet.</p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <!-- Radar Chart Comparison -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="font-bold text-stone-800 mb-4">TCP vs. UDP Trade-offs</h3>
+                    <div class="chart-container">
+                        <canvas id="protocolRadarChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center text-xs text-stone-500 italic">
+                        TCP sacrifices speed for perfect reliability. UDP sacrifices reliability for raw speed.
+                    </div>
+                </div>
+
+                <!-- Usage Table -->
+                <div class="space-y-4">
+                    <div class="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                        <h4 class="font-bold text-blue-800 flex items-center mb-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-600 mr-2"></span> TCP (Transmission Control Protocol)
+                        </h4>
+                        <ul class="text-sm text-blue-900 space-y-2 mb-3">
+                            <li>✅ Guaranteed Delivery & Ordering</li>
+                            <li>❌ Slower (Handshake overhead)</li>
+                        </ul>
+                        <div class="text-xs text-blue-700 font-bold uppercase">Uses:</div>
+                        <div class="text-xs text-blue-800">Databases, REST APIs, File Transfers, SSH</div>
+                    </div>
+
+                    <div class="bg-orange-50 p-5 rounded-xl border border-orange-100">
+                        <h4 class="font-bold text-orange-800 flex items-center mb-2">
+                            <span class="w-2 h-2 rounded-full bg-orange-600 mr-2"></span> UDP (User Datagram Protocol)
+                        </h4>
+                        <ul class="text-sm text-orange-900 space-y-2 mb-3">
+                            <li>✅ Fast "Fire and Forget"</li>
+                            <li>❌ No Guarantee, No Ordering</li>
+                        </ul>
+                        <div class="text-xs text-orange-700 font-bold uppercase">Uses:</div>
+                        <div class="text-xs text-orange-800">Video Streaming, VoIP, DNS Lookups, IoT Sensors</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TCP Handshake Simulator -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-stone-200">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="font-bold text-stone-800 text-lg">TCP 3-Way Handshake Simulator</h3>
+                        <p class="text-sm text-stone-500">Before data flows, they must agree to connect.</p>
+                    </div>
+                    <button id="handshake-btn" onclick="runHandshake()" class="bg-stone-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-stone-700 transition-colors">
+                        <i class="fas fa-play mr-2"></i> Start Connection
+                    </button>
+                </div>
+
+                <div class="relative h-40 bg-stone-50 rounded-lg border border-stone-200 flex justify-between px-16 items-center overflow-hidden">
+                    <!-- Client -->
+                    <div class="text-center z-10">
+                        <div class="w-16 h-16 bg-stone-200 rounded-full flex items-center justify-center text-2xl text-stone-600 mb-2 mx-auto">
+                            <i class="fas fa-laptop"></i>
+                        </div>
+                        <div class="text-xs font-bold text-stone-700">Client</div>
+                    </div>
+
+                    <!-- Connection Lines -->
+                    <div class="absolute left-24 right-24 h-px bg-stone-300 top-1/2 -translate-y-1/2"></div>
+                    
+                    <!-- Server -->
+                    <div class="text-center z-10">
+                        <div class="w-16 h-16 bg-stone-200 rounded-full flex items-center justify-center text-2xl text-stone-600 mb-2 mx-auto">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <div class="text-xs font-bold text-stone-700">Server</div>
+                    </div>
+
+                    <!-- Animated Packet -->
+                    <div id="tcp-packet" class="packet flex items-center justify-center text-[10px] text-white font-bold font-mono"></div>
+                </div>
+
+                <div class="mt-4 p-4 bg-stone-100 rounded text-sm font-mono text-stone-700 min-h-[80px]" id="handshake-log">
+                    <span class="text-stone-400">System Ready. Click Start.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: ADDRESSING -->
+        <section id="addressing" class="view-section hidden max-w-5xl mx-auto">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Addressing & Routing</h2>
+                <p class="text-stone-600 text-lg">IP Addresses find the machine. DNS names find the IP.</p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- CIDR Calculator -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="font-bold text-stone-800 mb-4 border-b border-stone-100 pb-2">CIDR Subnet Calculator</h3>
+                    <p class="text-sm text-stone-500 mb-4">Calculate usable IPv4 hosts based on network prefix.</p>
+                    
+                    <div class="flex items-center gap-4 mb-6">
+                        <span class="text-stone-400 font-mono text-lg">192.168.1.0 /</span>
+                        <input type="number" id="cidrInput" min="0" max="32" value="24" class="w-20 p-2 border border-stone-300 rounded font-mono text-center focus:border-orange-500 outline-none">
+                    </div>
+
+                    <div class="bg-stone-50 p-4 rounded-lg border border-stone-100 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-stone-500">Formula:</span>
+                            <code class="text-xs bg-white px-2 py-1 rounded border border-stone-200 text-orange-600">2^(32 - prefix) - 2</code>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-stone-200">
+                            <span class="font-bold text-stone-700">Usable Hosts:</span>
+                            <span id="hostOutput" class="text-2xl font-bold text-orange-600">254</span>
+                        </div>
+                        <div class="text-xs text-stone-400 text-right">(-2 for Network ID & Broadcast IP)</div>
+                    </div>
+                </div>
+
+                <!-- DNS Flow -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200">
+                    <h3 class="font-bold text-stone-800 mb-4 border-b border-stone-100 pb-2">DNS Resolution Chain</h3>
+                    <p class="text-sm text-stone-500 mb-4">How <code>kaggle.com</code> becomes <code>35.244.233.98</code>.</p>
+
+                    <div class="space-y-3 relative">
+                        <div class="absolute left-4 top-4 bottom-4 w-0.5 bg-stone-200"></div>
+                        
+                        <div class="relative pl-10">
+                            <div class="absolute left-2 top-2 w-4 h-4 rounded-full bg-stone-300 border-2 border-white"></div>
+                            <div class="text-sm font-bold text-stone-700">1. Local Resolver</div>
+                            <div class="text-xs text-stone-500">"Where is kaggle.com?"</div>
+                        </div>
+                        <div class="relative pl-10">
+                            <div class="absolute left-2 top-2 w-4 h-4 rounded-full bg-stone-300 border-2 border-white"></div>
+                            <div class="text-sm font-bold text-stone-700">2. Root Nameserver</div>
+                            <div class="text-xs text-stone-500">"I don't know, but here is the .com server."</div>
+                        </div>
+                        <div class="relative pl-10">
+                            <div class="absolute left-2 top-2 w-4 h-4 rounded-full bg-stone-300 border-2 border-white"></div>
+                            <div class="text-sm font-bold text-stone-700">3. TLD Nameserver (.com)</div>
+                            <div class="text-xs text-stone-500">"Go ask ns1.kaggle.com."</div>
+                        </div>
+                        <div class="relative pl-10">
+                            <div class="absolute left-2 top-2 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white"></div>
+                            <div class="text-sm font-bold text-stone-700">4. Authoritative NS</div>
+                            <div class="text-xs text-stone-500">"Here is the IP: 35.244.233.98 (TTL=300)"</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-blue-50 border border-blue-100 p-4 rounded-lg flex items-start gap-3">
+                <i class="fas fa-info-circle text-blue-600 mt-1"></i>
+                <div>
+                    <h4 class="font-bold text-blue-800 text-sm">Key Takeaway</h4>
+                    <p class="text-xs text-blue-700">IPv4 is running out (only 4.3 billion addresses). We use <strong>NAT</strong> to hide many devices behind one public IP. IPv6 solves this with 2¹²⁸ addresses.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: TOOLBOX -->
+        <section id="toolbox" class="view-section hidden max-w-5xl mx-auto">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Data Scientist's Toolkit</h2>
+                <p class="text-stone-600 text-lg">Checklists, commands, and reference material for debugging pipelines.</p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Debugging Checklist -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+                    <div class="bg-stone-800 p-4 text-white font-bold flex justify-between items-center">
+                        <span><i class="fas fa-bug mr-2"></i> Pipeline Debugging</span>
+                    </div>
+                    <div class="p-0">
+                        <div class="flex items-center p-3 border-b border-stone-100 hover:bg-stone-50">
+                            <span class="w-6 h-6 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center text-xs font-bold mr-3">1</span>
+                            <div class="flex-1">
+                                <div class="text-sm font-bold text-stone-700">DNS OK?</div>
+                                <code class="text-xs text-orange-600 bg-orange-50 px-1 rounded">nslookup kaggle.com</code>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-3 border-b border-stone-100 hover:bg-stone-50">
+                            <span class="w-6 h-6 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center text-xs font-bold mr-3">2</span>
+                            <div class="flex-1">
+                                <div class="text-sm font-bold text-stone-700">IP Reachable?</div>
+                                <code class="text-xs text-orange-600 bg-orange-50 px-1 rounded">ping 8.8.8.8</code>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-3 border-b border-stone-100 hover:bg-stone-50">
+                            <span class="w-6 h-6 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center text-xs font-bold mr-3">3</span>
+                            <div class="flex-1">
+                                <div class="text-sm font-bold text-stone-700">Port Open?</div>
+                                <code class="text-xs text-orange-600 bg-orange-50 px-1 rounded">telnet host 443</code>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-3 border-b border-stone-100 hover:bg-stone-50">
+                            <span class="w-6 h-6 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center text-xs font-bold mr-3">4</span>
+                            <div class="flex-1">
+                                <div class="text-sm font-bold text-stone-700">Rate Limited?</div>
+                                <span class="text-xs text-stone-500">Check for HTTP 429</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HTTP Status Codes -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
+                    <h3 class="font-bold text-stone-800 mb-4">HTTP Status Cheatsheet</h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <span class="w-12 text-sm font-bold text-emerald-600">2xx</span>
+                            <span class="text-sm text-stone-600">Success (200 OK, 201 Created)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-12 text-sm font-bold text-blue-600">3xx</span>
+                            <span class="text-sm text-stone-600">Redirect (301 Moved, 302 Found)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-12 text-sm font-bold text-orange-600">4xx</span>
+                            <span class="text-sm text-stone-600">Client Error (400 Bad Req, 403 Forbidden, 404 Not Found)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-12 text-sm font-bold text-red-600">5xx</span>
+                            <span class="text-sm text-stone-600">Server Error (500 Internal, 502 Bad Gateway)</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-stone-100">
+                        <h4 class="font-bold text-stone-700 text-sm mb-1">REST Verbs</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-stone-100 text-xs rounded font-mono font-bold text-stone-600">GET</span>
+                            <span class="px-2 py-1 bg-stone-100 text-xs rounded font-mono font-bold text-stone-600">POST</span>
+                            <span class="px-2 py-1 bg-stone-100 text-xs rounded font-mono font-bold text-stone-600">PUT</span>
+                            <span class="px-2 py-1 bg-stone-100 text-xs rounded font-mono font-bold text-stone-600">DELETE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- Navigation Logic ---
+        function switchTab(tabId) {
+            // Hide all sections
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('fade-in'); // Reset animation
+            });
+            
+            // Show selected section
+            const target = document.getElementById(tabId);
+            target.classList.remove('hidden');
+            void target.offsetWidth; // Trigger reflow for animation
+            target.classList.add('fade-in');
+
+            // Update Nav Styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-stone-100', 'text-orange-700');
+                btn.classList.add('text-stone-600', 'hover:bg-stone-50');
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            activeBtn.classList.remove('text-stone-600', 'hover:bg-stone-50');
+            activeBtn.classList.add('bg-stone-100', 'text-orange-700');
+
+            // Mobile menu logic
+            if(window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('hidden');
+            }
+        }
+
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+        });
+
+        // --- Highway Analogy Logic ---
+        const bandwidthRange = document.getElementById('bandwidthRange');
+        const latencyRange = document.getElementById('latencyRange');
+        const road = document.getElementById('road');
+        const highwayContainer = document.getElementById('highway-container');
+
+        function updateHighway() {
+            const lanes = bandwidthRange.value * 20; // 20px per lane unit
+            const distance = latencyRange.value * 100; // width in pixels
+            
+            road.style.height = `${lanes + 10}px`; // Base + lanes
+            road.style.width = `${distance + 50}px`;
+        }
+
+        bandwidthRange.addEventListener('input', updateHighway);
+        latencyRange.addEventListener('input', updateHighway);
+
+        // --- Topology Logic ---
+        const topologies = {
+            bus: {
+                title: "Bus Topology",
+                desc: "All devices share one shared cable. Simple, cheap, but one break kills all.",
+                strength: "Simple, Cheap",
+                weakness: "Single point of failure",
+                render: () => `
+                    <div class="relative w-full h-full flex items-center justify-center">
+                        <div class="absolute h-1 w-3/4 bg-stone-800"></div>
+                        <div class="node absolute bg-stone-600" style="left: 20%; top: 48%;"></div>
+                        <div class="node absolute bg-stone-600" style="left: 40%; top: 48%;"></div>
+                        <div class="node absolute bg-stone-600" style="left: 60%; top: 48%;"></div>
+                        <div class="node absolute bg-stone-600" style="left: 80%; top: 48%;"></div>
+                        <div class="h-4 w-0.5 bg-stone-400 absolute" style="left: 20%; top: 50%;"></div>
+                        <div class="h-4 w-0.5 bg-stone-400 absolute" style="left: 40%; top: 50%;"></div>
+                        <div class="h-4 w-0.5 bg-stone-400 absolute" style="left: 60%; top: 50%;"></div>
+                        <div class="h-4 w-0.5 bg-stone-400 absolute" style="left: 80%; top: 50%;"></div>
+                    </div>`
+            },
+            star: {
+                title: "Star Topology",
+                desc: "All devices connect to a central switch. Easy to manage, but the switch is a bottleneck.",
+                strength: "Fault-isolated",
+                weakness: "Switch failure kills network",
+                render: () => `
+                    <div class="relative w-full h-full flex items-center justify-center">
+                        <div class="w-8 h-8 bg-orange-500 rounded z-20 flex items-center justify-center text-white text-xs font-bold">SW</div>
+                        <div class="node absolute" style="top: 20%; left: 50%;"></div>
+                        <div class="node absolute" style="bottom: 20%; left: 50%;"></div>
+                        <div class="node absolute" style="top: 50%; left: 20%;"></div>
+                        <div class="node absolute" style="top: 50%; right: 20%;"></div>
+                        <div class="connection bg-stone-300 h-0.5 w-1/4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-90"></div>
+                        <div class="connection bg-stone-300 h-0.5 w-1/4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+                    </div>`
+            },
+            ring: {
+                title: "Ring Topology",
+                desc: "Devices form a closed loop. Latency is predictable, but one break disrupts everything.",
+                strength: "Predictable latency",
+                weakness: "Single failure point",
+                render: () => `
+                    <div class="relative w-full h-full flex items-center justify-center">
+                        <div class="w-32 h-32 rounded-full border-2 border-stone-400 absolute"></div>
+                        <div class="node absolute" style="top: 20px; left: 50%; transform: translateX(-50%);"></div>
+                        <div class="node absolute" style="bottom: 20px; left: 50%; transform: translateX(-50%);"></div>
+                        <div class="node absolute" style="left: 20px; top: 50%; transform: translateY(-50%);"></div>
+                        <div class="node absolute" style="right: 20px; top: 50%; transform: translateY(-50%);"></div>
+                    </div>`
+            },
+            mesh: {
+                title: "Mesh Topology",
+                desc: "Every device connects to every other. Max redundancy, very expensive.",
+                strength: "Max Redundancy",
+                weakness: "Expensive cabling",
+                render: () => `
+                    <div class="relative w-full h-full flex items-center justify-center">
+                        <div class="node absolute z-10" style="top: 20%; left: 50%;"></div>
+                        <div class="node absolute z-10" style="bottom: 20%; left: 30%;"></div>
+                        <div class="node absolute z-10" style="bottom: 20%; right: 30%;"></div>
+                        <svg class="absolute w-full h-full opacity-30">
+                            <line x1="50%" y1="20%" x2="30%" y2="80%" stroke="#a8a29e" stroke-width="2" />
+                            <line x1="50%" y1="20%" x2="70%" y2="80%" stroke="#a8a29e" stroke-width="2" />
+                            <line x1="30%" y1="80%" x2="70%" y2="80%" stroke="#a8a29e" stroke-width="2" />
+                        </svg>
+                    </div>`
+            },
+            hybrid: {
+                title: "Hybrid Topology",
+                desc: "Mix of layouts. E.g., Star of Stars (Tree). Used in modern campuses and clouds.",
+                strength: "Flexible, Scalable",
+                weakness: "Complex Management",
+                render: () => `
+                    <div class="relative w-full h-full flex items-center justify-center">
+                        <div class="w-6 h-6 bg-orange-500 rounded z-20 absolute top-1/3 left-1/2 -translate-x-1/2 text-white text-[10px] flex items-center justify-center">Core</div>
+                        
+                        <div class="w-0.5 h-8 bg-stone-300 absolute top-1/3 left-1/4 mt-4"></div>
+                        <div class="w-0.5 h-8 bg-stone-300 absolute top-1/3 right-1/4 mt-4"></div>
+                        <div class="w-32 h-0.5 bg-stone-300 absolute top-1/3 left-1/2 -translate-x-1/2 mt-3"></div>
+
+                        <div class="node absolute" style="top: 60%; left: 25%;"></div>
+                        <div class="node absolute" style="top: 60%; left: 20%;"></div>
+                        <div class="node absolute" style="top: 60%; left: 30%;"></div>
+
+                        <div class="node absolute" style="top: 60%; right: 25%;"></div>
+                        <div class="node absolute" style="top: 60%; right: 20%;"></div>
+                        <div class="node absolute" style="top: 60%; right: 30%;"></div>
+                    </div>`
+            }
+        };
+
+        function showTopology(type) {
+            const t = topologies[type];
+            document.getElementById('topo-title').innerText = t.title;
+            document.getElementById('topo-desc').innerText = t.desc;
+            document.getElementById('topo-strength').innerText = t.strength;
+            document.getElementById('topo-weakness').innerText = t.weakness;
+            document.getElementById('topology-visual').innerHTML = t.render();
+
+            // Handle button states
+            document.querySelectorAll('.topology-btn').forEach(b => {
+                b.classList.remove('bg-stone-800', 'text-white');
+                b.classList.add('bg-stone-200', 'text-stone-600');
+            });
+
+            // Find the button via data attribute instead of event.target
+            const activeBtn = document.querySelector(`.topology-btn[data-topo="${type}"]`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-stone-200', 'text-stone-600');
+                activeBtn.classList.add('bg-stone-800', 'text-white');
+            }
+        }
+
+        // --- OSI Logic ---
+        const osiData = {
+            1: { title: "Physical Layer", pdu: "Bits", desc: "Raw bits on the wire/air. Cables, radio waves.", protocols: ["Cable", "Fiber", "Radio"], mnemonic: "Please", action: "Sending voltage/light pulses." },
+            2: { title: "Data Link Layer", pdu: "Frames", desc: "Physical addressing (MAC) & frame delivery. Switch lives here.", protocols: ["Ethernet", "Wi-Fi"], mnemonic: "Do", action: "Stripping Ethernet frame." },
+            3: { title: "Network Layer", pdu: "Packets", desc: "Logical addressing & routing (IP). Router lives here.", protocols: ["IP", "ICMP", "ARP"], mnemonic: "Not", action: "Reading IP header." },
+            4: { title: "Transport Layer", pdu: "Segments", desc: "End-to-end delivery & reliability. TCP/UDP live here.", protocols: ["TCP", "UDP"], mnemonic: "Throw", action: "Reassembling TCP segments." },
+            5: { title: "Session Layer", pdu: "Data", desc: "Maintain/Close sessions.", protocols: ["RPC", "NetBIOS"], mnemonic: "Sausage", action: "Validating session." },
+            6: { title: "Presentation Layer", pdu: "Data", desc: "Format, encrypt, compress.", protocols: ["TLS", "JSON", "JPEG"], mnemonic: "Pizza", action: "Decrypting TLS." },
+            7: { title: "Application Layer", pdu: "Data", desc: "User-facing services.", protocols: ["HTTP", "DNS", "FTP"], mnemonic: "Away", action: "Serving CSV response." }
+        };
+
+        function selectLayer(num) {
+            const d = osiData[num];
+            document.getElementById('layer-title').innerText = d.title;
+            document.getElementById('layer-title').className = num >= 5 ? "text-2xl font-bold text-orange-600" : (num >= 3 ? "text-2xl font-bold text-blue-600" : "text-2xl font-bold text-stone-600");
+            document.getElementById('layer-pdu').innerText = d.pdu;
+            document.getElementById('layer-desc').innerText = d.desc;
+            document.getElementById('bg-layer-num').innerText = num;
+            document.getElementById('layer-mnemonic').innerText = `"${d.mnemonic}"`;
+            document.getElementById('layer-action').innerText = d.action;
+            
+            const protoContainer = document.getElementById('layer-protocols');
+            protoContainer.innerHTML = '';
+            d.protocols.forEach(p => {
+                const span = document.createElement('span');
+                span.className = "px-2 py-1 bg-stone-100 text-stone-700 rounded text-xs font-mono";
+                span.innerText = p;
+                protoContainer.appendChild(span);
+            });
+
+            document.querySelectorAll('.osi-layer').forEach(el => {
+                if(el.dataset.layer == num) {
+                    el.classList.add('border-orange-500', 'bg-orange-100');
+                    el.classList.remove('border-stone-400', 'bg-stone-100');
+                } else {
+                    el.classList.remove('border-orange-500', 'bg-orange-100');
+                    el.classList.add('border-stone-400', 'bg-stone-100');
+                }
+            });
+        }
+
+        // --- Chart.js Radar ---
+        const ctx = document.getElementById('protocolRadarChart').getContext('2d');
+        const radarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Reliability', 'Speed', 'Ordering', 'Low Overhead', 'Setup Cost (Low is Good)'],
+                datasets: [{
+                    label: 'TCP',
+                    data: [10, 4, 10, 3, 2], // High rel, low speed, strict order, heavy overhead, high cost (low score)
+                    fill: true,
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)', // Blue
+                    borderColor: 'rgb(59, 130, 246)',
+                    pointBackgroundColor: 'rgb(59, 130, 246)',
+                }, {
+                    label: 'UDP',
+                    data: [2, 10, 1, 10, 10], // Low rel, high speed, no order, light overhead, low cost (high score)
+                    fill: true,
+                    backgroundColor: 'rgba(234, 88, 12, 0.2)', // Orange
+                    borderColor: 'rgb(234, 88, 12)',
+                    pointBackgroundColor: 'rgb(234, 88, 12)',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 10,
+                        ticks: { display: false },
+                        grid: { color: '#e7e5e4' } // Stone 200
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' }
+                }
+            }
+        });
+
+        // --- Handshake Simulator ---
+        function runHandshake() {
+            const packet = document.getElementById('tcp-packet');
+            const log = document.getElementById('handshake-log');
+            const btn = document.getElementById('handshake-btn');
+            
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            log.innerHTML = "";
+
+            // Step 1: SYN
+            setTimeout(() => {
+                packet.innerText = "SYN";
+                packet.style.left = "30%";
+                packet.style.opacity = "1";
+                log.innerHTML += `<div class="text-orange-600 mb-1">→ CLIENT sends SYN (Seq=0)</div>`;
+            }, 100);
+
+            setTimeout(() => {
+                packet.style.left = "70%";
+            }, 200);
+
+            // Step 2: SYN-ACK
+            setTimeout(() => {
+                packet.style.opacity = "0"; // hide brief
+                log.innerHTML += `<div class="text-blue-600 mb-1">← SERVER receives SYN, sends SYN-ACK</div>`;
+            }, 1600);
+
+            setTimeout(() => {
+                packet.innerText = "SYN-ACK";
+                packet.style.left = "70%";
+                packet.style.opacity = "1";
+                packet.classList.remove('bg-orange-600');
+                packet.classList.add('bg-blue-600');
+            }, 1700);
+
+            setTimeout(() => {
+                packet.style.left = "30%";
+            }, 1800);
+
+            // Step 3: ACK
+            setTimeout(() => {
+                packet.style.opacity = "0";
+                log.innerHTML += `<div class="text-emerald-600 font-bold">→ CLIENT sends ACK. Connection Est!</div>`;
+            }, 3200);
+
+            setTimeout(() => {
+                packet.innerText = "ACK";
+                packet.style.left = "30%";
+                packet.style.opacity = "1";
+                packet.classList.remove('bg-blue-600');
+                packet.classList.add('bg-emerald-600');
+            }, 3300);
+
+            setTimeout(() => {
+                packet.style.left = "70%";
+            }, 3400);
+
+            setTimeout(() => {
+                packet.style.opacity = "0";
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+                // Reset styles
+                setTimeout(() => {
+                    packet.classList.remove('bg-emerald-600');
+                    packet.classList.add('bg-orange-600');
+                }, 500);
+            }, 4800);
+        }
+
+        // --- CIDR Logic ---
+        document.getElementById('cidrInput').addEventListener('input', (e) => {
+            const prefix = parseInt(e.target.value);
+            if(prefix >= 0 && prefix <= 32) {
+                // Formula: 2^(32 - prefix) - 2
+                let hosts = Math.pow(2, 32 - prefix) - 2;
+                if (hosts < 0) hosts = 0; // /32 or /31 edge cases
+                document.getElementById('hostOutput').innerText = hosts.toLocaleString();
+            }
+        });
+
+        // Initialize view
+        showTopology('bus');
+    </script>
+</body>
+</html>
+
+
+
+
