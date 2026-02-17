@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Technology: Cookies & Cloud Computing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4d4d8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1aa;
+        }
+
+        /* Chart Container Utilities */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Animation utilities */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom active state for nav */
+        .nav-item.active {
+            background-color: #f3f4f6;
+            color: #0f766e;
+            border-right: 4px solid #0f766e;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals & Teal -->
+    <!-- Application Structure Plan: 
+         The app is structured as a vertical dashboard with a fixed sidebar navigation (responsive on mobile) and a main content area.
+         The structure focuses on the two main lessons: Cookies and Cloud, sandwiched between an Overview and a Resource Hub.
+         
+         1. Overview: Sets the stage, learning objectives, and timeline.
+         2. Cookie Lab: Interactive lifecycle explorer and privacy/security breakdown. Deep dive into the mechanics.
+         3. Cloud Command: Interactive models (Pizza analogy), provider market share, and DS workflow.
+         4. Resource Hub: Searchable abbreviations and links.
+
+         Why? This separates the two distinct technical topics while allowing the user to toggle between them easily without scrolling a massive document. 
+         Interactive elements (steppers, toggles, charts) replace static lists to encourage active learning.
+    -->
+    <!-- Visualization & Content Choices:
+         1. Cloud Market Share: Doughnut Chart (Chart.js) -> Goal: Inform/Compare -> Allows quick visual comparison of AWS/Azure/GCP dominance.
+         2. Cookie Lifecycle: Javascript Stepper -> Goal: Change/Process -> Breaking down the 5 steps visually helps understand the "Stateful on Stateless" concept better than a list.
+         3. Service Models (Pizza): Interactive Toggle Table -> Goal: Compare -> Toggling between IaaS/PaaS/SaaS changes row highlighting, making the responsibility shift obvious.
+         4. Security Layer Stack: CSS/HTML Visual Stack -> Goal: Inform -> Visualizing the "Defense in Depth" as actual layers.
+         5. Interactive Abbreviations: Searchable Table -> Goal: Organize -> Quick reference for the many acronyms in the report.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-[#faf9f6] text-slate-800 font-sans h-screen flex overflow-hidden">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden fixed w-full bg-white border-b border-gray-200 z-50 flex justify-between items-center p-4">
+        <h1 class="text-lg font-bold text-teal-800">Cyber.SoHo Day 06</h1>
+        <button id="mobile-menu-btn" class="text-gray-600 focus:outline-none">
+            <span class="text-2xl">☰</span>
+        </button>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar" class="bg-white w-64 border-r border-gray-200 flex-col justify-between hidden md:flex h-full fixed md:relative z-40 transition-transform transform md:translate-x-0 -translate-x-full">
+        <div>
+            <div class="p-6 border-b border-gray-100">
+                <h1 class="text-2xl font-bold text-teal-800 tracking-tight">Cyber.SoHo</h1>
+                <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Digital Technology</p>
+            </div>
+            <div class="flex flex-col py-4 space-y-1">
+                <button onclick="navTo('section-overview')" class="nav-item active px-6 py-3 text-left hover:bg-gray-50 text-gray-600 font-medium transition-colors duration-200 flex items-center">
+                    <span class="mr-3">📊</span> Session Overview
+                </button>
+                <button onclick="navTo('section-cookies')" class="nav-item px-6 py-3 text-left hover:bg-gray-50 text-gray-600 font-medium transition-colors duration-200 flex items-center">
+                    <span class="mr-3">🍪</span> Lesson 1: Cookies
+                </button>
+                <button onclick="navTo('section-cloud')" class="nav-item px-6 py-3 text-left hover:bg-gray-50 text-gray-600 font-medium transition-colors duration-200 flex items-center">
+                    <span class="mr-3">☁️</span> Lesson 2: Cloud
+                </button>
+                <button onclick="navTo('section-resources')" class="nav-item px-6 py-3 text-left hover:bg-gray-50 text-gray-600 font-medium transition-colors duration-200 flex items-center">
+                    <span class="mr-3">📚</span> Resource Hub
+                </button>
+            </div>
+        </div>
+        <div class="p-6 bg-gray-50 border-t border-gray-200">
+            <p class="text-xs text-gray-400">© 2026 Cyber.SoHo<br></p>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto pt-16 md:pt-0 p-4 md:p-8 relative" id="main-content">
+        
+        <!-- SECTION: OVERVIEW -->
+        <section id="section-overview" class="fade-in space-y-8 max-w-5xl mx-auto">
+            <header class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                    <div>
+                        <span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">Day 06</span>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">Cookies & Cloud Computing</h2>
+                        <p class="text-gray-600">A deep dive into web state mechanisms and the infrastructure of the modern internet.</p>
+                    </div>
+                    <div class="mt-4 md:mt-0 text-right text-sm text-gray-500">
+                        <p>Date: Feb 2026</p>
+                        <p></p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Learning Objectives -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-xl font-bold text-teal-800 mb-4 border-b border-gray-100 pb-2">🎯 Learning Objectives</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <span class="text-teal-500 mr-2">✓</span>
+                            <span class="text-gray-700">Explain HTTP cookies and the problem of statelessness.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-teal-500 mr-2">✓</span>
+                            <span class="text-gray-700">Distinguish cookie types and understand privacy/GDPR implications.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-teal-500 mr-2">✓</span>
+                            <span class="text-gray-700">Define Cloud Computing (NIST) and its 3 service models (IaaS/PaaS/SaaS).</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-teal-500 mr-2">✓</span>
+                            <span class="text-gray-700">Identify major platforms (AWS, Azure, GCP) and their Data Science relevance.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Timeline -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-xl font-bold text-teal-800 mb-4 border-b border-gray-100 pb-2">⏱️ Session Timeline</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <div class="w-16 font-mono text-sm text-gray-500">0:00</div>
+                            <div class="flex-1 bg-gray-100 rounded-lg p-2 ml-4 border-l-4 border-blue-500">
+                                <span class="font-medium text-gray-800">Lesson 1: Cookies</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-16 font-mono text-sm text-gray-500">0:45</div>
+                            <div class="flex-1 bg-gray-100 rounded-lg p-2 ml-4 border-l-4 border-gray-400">
+                                <span class="font-medium text-gray-600">Break & Q&A</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-16 font-mono text-sm text-gray-500">0:50</div>
+                            <div class="flex-1 bg-gray-100 rounded-lg p-2 ml-4 border-l-4 border-teal-500">
+                                <span class="font-medium text-gray-800">Lesson 2: Cloud Computing</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-16 font-mono text-sm text-gray-500">1:25</div>
+                            <div class="flex-1 bg-gray-100 rounded-lg p-2 ml-4 border-l-4 border-purple-500">
+                                <span class="font-medium text-gray-800">Wrap-Up</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Introductory Context -->
+            <div class="bg-amber-50 p-6 rounded-xl border border-amber-100">
+                <h4 class="font-bold text-amber-800 mb-2">Why This Matters</h4>
+                <p class="text-amber-900 opacity-90 leading-relaxed">
+                    The web was designed to be <strong>stateless</strong>—it has no memory. Without cookies, every click is a first impression. Simultaneously, the infrastructure powering these interactions has shifted from basement servers to the <strong>Cloud</strong>. For Data Scientists, understanding how user data is collected (Cookies) and where it is processed (Cloud) is fundamental to modern workflows.
+                </p>
+            </div>
+        </section>
+
+        <!-- SECTION: COOKIES -->
+        <section id="section-cookies" class="hidden fade-in space-y-8 max-w-5xl mx-auto">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h2 class="text-2xl font-bold text-teal-800 mb-2">🍪 Lesson 1: Cookies</h2>
+                <p class="text-gray-600 mb-4">
+                    HTTP is stateless. Every request is a "brand new conversation". Cookies are the memory mechanism—small text files exchanged between server and browser—invented by Netscape in 1994.
+                </p>
+                
+                <!-- Interactive Cookie Lifecycle -->
+                <div class="mt-8 bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">🔄 Interactive Lifecycle: How It Works</h3>
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+                        <div class="text-center w-full md:w-1/4">
+                            <div class="bg-blue-100 text-blue-800 p-4 rounded-lg shadow font-bold text-xl">Browser 💻</div>
+                            <p class="text-xs mt-2 text-gray-500">Local Storage</p>
+                        </div>
+                        <div class="flex-1 text-center relative px-4">
+                            <!-- Arrow visualization handled by JS -->
+                            <div id="lifecycle-arrow" class="h-1 bg-gray-300 w-full relative">
+                                <div id="arrow-head" class="absolute right-0 -top-1.5 w-3 h-3 bg-gray-300 transform rotate-45"></div>
+                            </div>
+                            <div id="lifecycle-action" class="mt-2 text-sm font-bold text-teal-600 min-h-[20px]">Click 'Next Step' to start</div>
+                        </div>
+                        <div class="text-center w-full md:w-1/4">
+                            <div class="bg-purple-100 text-purple-800 p-4 rounded-lg shadow font-bold text-xl">Server 🖥️</div>
+                            <p class="text-xs mt-2 text-gray-500">Database/Session</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-800 text-green-400 font-mono text-xs p-4 rounded mb-4 overflow-x-auto">
+                        <p id="header-display" class="whitespace-pre-wrap">// HTTP Headers will appear here...</p>
+                    </div>
+
+                    <div class="flex justify-center space-x-2">
+                        <button onclick="updateLifecycle(0)" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium transition">Reset</button>
+                        <button onclick="nextLifecycleStep()" class="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded shadow text-sm font-bold transition">Next Step ▶</button>
+                    </div>
+                    <div class="text-center mt-2 text-xs text-gray-400">Step <span id="step-counter">0</span> of 5</div>
+                </div>
+            </div>
+
+            <!-- Cookie Types Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Lifespan -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex items-center mb-3 text-orange-600">
+                        <span class="text-2xl mr-2">⏳</span>
+                        <h3 class="font-bold text-lg">By Lifespan</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm">
+                        <li class="bg-orange-50 p-3 rounded">
+                            <span class="font-bold block text-gray-800">Session</span>
+                            <span class="text-gray-600">Dies when browser closes. No expiration date. Like a concert wristband.</span>
+                        </li>
+                        <li class="bg-orange-50 p-3 rounded">
+                            <span class="font-bold block text-gray-800">Persistent</span>
+                            <span class="text-gray-600">Survives restarts. Has `Expires` or `Max-Age`. The "Remember Me" feature.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Origin -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex items-center mb-3 text-blue-600">
+                        <span class="text-2xl mr-2">🌍</span>
+                        <h3 class="font-bold text-lg">By Origin</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm">
+                        <li class="bg-blue-50 p-3 rounded">
+                            <span class="font-bold block text-gray-800">First-Party</span>
+                            <span class="text-gray-600">Set by visited domain. Essential for logins, carts, preferences.</span>
+                        </li>
+                        <li class="bg-blue-50 p-3 rounded">
+                            <span class="font-bold block text-gray-800">Third-Party</span>
+                            <span class="text-gray-600">Set by a different domain (ads, analytics). Used for tracking cross-site.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Security Flags -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex items-center mb-3 text-red-600">
+                        <span class="text-2xl mr-2">🛡️</span>
+                        <h3 class="font-bold text-lg">Security Flags</h3>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="border-l-4 border-red-500 pl-3 py-1">
+                            <h4 class="font-bold text-xs text-gray-800 uppercase">Secure</h4>
+                            <p class="text-xs text-gray-600">Transmission only over HTTPS (Prevents Sniffing).</p>
+                        </div>
+                        <div class="border-l-4 border-red-500 pl-3 py-1">
+                            <h4 class="font-bold text-xs text-gray-800 uppercase">HttpOnly</h4>
+                            <p class="text-xs text-gray-600">Blocks JavaScript access. Defends against XSS.</p>
+                        </div>
+                        <div class="border-l-4 border-red-500 pl-3 py-1">
+                            <h4 class="font-bold text-xs text-gray-800 uppercase">SameSite</h4>
+                            <p class="text-xs text-gray-600">Controls cross-origin sending (Strict/Lax). Defends against CSRF.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regulation & Privacy -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="text-lg font-bold text-teal-800 mb-4">⚖️ Privacy & Regulation</h3>
+                <p class="text-sm text-gray-600 mb-4">Cookies aren't programs, but their misuse for surveillance triggered global laws. <span class="font-bold text-red-600">GDPR Penalty: Up to €20M or 4% of global turnover.</span></p>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3">Regulation</th>
+                                <th class="px-4 py-3">Jurisdiction</th>
+                                <th class="px-4 py-3">Core Requirement</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-white border-b hover:bg-gray-50">
+                                <td class="px-4 py-3 font-bold text-gray-900">GDPR</td>
+                                <td class="px-4 py-3">EU / EEA</td>
+                                <td class="px-4 py-3">Explicit consent for non-essential cookies (2018).</td>
+                            </tr>
+                            <tr class="bg-white border-b hover:bg-gray-50">
+                                <td class="px-4 py-3 font-bold text-gray-900">CCPA / CPRA</td>
+                                <td class="px-4 py-3">California, USA</td>
+                                <td class="px-4 py-3">Right to know + Opt-out of data sale (2020/2023).</td>
+                            </tr>
+                            <tr class="bg-white hover:bg-gray-50">
+                                <td class="px-4 py-3 font-bold text-gray-900">ePrivacy</td>
+                                <td class="px-4 py-3">EU</td>
+                                <td class="px-4 py-3">"Cookie Law" - Consent for electronic tracking.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 p-4 bg-teal-50 border border-teal-100 rounded text-teal-800 text-sm">
+                    <strong>Data Science Implication:</strong> If your model ingests user data derived from cookies, you MUST verify the data was collected lawfully.
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: CLOUD -->
+        <section id="section-cloud" class="hidden fade-in space-y-8 max-w-5xl mx-auto">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h2 class="text-2xl font-bold text-teal-800 mb-2">☁️ Lesson 2: Cloud Computing</h2>
+                <p class="text-gray-600 mb-4">
+                    "Nobody builds a power plant to charge a laptop." Cloud computing is IT as a utility—on-demand, metered, and elastic. Defined by NIST SP 800-145.
+                </p>
+
+                <!-- Service Models (Pizza Analogy) -->
+                <div class="mt-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">🍕 The Pizza Framework (Service Models)</h3>
+                        <div class="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-500">Interactive: Click Tabs</div>
+                    </div>
+                    
+                    <div class="flex space-x-1 mb-4 bg-gray-200 p-1 rounded-lg" id="pizza-controls">
+                        <button onclick="updatePizza('on-prem')" class="flex-1 py-2 text-sm font-medium rounded-md bg-white shadow text-gray-800 transition pizza-btn" id="btn-on-prem">On-Premises</button>
+                        <button onclick="updatePizza('iaas')" class="flex-1 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-gray-800 transition pizza-btn" id="btn-iaas">IaaS (Infra)</button>
+                        <button onclick="updatePizza('paas')" class="flex-1 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-gray-800 transition pizza-btn" id="btn-paas">PaaS (Platform)</button>
+                        <button onclick="updatePizza('saas')" class="flex-1 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-gray-800 transition pizza-btn" id="btn-saas">SaaS (Software)</button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="space-y-2">
+                            <div class="pizza-layer p-2 rounded border border-gray-200 text-center" id="layer-ui">Dining Table (UI)</div>
+                            <div class="pizza-layer p-2 rounded border border-gray-200 text-center" id="layer-data">Toppings (Data)</div>
+                            <div class="pizza-layer p-2 rounded border border-gray-200 text-center" id="layer-code">Recipe (App Code)</div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="pizza-layer p-2 rounded border border-gray-200 text-center" id="layer-runtime">Oven (Runtime/OS)</div>
+                            <div class="pizza-layer p-2 rounded border border-gray-200 text-center" id="layer-servers">Kitchen (Servers)</div>
+                            <div class="pizza-layer p-2 rounded border border-gray-200 text-center" id="layer-network">Utilities (Network)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex justify-center space-x-6 text-xs font-bold uppercase tracking-wide">
+                        <div class="flex items-center"><span class="w-3 h-3 bg-blue-100 border border-blue-300 mr-2 rounded"></span> You Manage</div>
+                        <div class="flex items-center"><span class="w-3 h-3 bg-orange-100 border border-orange-300 mr-2 rounded"></span> Provider Manages</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Market Share Chart -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
+                    <h3 class="text-lg font-bold text-teal-800 mb-2">The Big Three Providers</h3>
+                    <p class="text-xs text-gray-500 mb-4">Approximate Market Share (~2025)</p>
+                    <div class="chart-container flex-1">
+                        <canvas id="cloudMarketChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-sm text-gray-600">
+                        <p><strong>AWS:</strong> Broadest catalogue (200+). DS: SageMaker.</p>
+                        <p><strong>Azure:</strong> Enterprise focus. DS: ML Studio.</p>
+                        <p><strong>GCP:</strong> Analytics/AI leader. DS: Vertex AI/BigQuery.</p>
+                    </div>
+                </div>
+
+                <!-- DS Relevance -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-teal-800 mb-4">🚀 Why Data Scientists Care</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="bg-teal-100 p-2 rounded-lg text-teal-700 mr-3 text-lg">💾</div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Elastic Storage</h4>
+                                <p class="text-sm text-gray-600">Store MBs to PBs cheaply (AWS S3, GCS). No hard drive limits.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-teal-100 p-2 rounded-lg text-teal-700 mr-3 text-lg">⚡</div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Scalable Compute</h4>
+                                <p class="text-sm text-gray-600">Train on 80GB VRAM GPUs (A100s) instead of your laptop's 8GB.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-teal-100 p-2 rounded-lg text-teal-700 mr-3 text-lg">📓</div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Collaborative Notebooks</h4>
+                                <p class="text-sm text-gray-600">Google Colab, SageMaker Studio. Shared environments.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 bg-gray-50 p-3 rounded text-center text-sm font-mono border border-gray-200">
+                            Workflow: Upload Data ➔ Choose GPU Runtime ➔ Train ➔ Download Weights
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analogy Table -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="font-bold text-gray-800 mb-3">Choosing a Provider (Mobile Carrier Analogy)</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm">
+                    <div class="p-3 bg-gray-50 rounded">
+                        <div class="font-bold text-gray-500 uppercase text-xs mb-1">Coverage</div>
+                        <div>Regions & Zones</div>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded">
+                        <div class="font-bold text-gray-500 uppercase text-xs mb-1">Price</div>
+                        <div>Instance/Egress Cost</div>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded">
+                        <div class="font-bold text-gray-500 uppercase text-xs mb-1">Extras</div>
+                        <div>Managed Services</div>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded">
+                        <div class="font-bold text-gray-500 uppercase text-xs mb-1">Lock-in</div>
+                        <div>Proprietary APIs</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: RESOURCES -->
+        <section id="section-resources" class="hidden fade-in space-y-8 max-w-5xl mx-auto">
+            <header class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h2 class="text-2xl font-bold text-teal-800 mb-2">📚 Resource Hub</h2>
+                <p class="text-gray-600">Quick reference for abbreviations and external links used in this session.</p>
+            </header>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-800">Abbreviations Decoder</h3>
+                    <input type="text" id="abbr-search" placeholder="Search (e.g., GDPR)..." class="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:border-teal-500" onkeyup="filterAbbreviations()">
+                </div>
+                <div class="overflow-x-auto max-h-96">
+                    <table class="min-w-full text-sm text-left text-gray-500" id="abbr-table">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 sticky top-0">
+                            <tr>
+                                <th class="px-4 py-2">Abbr</th>
+                                <th class="px-4 py-2">Full Form</th>
+                            </tr>
+                        </thead>
+                        <tbody id="abbr-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">🔗 External References</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <a href="https://www.rfc-editor.org/rfc/rfc6265" target="_blank" class="flex items-center p-3 border border-gray-200 rounded hover:bg-gray-50 transition text-teal-700">
+                        📄 RFC 6265 (Cookie Spec)
+                    </a>
+                    <a href="https://owasp.org/" target="_blank" class="flex items-center p-3 border border-gray-200 rounded hover:bg-gray-50 transition text-teal-700">
+                        🛡️ OWASP Foundation
+                    </a>
+                    <a href="https://csrc.nist.gov/publications/detail/sp/800-145/final" target="_blank" class="flex items-center p-3 border border-gray-200 rounded hover:bg-gray-50 transition text-teal-700">
+                        ☁️ NIST SP 800-145 (Cloud Def)
+                    </a>
+                    <a href="https://gdpr.eu/" target="_blank" class="flex items-center p-3 border border-gray-200 rounded hover:bg-gray-50 transition text-teal-700">
+                        🇪🇺 GDPR Info
+                    </a>
+                </div>
+                <div class="mt-4 text-xs text-gray-400 border-t border-gray-100 pt-4">
+                    Disclaimer: Links provided for convenience. Verify URLs with tools like VirusTotal before visiting. Materials © 2026 Cyber.SoHo.
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- DATA ---
+        const abbreviations = [
+            { abbr: "HTTP", full: "HyperText Transfer Protocol" },
+            { abbr: "HTTPS", full: "HyperText Transfer Protocol Secure" },
+            { abbr: "API", full: "Application Programming Interface" },
+            { abbr: "IETF", full: "Internet Engineering Task Force" },
+            { abbr: "XSS", full: "Cross-Site Scripting" },
+            { abbr: "CSRF", full: "Cross-Site Request Forgery" },
+            { abbr: "GDPR", full: "General Data Protection Regulation" },
+            { abbr: "CCPA", full: "California Consumer Privacy Act" },
+            { abbr: "NIST", full: "National Institute of Standards and Technology" },
+            { abbr: "IaaS", full: "Infrastructure as a Service" },
+            { abbr: "PaaS", full: "Platform as a Service" },
+            { abbr: "SaaS", full: "Software as a Service" },
+            { abbr: "AWS", full: "Amazon Web Services" },
+            { abbr: "GCP", full: "Google Cloud Platform" },
+            { abbr: "EC2", full: "Elastic Compute Cloud (AWS)" },
+            { abbr: "S3", full: "Simple Storage Service (AWS)" },
+            { abbr: "CapEx", full: "Capital Expenditure" },
+            { abbr: "OpEx", full: "Operating Expenditure" }
+        ];
+
+        // --- NAVIGATION LOGIC ---
+        function navTo(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('main > section').forEach(sec => {
+                sec.classList.add('hidden');
+            });
+            
+            // Show target section
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            // Update Sidebar Active State
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('active', 'bg-gray-50', 'text-teal-800', 'border-r-4', 'border-teal-600');
+                btn.classList.add('text-gray-600'); // Reset text color
+            });
+            
+            // Highlight clicked button (find the button that calls this function)
+            const activeBtn = Array.from(document.querySelectorAll('.nav-item')).find(b => b.getAttribute('onclick') === `navTo('${sectionId}')`);
+            if(activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.classList.remove('text-gray-600');
+            }
+
+            // Close mobile menu if open
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        // --- COOKIE LIFECYCLE LOGIC ---
+        let lifecycleStep = 0;
+        const steps = [
+            { text: "1. Browser sends GET Request (First Visit).", header: "GET /page HTTP/1.1\nHost: example.com", arrowDir: "right" },
+            { text: "2. Server responds with Set-Cookie header.", header: "HTTP/1.1 200 OK\nSet-Cookie: session_id=abc123; Path=/; HttpOnly", arrowDir: "left" },
+            { text: "3. Browser stores the cookie locally.", header: "Storage: { session_id: 'abc123' }", arrowDir: "none" },
+            { text: "4. Browser sends Cookie header on next visit.", header: "GET /dashboard HTTP/1.1\nCookie: session_id=abc123", arrowDir: "right" },
+            { text: "5. Server reads cookie & remembers you.", header: "Server: 'Welcome back, User abc123!'", arrowDir: "none" }
+        ];
+
+        function updateLifecycle(stepIndex) {
+            lifecycleStep = stepIndex;
+            document.getElementById('step-counter').innerText = stepIndex + 1;
+            document.getElementById('lifecycle-action').innerText = steps[stepIndex].text;
+            document.getElementById('header-display').innerText = steps[stepIndex].header;
+            
+            const arrow = document.getElementById('lifecycle-arrow');
+            const arrowHead = document.getElementById('arrow-head');
+
+            // Reset Animation
+            arrow.style.animation = 'none';
+            arrow.offsetHeight; /* trigger reflow */
+            
+            if (steps[stepIndex].arrowDir === 'right') {
+                arrow.classList.remove('opacity-0');
+                arrowHead.classList.remove('left-0', 'rotate-[-135deg]');
+                arrowHead.classList.add('right-0', 'rotate-45');
+                arrow.style.transform = 'scaleX(1)';
+                arrow.style.animation = 'fadeIn 0.5s';
+            } else if (steps[stepIndex].arrowDir === 'left') {
+                arrow.classList.remove('opacity-0');
+                arrowHead.classList.remove('right-0', 'rotate-45');
+                arrowHead.classList.add('left-0', 'rotate-[-135deg]'); // CSS rotate logic
+                // Visual trick for left arrow
+                arrow.style.transform = 'scaleX(1)';
+                 arrow.style.animation = 'fadeIn 0.5s';
+            } else {
+                arrow.classList.add('opacity-0');
+            }
+        }
+
+        function nextLifecycleStep() {
+            lifecycleStep++;
+            if (lifecycleStep >= steps.length) lifecycleStep = 0;
+            updateLifecycle(lifecycleStep);
+        }
+
+        // --- PIZZA FRAMEWORK LOGIC ---
+        const pizzaLayers = ['layer-ui', 'layer-data', 'layer-code', 'layer-runtime', 'layer-servers', 'layer-network'];
+        const responsibilityMap = {
+            'on-prem': { user: pizzaLayers, provider: [] }, // User manages all
+            'iaas': { user: ['layer-ui', 'layer-data', 'layer-code', 'layer-runtime'], provider: ['layer-servers', 'layer-network'] },
+            'paas': { user: ['layer-ui', 'layer-data'], provider: ['layer-code', 'layer-runtime', 'layer-servers', 'layer-network'] },
+            'saas': { user: [], provider: pizzaLayers } // Provider manages all
+        };
+
+        function updatePizza(model) {
+            // Update Buttons
+            document.querySelectorAll('.pizza-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'shadow', 'text-gray-800');
+                btn.classList.add('text-gray-600');
+            });
+            const activeBtn = document.getElementById(`btn-${model}`);
+            activeBtn.classList.add('bg-white', 'shadow', 'text-gray-800');
+            activeBtn.classList.remove('text-gray-600');
+
+            // Update Layers
+            const map = responsibilityMap[model];
+            
+            map.user.forEach(id => {
+                const el = document.getElementById(id);
+                el.className = 'pizza-layer p-2 rounded border border-blue-200 bg-blue-50 text-blue-800 text-center font-medium transition-colors duration-300';
+            });
+            
+            map.provider.forEach(id => {
+                const el = document.getElementById(id);
+                el.className = 'pizza-layer p-2 rounded border border-orange-200 bg-orange-50 text-orange-800 text-center font-medium transition-colors duration-300';
+            });
+        }
+
+        // --- ABBREVIATION SEARCH ---
+        function populateAbbreviations() {
+            const tbody = document.getElementById('abbr-body');
+            tbody.innerHTML = abbreviations.map(item => `
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-4 py-2 font-bold text-gray-900">${item.abbr}</td>
+                    <td class="px-4 py-2">${item.full}</td>
+                </tr>
+            `).join('');
+        }
+
+        function filterAbbreviations() {
+            const input = document.getElementById('abbr-search').value.toUpperCase();
+            const rows = document.getElementById('abbr-body').getElementsByTagName('tr');
+            
+            for (let i = 0; i < rows.length; i++) {
+                const abbrCell = rows[i].getElementsByTagName("td")[0];
+                const fullCell = rows[i].getElementsByTagName("td")[1];
+                if (abbrCell || fullCell) {
+                    const txtValue = abbrCell.textContent || abbrCell.innerText;
+                    const fullValue = fullCell.textContent || fullCell.innerText;
+                    if (txtValue.toUpperCase().indexOf(input) > -1 || fullValue.toUpperCase().indexOf(input) > -1) {
+                        rows[i].style.display = "";
+                    } else {
+                        rows[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        // --- CHART.JS INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Init Pizza Model default
+            updatePizza('iaas'); // Start in middle for contrast
+            
+            // Init Cookie Lifecycle
+            updateLifecycle(0);
+
+            // Init Abbreviations
+            populateAbbreviations();
+
+            // Init Chart
+            const ctx = document.getElementById('cloudMarketChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['AWS (Amazon)', 'Azure (Microsoft)', 'GCP (Google)', 'Others (IBM, Oracle, etc.)'],
+                    datasets: [{
+                        data: [31, 25, 11, 33],
+                        backgroundColor: [
+                            '#FF9900', // AWS Orange
+                            '#007FFF', // Azure Blue
+                            '#4285F4', // GCP Blue
+                            '#E5E7EB'  // Gray
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 12, padding: 20 }
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
+
+
+

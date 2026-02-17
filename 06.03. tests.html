@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study App: Cookies & Cloud</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Perspective for the flip animation */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        
+        /* The card container */
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        
+        /* Class to trigger the flip */
+        .flashcard-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        /* Front and Back styling */
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .flashcard-front {
+            background-color: #ffffff;
+            color: #1f2937;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .flashcard-back {
+            background-color: #f0fdfa; /* Teal-50 */
+            color: #115e59; /* Teal-800 */
+            border: 2px solid #99f6e4; /* Teal-200 */
+            transform: rotateY(180deg);
+        }
+
+        /* Hide scrollbar for quiz list */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans h-screen flex flex-col overflow-hidden">
+
+    <!-- Header & Tabs -->
+    <header class="bg-white border-b border-gray-200 shadow-sm z-10 flex-none">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center py-4">
+                <h1 class="text-xl font-bold text-teal-700 mb-4 md:mb-0">🍪 Cookies & ☁️ Cloud Prep</h1>
+                
+                <!-- Tab Controls -->
+                <div class="flex space-x-2 bg-gray-100 p-1 rounded-lg">
+                    <button onclick="switchTab('flashcards')" id="tab-flashcards" class="px-6 py-2 rounded-md text-sm font-medium transition-all duration-200 bg-white text-teal-700 shadow-sm">
+                        Flashcards
+                    </button>
+                    <button onclick="switchTab('quiz')" id="tab-quiz" class="px-6 py-2 rounded-md text-sm font-medium transition-all duration-200 text-gray-500 hover:text-gray-700">
+                        Quiz
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-hidden relative max-w-4xl mx-auto w-full p-4">
+        
+        <!-- FLASHCARD TAB -->
+        <div id="view-flashcards" class="h-full flex flex-col items-center justify-center transition-opacity duration-300">
+            
+            <!-- Progress -->
+            <div class="w-full flex justify-between items-center mb-4 text-sm text-gray-500">
+                <span>Topic: <span id="fc-topic" class="font-bold text-teal-600">General</span></span>
+                <span>Card <span id="fc-current">1</span> of <span id="fc-total">25</span></span>
+            </div>
+
+            <!-- Card Container -->
+            <div class="w-full max-w-2xl h-80 md:h-96 perspective-1000 mb-8">
+                <div class="flashcard-inner" id="flashcard" onclick="flipCard()">
+                    <div class="flashcard-front">
+                        <h2 id="fc-front-text" class="text-2xl md:text-3xl font-bold text-center">Loading...</h2>
+                        <div class="absolute bottom-4 text-xs text-gray-400 uppercase tracking-widest">Tap to Flip</div>
+                    </div>
+                    <div class="flashcard-back">
+                        <p id="fc-back-text" class="text-lg md:text-xl font-medium text-center leading-relaxed">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center gap-4">
+                <button onclick="prevCard()" class="p-4 rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 text-gray-600 transition disabled:opacity-50">
+                    ← Prev
+                </button>
+                <button onclick="flipCard()" class="px-8 py-4 rounded-full bg-teal-600 shadow-lg hover:bg-teal-700 text-white font-bold transition">
+                    Flip Card
+                </button>
+                <button onclick="nextCard()" class="p-4 rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 text-gray-600 transition disabled:opacity-50">
+                    Next →
+                </button>
+            </div>
+            <p class="mt-6 text-xs text-gray-400">Keyboard: Use Left/Right Arrows to navigate, Space to flip.</p>
+        </div>
+
+        <!-- QUIZ TAB -->
+        <div id="view-quiz" class="hidden h-full flex flex-col">
+            <div class="flex-1 overflow-y-auto no-scrollbar pb-20">
+                <div class="max-w-2xl mx-auto space-y-8 py-4" id="quiz-container">
+                    <!-- Questions injected here by JS -->
+                </div>
+                
+                <!-- Result Summary (Hidden initially) -->
+                <div id="quiz-results" class="hidden max-w-2xl mx-auto mt-8 p-6 bg-teal-50 border border-teal-200 rounded-xl text-center">
+                    <h3 class="text-2xl font-bold text-teal-800 mb-2">Quiz Complete!</h3>
+                    <p class="text-lg text-teal-700">You scored <span id="score-display" class="font-bold">0</span> / 10</p>
+                    <button onclick="resetQuiz()" class="mt-4 px-6 py-2 bg-teal-600 text-white rounded shadow hover:bg-teal-700 transition">Retake Quiz</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- DATA: FLASHCARDS (25 Items) ---
+        const flashcardsData = [
+            // Cookies
+            { front: "The main problem HTTP cookies solve", back: "HTTP is stateless; cookies provide a memory mechanism for the server to recognize users across requests.", topic: "Cookies" },
+            { front: "Cookie Lifecycle", back: "Server sends Set-Cookie → Browser stores it → Browser sends Cookie header on subsequent visits → Server reads it.", topic: "Cookies" },
+            { front: "Session Cookies", back: "Temporary cookies that expire immediately when the browser is closed; analogous to a concert wristband.", topic: "Cookies" },
+            { front: "Persistent Cookies", back: "Cookies that survive browser restarts because they have a specific Expiration Date or Max-Age.", topic: "Cookies" },
+            { front: "First-Party Cookies", back: "Cookies set by the domain you are currently visiting, used for logins, preferences, and carts.", topic: "Cookies" },
+            { front: "Third-Party Cookies", back: "Cookies set by a different domain than the one displayed (e.g., ads, analytics) used for cross-site tracking.", topic: "Cookies" },
+            { front: "Secure Flag", back: "A cookie attribute that ensures the cookie is transmitted only over encrypted HTTPS connections.", topic: "Cookies" },
+            { front: "HttpOnly Flag", back: "A security attribute that blocks JavaScript access to the cookie, defending against Cross-Site Scripting (XSS).", topic: "Cookies" },
+            { front: "SameSite Flag", back: "A cookie attribute that controls when cookies are sent with cross-origin requests, defending against CSRF attacks.", topic: "Cookies" },
+            { front: "GDPR Core Cookie Requirement", back: "Explicit user consent is required before storing non-essential cookies.", topic: "Cookies" },
+            { front: "Session Hijacking", back: "An attack where an attacker intercepts a valid session cookie and impersonates the user.", topic: "Cookies" },
+            { front: "XSS (Cross-Site Scripting)", back: "Attack where malicious scripts are injected into web pages; prevented by HttpOnly cookie flag.", topic: "Cookies" },
+            // Cloud
+            { front: "Definition of Cloud Computing (NIST)", back: "On-demand delivery of computing resources over the internet with pay-as-you-go pricing.", topic: "Cloud" },
+            { front: "Rapid Elasticity", back: "A cloud characteristic allowing resources to be scaled up or down in minutes to match demand.", topic: "Cloud" },
+            { front: "Measured Service", back: "Cloud usage is metered, meaning users only pay for the specific resources they consume.", topic: "Cloud" },
+            { front: "CapEx vs. OpEx shift", back: "Moving from upfront Capital Expenditure (buying hardware) to Operational Expenditure (paying for usage).", topic: "Cloud" },
+            { front: "IaaS (Infrastructure as a Service)", back: "You manage OS, apps, and data; provider manages hardware (e.g., AWS EC2).", topic: "Cloud" },
+            { front: "PaaS (Platform as a Service)", back: "You manage apps and data; provider manages OS and hardware (e.g., Google App Engine).", topic: "Cloud" },
+            { front: "SaaS (Software as a Service)", back: "You manage data/settings; provider manages everything (e.g., Gmail, Dropbox).", topic: "Cloud" },
+            { front: "AWS (Amazon Web Services)", back: "Market leader with broadest catalogue; flagship DS service is SageMaker.", topic: "Cloud" },
+            { front: "Microsoft Azure", back: "Strong enterprise integration; flagship DS service is Azure ML Studio.", topic: "Cloud" },
+            { front: "Google Cloud Platform (GCP)", back: "Strengths in analytics/AI; flagship DS services are Vertex AI and BigQuery.", topic: "Cloud" },
+            { front: "Pizza Framework: SaaS Analogy", back: "Dining out: Provider manages venue, cooking, cleaning; you just eat.", topic: "Cloud" },
+            { front: "Cloud benefits for Data Science", back: "Access to scalable GPUs, elastic storage for massive datasets, and collaborative notebooks.", topic: "Cloud" },
+            { front: "Serverless Computing", back: "Running code on demand without managing servers (e.g., AWS Lambda).", topic: "Cloud" }
+        ];
+
+        // --- DATA: QUIZ (10 Items) ---
+        const quizData = [
+            {
+                q: "A user refreshes a shopping cart page and it becomes empty. Why?",
+                options: [
+                    { text: "HTTP is stateless and treats the refresh as a new conversation.", correct: true, rationale: "HTTP has no memory; without cookies, the server sees a stranger." },
+                    { text: "The web server crashed.", correct: false, rationale: "Server crashes cause errors, not necessarily a clean state reset." },
+                    { text: "Internet connection failed.", correct: false, rationale: "Connection failure causes a timeout, not an empty cart." },
+                    { text: "Browser cache cleared.", correct: false, rationale: "Cache stores images/scripts, not session state." }
+                ]
+            },
+            {
+                q: "Which flag prevents XSS attacks from stealing cookies via JavaScript?",
+                options: [
+                    { text: "HttpOnly", correct: true, rationale: "It blocks client-side scripts from accessing document.cookie." },
+                    { text: "Secure", correct: false, rationale: "Secure forces HTTPS, protecting against sniffing, not scripts." },
+                    { text: "SameSite", correct: false, rationale: "SameSite protects against CSRF, not XSS." },
+                    { text: "Persistent", correct: false, rationale: "Persistent refers to lifespan, not security access." }
+                ]
+            },
+            {
+                q: "You close your browser, reopen it, and are still logged in. What cookie type is this?",
+                options: [
+                    { text: "Persistent Cookie", correct: true, rationale: "It has an expiration date, surviving restarts." },
+                    { text: "Session Cookie", correct: false, rationale: "Session cookies die when the browser closes." },
+                    { text: "Third-Party Cookie", correct: false, rationale: "Refers to the domain origin, not lifespan." },
+                    { text: "Secure Cookie", correct: false, rationale: "Refers to encryption, not persistence." }
+                ]
+            },
+            {
+                q: "Moving from buying servers to paying for cloud usage represents which financial shift?",
+                options: [
+                    { text: "CapEx to OpEx", correct: true, rationale: "Capital Expenditure (buying assets) to Operational Expenditure (renting services)." },
+                    { text: "OpEx to CapEx", correct: false, rationale: "This would mean going back to buying hardware." },
+                    { text: "SaaS to IaaS", correct: false, rationale: "This is a technical service model change, not financial." },
+                    { text: "Public to Private", correct: false, rationale: "This is a deployment model change." }
+                ]
+            },
+            {
+                q: "You want to deploy Python code but let the provider manage the OS and hardware. Which model?",
+                options: [
+                    { text: "PaaS", correct: true, rationale: "Platform as a Service manages the runtime/OS, leaving you to manage code." },
+                    { text: "IaaS", correct: false, rationale: "In IaaS, you must manage the OS yourself." },
+                    { text: "SaaS", correct: false, rationale: "In SaaS, you can't usually deploy custom backend code." },
+                    { text: "On-Premises", correct: false, rationale: "You manage everything, including hardware." }
+                ]
+            },
+            {
+                q: "Which cloud characteristic allows automatic scaling during a flash sale?",
+                options: [
+                    { text: "Rapid Elasticity", correct: true, rationale: "The ability to scale resources outward and inward instantly." },
+                    { text: "Measured Service", correct: false, rationale: "This refers to billing/metering." },
+                    { text: "Broad Network Access", correct: false, rationale: "Refers to accessibility over the internet." },
+                    { text: "Resource Pooling", correct: false, rationale: "Refers to multi-tenant sharing." }
+                ]
+            },
+            {
+                q: "Under GDPR, what is required for non-essential tracking cookies?",
+                options: [
+                    { text: "Explicit prior consent", correct: true, rationale: "Users must opt-in before data is collected." },
+                    { text: "Passive notification", correct: false, rationale: "Just telling the user is not enough." },
+                    { text: "Opt-out mechanism", correct: false, rationale: "You cannot set the cookie first and ask later." },
+                    { text: "Encryption", correct: false, rationale: "Security practice, not a legal basis for collection." }
+                ]
+            },
+            {
+                q: "Logging into Salesforce to manage leads is an example of:",
+                options: [
+                    { text: "SaaS", correct: true, rationale: "You are using finished software over the internet." },
+                    { text: "IaaS", correct: false, rationale: "You aren't managing infrastructure." },
+                    { text: "PaaS", correct: false, rationale: "You aren't building an app." },
+                    { text: "On-Premises", correct: false, rationale: "You aren't hosting it yourself." }
+                ]
+            },
+            {
+                q: "Which attribute prevents Cross-Site Request Forgery (CSRF)?",
+                options: [
+                    { text: "SameSite", correct: true, rationale: "Restricts cookies from being sent with cross-site requests." },
+                    { text: "HttpOnly", correct: false, rationale: "Prevents XSS/Script access." },
+                    { text: "Secure", correct: false, rationale: "Prevents sniffing via HTTP." },
+                    { text: "Domain", correct: false, rationale: "Defines scope, doesn't block cross-site triggers specifically." }
+                ]
+            },
+            {
+                q: "Which provider is historically strongest in Data Analytics and AI/ML (BigQuery/Vertex)?",
+                options: [
+                    { text: "GCP (Google)", correct: true, rationale: "Known for data prowess (BigQuery) and AI tools." },
+                    { text: "AWS", correct: false, rationale: "Market leader, but GCP is the analytics niche specialist." },
+                    { text: "Azure", correct: false, rationale: "Strongest in Enterprise/Windows integration." },
+                    { text: "DigitalOcean", correct: false, rationale: "Strongest in developer simplicity." }
+                ]
+            }
+        ];
+
+        // --- APP LOGIC ---
+        let currentCardIndex = 0;
+        let isFlipped = false;
+        let quizScore = 0;
+        let answeredQuestions = new Set();
+
+        // Initialization
+        window.onload = function() {
+            renderFlashcard(0);
+            renderQuiz();
+            
+            // Keyboard nav
+            document.addEventListener('keydown', (e) => {
+                const isFlashcardTab = !document.getElementById('view-flashcards').classList.contains('hidden');
+                if (isFlashcardTab) {
+                    if (e.key === 'ArrowRight') nextCard();
+                    if (e.key === 'ArrowLeft') prevCard();
+                    if (e.key === ' ' || e.key === 'Enter') flipCard();
+                }
+            });
+        };
+
+        // Tab Switching
+        function switchTab(tab) {
+            const btnFlash = document.getElementById('tab-flashcards');
+            const btnQuiz = document.getElementById('tab-quiz');
+            const viewFlash = document.getElementById('view-flashcards');
+            const viewQuiz = document.getElementById('view-quiz');
+
+            if (tab === 'flashcards') {
+                viewFlash.classList.remove('hidden');
+                viewQuiz.classList.add('hidden');
+                
+                btnFlash.classList.add('bg-white', 'text-teal-700', 'shadow-sm');
+                btnFlash.classList.remove('text-gray-500');
+                
+                btnQuiz.classList.remove('bg-white', 'text-teal-700', 'shadow-sm');
+                btnQuiz.classList.add('text-gray-500');
+            } else {
+                viewFlash.classList.add('hidden');
+                viewQuiz.classList.remove('hidden');
+                
+                btnQuiz.classList.add('bg-white', 'text-teal-700', 'shadow-sm');
+                btnQuiz.classList.remove('text-gray-500');
+                
+                btnFlash.classList.remove('bg-white', 'text-teal-700', 'shadow-sm');
+                btnFlash.classList.add('text-gray-500');
+            }
+        }
+
+        // Flashcard Logic
+        function renderFlashcard(index) {
+            const card = flashcardsData[index];
+            const frontEl = document.getElementById('fc-front-text');
+            const backEl = document.getElementById('fc-back-text');
+            const cardInner = document.getElementById('flashcard');
+            
+            // Reset Flip
+            isFlipped = false;
+            cardInner.classList.remove('flipped');
+
+            // Update Content (Delay slightly to hide update during potential flip back)
+            setTimeout(() => {
+                frontEl.innerText = card.front;
+                backEl.innerText = card.back;
+                document.getElementById('fc-topic').innerText = card.topic;
+                document.getElementById('fc-current').innerText = index + 1;
+                document.getElementById('fc-total').innerText = flashcardsData.length;
+            }, 150);
+        }
+
+        function flipCard() {
+            const cardInner = document.getElementById('flashcard');
+            isFlipped = !isFlipped;
+            if(isFlipped) {
+                cardInner.classList.add('flipped');
+            } else {
+                cardInner.classList.remove('flipped');
+            }
+        }
+
+        function nextCard() {
+            if (currentCardIndex < flashcardsData.length - 1) {
+                currentCardIndex++;
+                renderFlashcard(currentCardIndex);
+            }
+        }
+
+        function prevCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                renderFlashcard(currentCardIndex);
+            }
+        }
+
+        // Quiz Logic
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            
+            quizData.forEach((q, index) => {
+                // Shuffle options
+                const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+                
+                let optionsHTML = '';
+                shuffledOptions.forEach((opt, i) => {
+                    optionsHTML += `
+                        <button onclick="checkAnswer(${index}, ${opt.correct}, this, '${opt.rationale.replace(/'/g, "\\'")}')" 
+                                class="quiz-option w-full text-left p-3 border rounded-lg hover:bg-gray-50 transition mb-2" 
+                                data-q="${index}">
+                            ${opt.text}
+                        </button>
+                    `;
+                });
+
+                container.innerHTML += `
+                    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm" id="q-card-${index}">
+                        <h3 class="font-bold text-lg mb-4 text-gray-800"><span class="text-teal-600 mr-2">Q${index+1}.</span> ${q.q}</h3>
+                        <div class="space-y-1">
+                            ${optionsHTML}
+                        </div>
+                        <div id="feedback-${index}" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
+                    </div>
+                `;
+            });
+        }
+
+        function checkAnswer(qIndex, isCorrect, btnElement, rationale) {
+            // Prevent multiple answers
+            if (answeredQuestions.has(qIndex)) return;
+            answeredQuestions.add(qIndex);
+
+            const feedbackEl = document.getElementById(`feedback-${qIndex}`);
+            const cardEl = document.getElementById(`q-card-${qIndex}`);
+            
+            // Visual Updates
+            if (isCorrect) {
+                btnElement.classList.remove('hover:bg-gray-50', 'border-gray-200');
+                btnElement.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                feedbackEl.innerHTML = `<strong>Correct!</strong> ${rationale}`;
+                feedbackEl.classList.add('bg-green-50', 'text-green-800', 'border', 'border-green-200');
+                quizScore++;
+            } else {
+                btnElement.classList.remove('hover:bg-gray-50', 'border-gray-200');
+                btnElement.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+                feedbackEl.innerHTML = `<strong>Incorrect.</strong> ${rationale}`;
+                feedbackEl.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+                
+                // Highlight correct answer
+                const allOpts = cardEl.querySelectorAll('.quiz-option');
+                // Note: We'd need to track which was correct in DOM to highlight it easily, 
+                // but usually showing the rationale is enough for study apps.
+            }
+
+            feedbackEl.classList.remove('hidden');
+
+            // Check if all done
+            if (answeredQuestions.size === quizData.length) {
+                document.getElementById('quiz-results').classList.remove('hidden');
+                document.getElementById('score-display').innerText = quizScore;
+                document.getElementById('quiz-results').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function resetQuiz() {
+            quizScore = 0;
+            answeredQuestions.clear();
+            document.getElementById('quiz-results').classList.add('hidden');
+            renderQuiz();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
+
+
+
