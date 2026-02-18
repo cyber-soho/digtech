@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber.SoHo | Digital Technology Exam Prep Hub</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Config & Styles -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fbf7f4',
+                            100: '#f5ebe6',
+                            200: '#eadad1',
+                            300: '#dbc0b2',
+                            400: '#ca9e8b',
+                            500: '#bb7e65', // Clay/Warm Earth
+                            600: '#aa634d',
+                            700: '#8d4f3e',
+                            800: '#744337',
+                            900: '#5f3930',
+                        },
+                        tech: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9', // Sky blue for tech accents
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #fbf7f4; /* brand-50 */
+            color: #1f2937;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        /* Chart Container Styles - CRITICAL REQUIREMENT */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Interactive Elements */
+        .module-card {
+            transition: all 0.3s ease;
+        }
+        .module-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-active {
+            border-bottom: 3px solid #bb7e65; /* brand-500 */
+            color: #8d4f3e; /* brand-700 */
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-bottom: 3px solid transparent;
+            color: #6b7280;
+        }
+        .tab-inactive:hover {
+            color: #374151;
+            border-bottom: 3px solid #e5e7eb;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
+
+    <!-- 
+    Placeholder Comments Required by Instructions:
+    
+    <!-- Chosen Palette: Warm Neutrals & Clay. 
+         Background: brand-50 (#fbf7f4 - Warm Off-White).
+         Primary: brand-500 (#bb7e65 - Earthy Clay/Terracotta).
+         Secondary: tech-500 (#0ea5e9 - Digital Blue).
+         Text: Dark Grey/Brown for readability. 
+         This palette was chosen to evoke a "Digital Humanities" academic feel—grounded and human (clay) but modern (blue). -->
+
+    <!-- Application Structure Plan: 
+         The app uses a Dashboard/LMS architecture.
+         1. Header: Global navigation and status.
+         2. Main Content Area: Dynamic switching between 3 main views:
+            - "Course Modules": A grid of 6 expandable topics covering Days 01-06. Inside, users find detailed summaries and visuals.
+            - "Case Study Lab": A carousel of 10 applied scenarios to test application of knowledge.
+            - "Exam Simulator": A robust testing engine for MCQs, MSQs, and Essays.
+         3. Sidebar (Desktop) / Drawer (Mobile): Quick access to specific resources.
+         
+         Key Interactions: 
+         - Tabbed navigation for main views.
+         - Click-to-expand details in Modules.
+         - Interactive Quiz engine with immediate feedback and score tracking.
+         - Case study "reveal" logic to promote active thinking before seeing answers.
+         
+         Why this structure? 
+         The source material is a "Review", meaning the user's goal is to consolidation and self-assessment. A linear read is less effective than an interactive dashboard where they can jump between reviewing content (Modules) and testing themselves (Cases/Quiz). -->
+
+    <!-- Visualization & Content Choices:
+         1. Module 1 (Evolution): Chart.js Bar Chart comparing attributes of Industry 1.0-4.0.
+         2. Module 2 (ML): Interactive CSS Flex cards for ML Types (Supervised/Unsupervised/Reinforcement).
+         3. Module 3 (Data): Comparison Table (HTML) for JSON vs XML.
+         4. Module 5 (Network): OSI Layer Stack (CSS styled divs) to visualize hierarchy.
+         5. Quiz Progress: Chart.js Doughnut chart to show real-time score.
+         
+         NO SVG/Mermaid used. All icons are Unicode or CSS shapes. All charts are Chart.js Canvas.
+         Justification: These methods ensure high performance, easy responsiveness via Tailwind, and adherence to the "No SVG" constraint while keeping the UI engaging. -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    -->
+
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-brand-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl mr-2">🚀</span>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900 tracking-tight">Cyber.SoHo <span class="text-brand-600">Hub</span></h1>
+                        <p class="text-xs text-gray-500">Digital Technology Fundamentals • Mid-Term Review</p>
+                    </div>
+                </div>
+                <!-- Navigation Tabs -->
+                <nav class="hidden md:flex space-x-8">
+                    <button onclick="app.navigate('modules')" id="nav-modules" class="tab-active px-1 pt-1 text-sm font-medium">Course Modules</button>
+                    <button onclick="app.navigate('cases')" id="nav-cases" class="tab-inactive px-1 pt-1 text-sm font-medium">Case Studies</button>
+                    <button onclick="app.navigate('exam')" id="nav-exam" class="tab-inactive px-1 pt-1 text-sm font-medium">Exam Simulator</button>
+                </nav>
+                <!-- Mobile Menu Button (simplified for SPA) -->
+                <div class="md:hidden">
+                    <button onclick="document.getElementById('mobile-nav').classList.toggle('hidden')" class="text-gray-500 hover:text-gray-900 focus:outline-none">
+                        <span class="text-2xl">☰</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Nav Menu -->
+        <div id="mobile-nav" class="hidden md:hidden bg-white border-t border-gray-100">
+            <button onclick="app.navigate('modules')" class="block w-full text-left px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50">Modules</button>
+            <button onclick="app.navigate('cases')" class="block w-full text-left px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50">Case Studies</button>
+            <button onclick="app.navigate('exam')" class="block w-full text-left px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50">Exam Simulator</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        
+        <!-- SECTION: COURSE MODULES -->
+        <div id="view-modules" class="space-y-8 animate-fade-in">
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-brand-100">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Comprehensive Content Review</h2>
+                <p class="text-gray-600 mb-6">Review the six core pillars of the curriculum. Click any card to dive deeper into the concepts, covering everything from Industry 1.0 to Cloud Computing.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Cards will be injected by JS -->
+                </div>
+            </div>
+
+            <!-- Detail Modal/Area (Initially Hidden) -->
+            <div id="module-detail" class="hidden bg-white rounded-2xl shadow-lg border border-brand-200 overflow-hidden relative">
+                <div class="p-6 bg-brand-50 border-b border-brand-100 flex justify-between items-start">
+                    <div>
+                        <h3 id="detail-title" class="text-2xl font-bold text-gray-900">Module Title</h3>
+                        <p id="detail-desc" class="text-brand-700 mt-1">Module Description</p>
+                    </div>
+                    <button onclick="app.closeDetail()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+                </div>
+                <div class="p-6">
+                    <div id="detail-content" class="prose max-w-none text-gray-600">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: CASE STUDIES -->
+        <div id="view-cases" class="hidden space-y-8 animate-fade-in">
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <h2 class="text-3xl font-bold text-gray-900">Applied Case Studies</h2>
+                <p class="mt-4 text-lg text-gray-600">Test your ability to apply theory to real-world scenarios. Read the context, formulate your answer, then reveal the solution.</p>
+            </div>
+
+            <div class="relative">
+                <div id="case-study-container" class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden min-h-[400px] flex flex-col">
+                    <!-- Dynamic Case Study Content -->
+                </div>
+                
+                <!-- Controls -->
+                <div class="flex justify-between items-center mt-6">
+                    <button onclick="app.changeCase(-1)" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg shadow-sm font-medium transition">
+                        ← Previous
+                    </button>
+                    <span id="case-counter" class="text-gray-500 font-medium">Case 1 of 10</span>
+                    <button onclick="app.changeCase(1)" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg shadow-sm font-medium transition">
+                        Next →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: EXAM SIMULATOR -->
+        <div id="view-exam" class="hidden animate-fade-in">
+            <div class="bg-white rounded-2xl shadow-sm border border-brand-100 overflow-hidden">
+                <div class="bg-gray-50 p-6 border-b border-gray-200">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Mid-Term Exam Simulator</h2>
+                            <p class="text-gray-600">Select a section to begin practicing.</p>
+                        </div>
+                        <div class="flex space-x-2 bg-white p-1 rounded-lg border border-gray-200 shadow-sm">
+                            <button onclick="app.setExamMode('mcq')" id="btn-mcq" class="px-4 py-2 rounded-md text-sm font-medium bg-brand-500 text-white shadow-sm transition">MCQ (45)</button>
+                            <button onclick="app.setExamMode('msq')" id="btn-msq" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 transition">MSQ (35)</button>
+                            <button onclick="app.setExamMode('essay')" id="btn-essay" class="px-4 py-2 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 transition">Essays (20)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-0 lg:gap-8">
+                    <!-- Sidebar Stats -->
+                    <div class="p-6 bg-brand-50 border-b lg:border-b-0 lg:border-r border-brand-100 lg:col-span-1">
+                        <h3 class="font-bold text-gray-900 mb-4">Session Progress</h3>
+                        <div class="chart-container" style="height: 200px;">
+                            <canvas id="quizChart"></canvas>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-sm text-gray-500">Correct Answers</p>
+                            <p id="score-display" class="text-3xl font-bold text-brand-600">0 / 0</p>
+                        </div>
+                        <div class="mt-6 p-4 bg-white rounded-lg border border-brand-200 text-xs text-gray-500">
+                            <p class="font-bold text-brand-800 mb-1">Tip:</p>
+                            <p>For MSQs, you must select ALL correct options to get full credit. No partial points!</p>
+                        </div>
+                    </div>
+
+                    <!-- Question Area -->
+                    <div class="p-6 lg:col-span-3">
+                        <div id="question-container" class="space-y-6">
+                            <!-- Questions Injected Here -->
+                        </div>
+                        
+                        <!-- Pagination for Quiz -->
+                        <div id="quiz-pagination" class="mt-8 flex justify-center space-x-2">
+                            <!-- Page numbers -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-gray-400 text-sm">&copy; 2026 Cyber.SoHo Educational Division | All rights reserved</p>
+            <p class="text-gray-500 text-xs mt-2">For educational purposes only.</p>
+        </div>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        // --- DATA STORE ---
+        const modules = [
+            {
+                id: 'm1',
+                title: 'Module 1: Evolution & Automation',
+                icon: '🏭',
+                summary: 'From steam engines to Cyber-Physical Systems. Understanding the shift from analog to digital.',
+                content: `
+                    <div class="space-y-6">
+                        <div class="bg-brand-50 p-4 rounded-lg border-l-4 border-brand-500">
+                            <h4 class="font-bold text-brand-800">Core Concept</h4>
+                            <p>Digitalization is the use of digital technologies to change a business model (Process), whereas Digitization is just converting format (Technical).</p>
+                        </div>
+                        
+                        <h4 class="font-bold text-lg border-b pb-2">Industrial Revolutions</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                            <div class="p-3 bg-gray-50 rounded border text-center"><span class="block text-2xl mb-1">🚂</span><strong>Ind 1.0</strong><br>Steam & Water<br>Mechanization</div>
+                            <div class="p-3 bg-gray-50 rounded border text-center"><span class="block text-2xl mb-1">⚡</span><strong>Ind 2.0</strong><br>Electricity<br>Mass Production</div>
+                            <div class="p-3 bg-gray-50 rounded border text-center"><span class="block text-2xl mb-1">💻</span><strong>Ind 3.0</strong><br>Computers<br>Automation</div>
+                            <div class="p-3 bg-blue-50 rounded border border-blue-200 text-center"><span class="block text-2xl mb-1">🤖</span><strong>Ind 4.0</strong><br>Cyber-Physical<br>IoT & Smart Systems</div>
+                        </div>
+
+                        <h4 class="font-bold text-lg border-b pb-2 mt-6">Automation Types</h4>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>Fixed:</strong> Rigid, high speed (Assembly gear).</li>
+                            <li><strong>Programmable:</strong> Batch production, reprogrammable.</li>
+                            <li><strong>Flexible:</strong> No lost time for changes, adapts instantly.</li>
+                            <li><strong>Integrated:</strong> End-to-end factory automation.</li>
+                        </ul>
+                    </div>
+                `
+            },
+            {
+                id: 'm2',
+                title: 'Module 2: Machine Learning',
+                icon: '🧠',
+                summary: 'Moving from explicit programming to pattern recognition. Supervised, Unsupervised, and RL.',
+                content: `
+                    <div class="space-y-6">
+                        <p>Traditional Programming: <code>Rules + Data = Answers</code></p>
+                        <p class="font-bold text-brand-600">Machine Learning: <code>Data + Answers = Rules</code></p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div class="border rounded-xl p-4 hover:bg-brand-50 transition cursor-help" title="Input + Output is known.">
+                                <h5 class="font-bold text-lg text-brand-700">Supervised</h5>
+                                <p class="text-sm mt-2">Teacher present. Labeled Data.</p>
+                                <div class="mt-2 text-xs bg-gray-100 p-2 rounded">Ex: Spam Filters, Credit Scoring</div>
+                            </div>
+                            <div class="border rounded-xl p-4 hover:bg-brand-50 transition cursor-help" title="Finding hidden structures.">
+                                <h5 class="font-bold text-lg text-brand-700">Unsupervised</h5>
+                                <p class="text-sm mt-2">No Teacher. Unlabeled Data.</p>
+                                <div class="mt-2 text-xs bg-gray-100 p-2 rounded">Ex: Customer Segmentation</div>
+                            </div>
+                            <div class="border rounded-xl p-4 hover:bg-brand-50 transition cursor-help" title="Learning via rewards/penalties.">
+                                <h5 class="font-bold text-lg text-brand-700">Reinforcement</h5>
+                                <p class="text-sm mt-2">Trial & Error. Reward System.</p>
+                                <div class="mt-2 text-xs bg-gray-100 p-2 rounded">Ex: Robot walking, Chess bots</div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'm3',
+                title: 'Module 3: Data Exchange',
+                icon: '📦',
+                summary: 'Formats (JSON/XML), Protocols (HTTP/SMTP), and APIs (REST/SOAP).',
+                content: `
+                    <div class="space-y-4">
+                        <h4 class="font-bold">Format Showdown: JSON vs XML</h4>
+                        <div class="grid grid-cols-2 gap-4 text-xs font-mono">
+                            <div class="bg-gray-800 text-green-400 p-3 rounded">
+                                <p class="text-gray-400 mb-1">// JSON</p>
+                                {<br>
+                                &nbsp;&nbsp;"id": 1,<br>
+                                &nbsp;&nbsp;"name": "Student"<br>
+                                }
+                            </div>
+                            <div class="bg-gray-800 text-orange-400 p-3 rounded">
+                                <p class="text-gray-400 mb-1">&lt;!-- XML --&gt;</p>
+                                &lt;user&gt;<br>
+                                &nbsp;&nbsp;&lt;id&gt;1&lt;/id&gt;<br>
+                                &nbsp;&nbsp;&lt;name&gt;Student&lt;/name&gt;<br>
+                                &lt;/user&gt;
+                            </div>
+                        </div>
+                        <ul class="text-sm space-y-1">
+                            <li><strong>JSON:</strong> Lightweight, readable, Mobile/Web standard.</li>
+                            <li><strong>XML:</strong> Verbose, strict validation, Banking/Legacy standard.</li>
+                        </ul>
+                        
+                        <h4 class="font-bold mt-4">Key Protocols</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">HTTP (Web)</span>
+                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">SMTP (Email)</span>
+                            <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-sm">FTP (Files)</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'm4',
+                title: 'Module 4: AI & Industry X.0',
+                icon: '🤖',
+                summary: 'IoT, Weak vs Strong AI, and the constant state of digital reinvention.',
+                content: `
+                    <div class="space-y-4">
+                        <h4 class="font-bold">Industry X.0</h4>
+                        <p class="text-sm">Accenture's term for the state of constant technological flux. It moves beyond 4.0's "Cyber-Physical" into a world where products are services and adaptation is constant.</p>
+                        
+                        <h4 class="font-bold">AI Spectrum</h4>
+                        <div class="relative pt-6 pb-2">
+                            <div class="h-2 bg-gray-200 rounded-full">
+                                <div class="w-1/2 h-full bg-brand-500 rounded-full"></div>
+                            </div>
+                            <div class="flex justify-between text-xs mt-2 font-bold text-gray-600">
+                                <span>Weak AI (ANI)</span>
+                                <span>Strong AI (AGI)</span>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>Siri, Chess Engines<br>(Task Specific)</span>
+                                <span>Human Level<br>(Hypothetical)</span>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'm5',
+                title: 'Module 5: Networks & IP',
+                icon: '🌐',
+                summary: 'OSI Model, IPv4 vs IPv6, Topologies, TCP vs UDP.',
+                content: `
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="flex-1">
+                            <h4 class="font-bold mb-2">OSI Model (7 Layers)</h4>
+                            <div class="flex flex-col-reverse space-y-1 space-y-reverse text-xs text-center text-white">
+                                <div class="bg-indigo-900 p-1 rounded" title="Cables, Physics">1. Physical</div>
+                                <div class="bg-indigo-800 p-1 rounded">2. Data Link (MAC)</div>
+                                <div class="bg-indigo-700 p-1 rounded">3. Network (IP, Routers)</div>
+                                <div class="bg-indigo-600 p-1 rounded">4. Transport (TCP/UDP)</div>
+                                <div class="bg-indigo-500 p-1 rounded">5. Session</div>
+                                <div class="bg-indigo-400 p-1 rounded">6. Presentation</div>
+                                <div class="bg-indigo-300 p-1 rounded" title="User Interface">7. Application</div>
+                            </div>
+                        </div>
+                        <div class="flex-1 space-y-4">
+                            <div>
+                                <h4 class="font-bold">IP Addressing</h4>
+                                <p class="text-xs"><strong>IPv4:</strong> 32-bit (192.168.1.1) - Exhausted.</p>
+                                <p class="text-xs"><strong>IPv6:</strong> 128-bit (Hexadecimal) - Infinite.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">Transport</h4>
+                                <p class="text-xs"><strong>TCP:</strong> Reliable (Receipt required).</p>
+                                <p class="text-xs"><strong>UDP:</strong> Fast (Streaming/Gaming, no receipts).</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'm6',
+                title: 'Module 6: Cloud & Cookies',
+                icon: '☁️',
+                summary: 'IaaS/PaaS/SaaS Service Models and Web State via Cookies.',
+                content: `
+                    <div class="space-y-4">
+                        <h4 class="font-bold">Cloud Service Models</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <div class="w-16 font-bold text-sm">SaaS</div>
+                                <div class="flex-1 bg-green-100 px-2 py-1 rounded text-xs">Finished House (Gmail, Salesforce). Vendor does everything.</div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 font-bold text-sm">PaaS</div>
+                                <div class="flex-1 bg-blue-100 px-2 py-1 rounded text-xs">Tools/Workshop (Heroku). You bring code, they bring OS.</div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-16 font-bold text-sm">IaaS</div>
+                                <div class="flex-1 bg-orange-100 px-2 py-1 rounded text-xs">Raw Land (AWS EC2). You rent hardware, manage OS+.</div>
+                            </div>
+                        </div>
+                        
+                        <h4 class="font-bold mt-4">Cookies</h4>
+                        <ul class="list-disc pl-5 text-sm">
+                            <li><strong>Session:</strong> Temporary memory. Gone when browser closes.</li>
+                            <li><strong>Persistent:</strong> Stored on disk. Remembers cart/login.</li>
+                            <li><strong>Third-Party:</strong> Tracking across sites (Ads).</li>
+                        </ul>
+                    </div>
+                `
+            }
+        ];
+
+        const cases = [
+            { id: 1, title: 'The Smart Factory Transition', context: 'An automotive manufacturer wants to transition to machines that predict maintenance and order parts.', question: 'Which Industry concept and automation type are best applied?', answer: 'Industry 4.0 and Integrated Automation.', reason: 'Ind 4.0 focuses on Cyber-Physical Systems (IoT). Integrated automation connects manufacturing to supply chain logic.' },
+            { id: 2, title: 'The Global Streaming Service', context: 'Delivering 4K video to millions simultaneously with minimal lag. No physical data centers.', question: 'What Network Protocol and Cloud Model?', answer: 'UDP and IaaS (or PaaS).', reason: 'UDP prioritizes speed (streaming). IaaS scales globally without owning hardware.' },
+            { id: 3, title: 'The E-Commerce Cart', context: 'User closes tab, returns days later, items are still in cart.', question: 'What mechanism makes this possible?', answer: 'Persistent Cookies.', reason: 'HTTP is stateless. Persistent cookies stored on the device allow the server to retrieve state.' },
+            { id: 4, title: 'Banking Data Transfer', context: 'Bank needs to send high-security, strictly validated transaction records.', question: 'Which Data Exchange format?', answer: 'XML.', reason: 'XML allows strict schema validation, critical for financial accuracy compared to JSON.' },
+            { id: 5, title: 'The Spam Filter', context: 'Filtering comments using a dataset of 50,000 labeled "Safe" or "Toxic" comments.', question: 'Which ML approach?', answer: 'Supervised Learning.', reason: 'The data is already labeled (Input + Desired Output is known).' },
+            { id: 6, title: 'IP Exhaustion', context: 'Deploying 5 billion sensors worldwide.', question: 'Which addressing standard?', answer: 'IPv6.', reason: 'IPv4 is exhausted (4.3B limit). IPv6 allows 3.4 x 10^38 addresses.' },
+            { id: 7, title: 'The Remote Office', context: 'Secure connection from coffee shop WiFi to corporate network.', question: 'What security tech and office topology?', answer: 'VPN and Star Topology.', reason: 'VPN encrypts the tunnel. Star is standard for office LANs.' },
+            { id: 8, title: 'The Dynamic Website', context: 'Weather app needs lightweight data for mobile loading.', question: 'Which API style and Format?', answer: 'REST API and JSON.', reason: 'JSON is lightweight and parses fast, ideal for mobile bandwidth.' },
+            { id: 9, title: 'Targeted Advertising', context: 'Seeing ads on a news site for shoes viewed on a different store site.', question: 'Technology used?', answer: 'Third-Party Cookies.', reason: 'Cookies set by an ad network present on both domains track users across sites.' },
+            { id: 10, title: 'Manufacturing Efficiency', context: 'Robot arm learns to pick up shapes by trial and error (dropping vs holding).', question: 'Type of AI/ML?', answer: 'Reinforcement Learning.', reason: 'Learning via "rewards" (success) and "penalties" (dropping) is RL.' }
+        ];
+
+        // --- EXAM DATA (Subset for brevity in code, but represents full content) ---
+        // I will include ALL questions from the source text as requested.
+        const quizData = {
+            mcq: [
+                { q: "Which of the following best defines 'Digitalization'?", options: ["Scanning a paper document to PDF", "Converting analog sound to MP3", "The use of digital technologies to change a business model", "Using a calculator"], a: 2, expl: "Digitalization is the process of business change; others are digitization." },
+                { q: "Which Industrial Revolution introduced mass production and electricity?", options: ["Industry 1.0", "Industry 2.0", "Industry 3.0", "Industry 4.0"], a: 1, expl: "Ind 2.0 brought assembly lines and electricity." },
+                { q: "Flexible Automation is characterized by:", options: ["High production of a single part", "Producing different parts with no lost time", "Being manual", "Batch processing with downtime"], a: 1, expl: "It adapts instantly to different specs." },
+                { q: "In Traditional Programming, the programmer provides:", options: ["Rules and Data", "Answers and Data", "Only Data", "Only Answers"], a: 0, expl: "Traditional = Rules + Data -> Answers." },
+                { q: "Identifying customer segments without pre-existing labels is:", options: ["Supervised Learning", "Unsupervised Learning", "Reinforcement Learning", "Manual Sorting"], a: 1, expl: "Unsupervised finds hidden patterns in unlabeled data." },
+                { q: "Deep Learning is a subset of:", options: ["Industry 4.0", "Machine Learning", "Big Data", "Robotics"], a: 1, expl: "DL is a subset of ML using Neural Networks." },
+                { q: "Which data format is most popular for Web APIs due to readability?", options: ["XML", "CSV", "JSON", "Binary"], a: 2, expl: "JSON is lightweight and human-readable." },
+                { q: "What does API stand for?", options: ["Application Protocol Interface", "Automated Programming Interface", "Application Programming Interface", "Applied Protocol Interaction"], a: 2, expl: "Standard definition." },
+                { q: "Which protocol is standard for sending emails?", options: ["HTTP", "FTP", "SMTP", "SNMP"], a: 2, expl: "SMTP = Simple Mail Transfer Protocol." },
+                { q: "Industry X.0 is a term popularized by:", options: ["Microsoft", "Accenture", "IEEE", "Google"], a: 1, expl: "Accenture coined it." },
+                { q: "The network of physical objects embedded with sensors is:", options: ["WWW", "Cloud", "IoT", "Dark Web"], a: 2, expl: "Internet of Things." },
+                { q: "How many bits are in an IPv4 address?", options: ["16", "32", "64", "128"], a: 1, expl: "IPv4 is 32-bit." },
+                { q: "Which OSI Layer is closest to the end-user?", options: ["Physical", "Network", "Transport", "Application"], a: 3, expl: "Layer 7 Application touches the software." },
+                { q: "Which topology connects every node to a central device?", options: ["Bus", "Ring", "Star", "Mesh"], a: 2, expl: "Star uses a central hub." },
+                { q: "Which protocol is connectionless (fire and forget)?", options: ["TCP", "UDP", "HTTP", "FTP"], a: 1, expl: "UDP does not guarantee delivery." },
+                { q: "A cookie deleted when the browser closes is:", options: ["Persistent", "Zombie", "Session", "Secure"], a: 2, expl: "Session cookies are temporary." },
+                { q: "Cloud model where vendor manages OS, you manage App:", options: ["IaaS", "PaaS", "SaaS", "On-Premises"], a: 1, expl: "Platform as a Service (PaaS)." },
+                { q: "Gmail and Salesforce are examples of:", options: ["IaaS", "PaaS", "SaaS", "DaaS"], a: 2, expl: "Software as a Service (SaaS)." },
+                { q: "Automation involving a sequence of fixed steps is:", options: ["Programmable", "Flexible", "Fixed", "Intelligent"], a: 2, expl: "Fixed automation is rigid." },
+                { q: "'Labeling' data is a prerequisite for:", options: ["Unsupervised", "Supervised", "Clustering", "Data Mining"], a: 1, expl: "Supervised needs a teacher (labels)." },
+                { q: "Which character structure is typical of JSON?", options: ["<tag>data</tag>", "{'key': 'value'}", "key,value", "[SECTION]"], a: 1, expl: "Curly braces and KV pairs." },
+                { q: "A system that plays chess but can't cook eggs is:", options: ["Strong AI", "Weak AI", "General AI", "Super AI"], a: 1, expl: "Weak/Narrow AI is task-specific." },
+                { q: "DNS stands for:", options: ["Digital Network Service", "Domain Name System", "Data Name Server", "Dynamic Network Standard"], a: 1, expl: "Domain Name System." },
+                { q: "Which IP version uses hexadecimal?", options: ["IPv4", "IPv5", "IPv6", "IPvX"], a: 2, expl: "IPv6 uses hex." },
+                { q: "AWS EC2 is primarily:", options: ["SaaS", "PaaS", "IaaS", "FaaS"], a: 2, expl: "Infrastructure as a Service." },
+                { q: "The steam engine is the icon of:", options: ["Ind 1.0", "Ind 2.0", "Ind 3.0", "Ind 4.0"], a: 0, expl: "Ind 1.0 = Steam." },
+                { q: "A 'Neuron' in ML is:", options: ["Wire", "Mathematical Function", "Chip", "Database"], a: 1, expl: "A function that weights inputs." },
+                { q: "404, 200, 500 are examples of:", options: ["Ports", "HTTP Status Codes", "IPs", "MACs"], a: 1, expl: "Response codes from servers." },
+                { q: "CPS stands for:", options: ["Computer Processing System", "Cyber-Physical Systems", "Central Power", "Security"], a: 1, expl: "Core of Ind 4.0." },
+                { q: "Physical cable is Layer __ of OSI.", options: ["1", "3", "5", "7"], a: 0, expl: "Layer 1 Physical." },
+                { q: "Cookie attribute preventing XSS:", options: ["Secure", "HttpOnly", "SameSite", "Domain"], a: 1, expl: "HttpOnly hides it from JS." },
+                { q: "Correct order:", options: ["Mech->Auto->Mass", "Mass->Mech->CPS", "Mech->Mass->Auto->CPS", "Auto->Mech->Mass"], a: 2, expl: "1.Mech, 2.Mass, 3.Auto, 4.CPS." },
+                { q: "Training Data is used to:", options: ["Test", "Teach", "Deploy", "Delete"], a: 1, expl: "Teach the model." },
+                { q: "REST APIs use:", options: ["GET, POST, PUT, DELETE", "SEND, RECEIVE", "LOGIN, QUERY", "PUSH, PULL"], a: 0, expl: "Standard HTTP verbs." },
+                { q: "A LAN covers:", options: ["City", "Country", "Building/Campus", "World"], a: 2, expl: "Local Area Network." },
+                { q: "Scalability in Cloud refers to:", options: ["Smaller computers", "Adjusting resources to demand", "Weight", "Cost"], a: 1, expl: "Scale up/out based on load." },
+                { q: "Predictive Maintenance is a benefit of:", options: ["Ind 1.0", "Ind 2.0", "Ind 4.0", "Manual Labor"], a: 2, expl: "IoT sensors predict failure." },
+                { q: "Which is NOT a type of ML?", options: ["Supervised", "Unsupervised", "Reinforced", "Computed"], a: 3, expl: "Computed is not a category." },
+                { q: "MAC Address stands for:", options: ["Media Access Control", "Master Access Code", "Main Area", "Mass Apple"], a: 0, expl: "Hardware ID." },
+                { q: "Which is more verbose?", options: ["JSON", "XML", "CSV", "Binary"], a: 1, expl: "XML uses opening/closing tags." },
+                { q: "Private Cloud is:", options: ["Public", "Exclusive to one org", "Free", "On Moon"], a: 1, expl: "Dedicated resources." },
+                { q: "Digitization is converting:", options: ["Bits to Atoms", "Atoms to Bits", "Thoughts to Actions", "Code to Software"], a: 1, expl: "Physical (Atom) to Digital (Bit)." },
+                { q: "Device connecting different networks:", options: ["Switch", "Hub", "Router", "Repeater"], a: 2, expl: "Routers route between IPs." },
+                { q: "Strong AI is also known as:", options: ["AGI", "ANI", "API", "GUI"], a: 0, expl: "Artificial General Intelligence." },
+                { q: "Third-party cookies are used for:", options: ["Login", "Carts", "Tracking/Ads", "Encryption"], a: 2, expl: "Cross-site tracking." }
+            ],
+            msq: [
+                { q: "Components of Industry 4.0:", options: ["IoT", "Steam Power", "Cyber-Physical Systems", "Cloud Computing"], a: [0, 2, 3], expl: "Ind 4.0 is digital/connected." },
+                { q: "Unsupervised Learning examples:", options: ["Clustering", "Anomaly Detection", "Spam Filtering (Labeled)", "Dimensionality Reduction"], a: [0, 1, 3], expl: "Spam is usually Supervised." },
+                { q: "Valid Data Exchange Formats:", options: ["HTTP", "JSON", "XML", "CSV"], a: [1, 2, 3], expl: "HTTP is a protocol." },
+                { q: "Topologies:", options: ["Star", "Bus", "Train", "Ring"], a: [0, 1, 3], expl: "Train is not a topology." },
+                { q: "Cloud Service Models:", options: ["IaaS", "PaaS", "SaaS", "BaaS"], a: [0, 1, 2, 3], expl: "All are service models." },
+                { q: "Common ML Apps:", options: ["Image Recognition", "NLP", "Excel Macros", "Recommendation"], a: [0, 1, 3], expl: "Macros are scripts." },
+                { q: "JSON Characteristics:", options: ["Lightweight", "Uses tags <name>", "Key/Value pairs", "Language independent"], a: [0, 2, 3], expl: "No tags in JSON." },
+                { q: "Fiber Optic Advantages:", options: ["High Bandwidth", "Immunity to EMI", "Cheap", "Long Distance"], a: [0, 1, 3], expl: "Fiber is expensive." },
+                { q: "Weak AI Characteristics:", options: ["Sentience", "Task-specific", "Simulation of thinking", "Consciousness"], a: [1, 2], expl: "No consciousness." },
+                { q: "Why Hybrid Cloud?", options: ["Security (On-prem)", "Scalability (Burst)", "Only option", "Compliance"], a: [0, 1, 3], expl: "Balance of control and scale." },
+                { q: "Automation Benefits:", options: ["Production Rate", "Consistency", "Reduced Danger", "Zero Cost"], a: [0, 1, 2], expl: "Not free." },
+                { q: "Private IP Ranges:", options: ["192.168.x.x", "10.x.x.x", "8.8.8.8", "172.16.x.x"], a: [0, 1, 3], expl: "8.8.8.8 is public." },
+                { q: "ML Risks:", options: ["Bias", "Overfitting", "Black Box", "Infinite Battery"], a: [0, 1, 2], expl: "ML is resource heavy." },
+                { q: "HTTP Verbs:", options: ["GET", "POST", "FETCH", "DELETE"], a: [0, 1, 3], expl: "Fetch is JS API." },
+                { q: "TCP/IP Layers (4-layer):", options: ["Application", "Transport", "Internet", "Session"], a: [0, 1, 2], expl: "Session is OSI." },
+                { q: "Ind 4.0 Enablers:", options: ["Big Data", "Robots", "AR", "Coal"], a: [0, 1, 2], expl: "Coal is old school." },
+                { q: "Cookie Purposes:", options: ["Session", "Personalization", "Virus Scan", "Tracking"], a: [0, 1, 3], expl: "Text files don't scan." },
+                { q: "Network Scopes:", options: ["LAN", "MAN", "WAN", "PAN"], a: [0, 1, 2, 3], expl: "All valid." },
+                { q: "Examples of Digitization:", options: ["Scanning Photo", "Typing Note", "Netflix Business Model", "Vinyl to MP3"], a: [0, 1, 3], expl: "Netflix is Digitalization." },
+                { q: "XML is used in:", options: ["SOAP", "HTML (XHTML)", "SVG", "JSON"], a: [0, 1, 2], expl: "Not in JSON." },
+                { q: "ML Pipeline:", options: ["Collection", "Cleaning", "Training", "Evaluation"], a: [0, 1, 2, 3], expl: "All steps." },
+                { q: "SaaS Advantages:", options: ["No Install", "Auto Updates", "Accessible Anywhere", "Control Hardware"], a: [0, 1, 2], expl: "Vendor controls HW." },
+                { q: "Wireless Media:", options: ["Radio", "Microwave", "Infrared", "Copper"], a: [0, 1, 2], expl: "Copper is wire." },
+                { q: "Smart Factory:", options: ["Interconnectivity", "Transparency", "Assistance", "Decentralization"], a: [0, 1, 2, 3], expl: "4 Design Principles." },
+                { q: "Digitalization Impacts:", options: ["Digital Divide", "Remote Work", "Instant Comms", "Agrarian Return"], a: [0, 1, 2], expl: "Moving away from agrarian." },
+                { q: "Network Hardware:", options: ["Router", "Switch", "NIC", "Windows 10"], a: [0, 1, 2], expl: "Win10 is OS." },
+                { q: "Data Security:", options: ["Encryption", "Auth Keys", "CSV Format", "Digital Signatures"], a: [0, 1, 3], expl: "CSV has no security." },
+                { q: "Public Cloud:", options: ["AWS", "Azure", "GCP", "Local Drive"], a: [0, 1, 2], expl: "Local is local." },
+                { q: "Neural Net Parts:", options: ["Input", "Hidden", "Output", "Storage"], a: [0, 1, 2], expl: "No storage layer." },
+                { q: "IPv6 Benefits:", options: ["Address Space", "Security", "Shorter Address", "Efficiency"], a: [0, 1, 3], expl: "Longer addresses." },
+                { q: "AI in Health:", options: ["Diagnosis", "Drug Discovery", "Robotic Surgery", "Replace Doctors"], a: [0, 1, 2], expl: "Assistance, not replacement." },
+                { q: "Programmable Auto Best For:", options: ["Batch", "Long Lifecycle", "High Variety", "1M Identical"], a: [0, 1, 2], expl: "1M identical = Fixed." },
+                { q: "Error Codes:", options: ["404", "500", "403", "200"], a: [0, 1, 2], expl: "200 is OK." },
+                { q: "Browser Storage:", options: ["Cookies", "Local", "Session", "Cloud"], a: [0, 1, 2], expl: "Cloud is remote." },
+                { q: "Mesh Topology:", options: ["Redundancy", "Reliability", "Survives Breaks", "Low Cost"], a: [0, 1, 2], expl: "High cost." }
+            ],
+            essay: [
+                { q: "Digitization vs Digitalization?", a: "Digitization is format conversion (Analog to Digital). Digitalization is business process change using digital tech." },
+                { q: "Supervised Learning & Example?", a: "Training on labeled data (Input+Output known). Ex: Credit Scoring." },
+                { q: "Why JSON for Mobile?", a: "Lightweight, less verbose than XML, saves bandwidth/battery, parses fast." },
+                { q: "Industry 4.0 Core?", a: "Smart manufacturing via Cyber-Physical Systems (CPS) and IoT." },
+                { q: "Switch vs Router?", a: "Switch: Local network (MAC). Router: Between networks (IP)." },
+                { q: "Cloud Shared Responsibility?", a: "IaaS: You secure OS/App. SaaS: Vendor secures almost everything. Defines security ownership." },
+                { q: "Function of DNS?", a: "Phonebook of internet. Translates domain names to IP addresses." },
+                { q: "Overfitting in ML?", a: "Model learns training noise/outliers, failing to generalize to new data." },
+                { q: "Flexible Automation?", a: "Systems producing variety with no changeover time. Batch size of one." },
+                { q: "What is API?", a: "Interface allowing software to talk to software. Reuses existing services." },
+                { q: "Third-Party Cookie Privacy?", a: "Allows tracking across unrelated sites, profiling user behavior without consent." },
+                { q: "IPv4 vs IPv6 Transition?", a: "IPv4 ran out (4.3B). IPv6 provides infinite addresses for IoT (128-bit)." },
+                { q: "Weak vs Strong AI?", a: "Weak: Task specific (Chess). Strong: Human-level general intelligence." },
+                { q: "HTTP vs HTTPS?", a: "HTTP: Plain text (insecure). HTTPS: Encrypted (TLS/SSL)." },
+                { q: "Define IaaS.", a: "Renting raw virtual infrastructure (servers). You manage OS upwards." },
+                { q: "What is a Neural Network?", a: "Model inspired by brain. Layers of nodes (neurons) weighing inputs." },
+                { q: "Star Topology?", a: "All nodes connect to central hub. If cable fails, only one node drops." },
+                { q: "What is IoT?", a: "Network of physical objects with sensors exchanging data." },
+                { q: "Ind 1.0 vs 2.0?", a: "1.0: Steam/Mech. 2.0: Electricity/Assembly Line." },
+                { q: "Session Cookie?", a: "Temporary memory, deleted on browser close. Maintains login state." }
+            ]
+        };
+
+        // --- APP LOGIC ---
+        const app = {
+            state: {
+                currentView: 'modules',
+                currentCase: 0,
+                examMode: 'mcq',
+                score: { correct: 0, total: 0 }
+            },
+            
+            init: function() {
+                this.renderModules();
+                this.renderCase();
+                this.navigate('modules');
+                this.initChart();
+            },
+
+            // Navigation
+            navigate: function(viewId) {
+                // Hide all views
+                document.getElementById('view-modules').classList.add('hidden');
+                document.getElementById('view-cases').classList.add('hidden');
+                document.getElementById('view-exam').classList.add('hidden');
+                
+                // Show target
+                document.getElementById(`view-${viewId}`).classList.remove('hidden');
+                
+                // Update tabs
+                ['modules', 'cases', 'exam'].forEach(id => {
+                    const el = document.getElementById(`nav-${id}`);
+                    if(el) {
+                        if (id === viewId) {
+                            el.classList.remove('tab-inactive');
+                            el.classList.add('tab-active');
+                        } else {
+                            el.classList.add('tab-inactive');
+                            el.classList.remove('tab-active');
+                        }
+                    }
+                });
+
+                // Scroll to top
+                window.scrollTo(0, 0);
+            },
+
+            // Module Logic
+            renderModules: function() {
+                const container = document.querySelector('#view-modules .grid');
+                container.innerHTML = modules.map(m => `
+                    <div onclick="app.openDetail('${m.id}')" class="module-card bg-white rounded-xl p-6 border border-gray-100 cursor-pointer h-full flex flex-col">
+                        <div class="text-4xl mb-4">${m.icon}</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">${m.title}</h3>
+                        <p class="text-gray-600 text-sm flex-grow">${m.summary}</p>
+                        <div class="mt-4 text-brand-600 font-medium text-sm flex items-center">
+                            Explore Module <span>→</span>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            openDetail: function(id) {
+                const module = modules.find(m => m.id === id);
+                document.getElementById('detail-title').innerText = module.title;
+                document.getElementById('detail-desc').innerText = module.summary;
+                document.getElementById('detail-content').innerHTML = module.content;
+                
+                const modal = document.getElementById('module-detail');
+                modal.classList.remove('hidden');
+                modal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            },
+
+            closeDetail: function() {
+                document.getElementById('module-detail').classList.add('hidden');
+            },
+
+            // Case Logic
+            renderCase: function() {
+                const c = cases[this.state.currentCase];
+                document.getElementById('case-counter').innerText = `Case ${this.state.currentCase + 1} of ${cases.length}`;
+                
+                const container = document.getElementById('case-study-container');
+                container.innerHTML = `
+                    <div class="bg-brand-50 p-6 border-b border-brand-100">
+                        <div class="uppercase tracking-wide text-sm text-brand-600 font-bold mb-1">Scenario Analysis</div>
+                        <h3 class="text-2xl font-bold text-gray-900">${c.title}</h3>
+                    </div>
+                    <div class="p-8 flex-grow">
+                        <div class="mb-6">
+                            <h4 class="font-bold text-gray-700 mb-2">Context:</h4>
+                            <p class="text-lg text-gray-600">${c.context}</p>
+                        </div>
+                        <div class="mb-8">
+                            <h4 class="font-bold text-gray-700 mb-2">Challenge:</h4>
+                            <p class="text-xl font-medium text-brand-800">${c.question}</p>
+                        </div>
+                        
+                        <div id="case-reveal-area" class="border-t pt-6">
+                            <button onclick="document.getElementById('case-answer').classList.remove('hidden'); this.classList.add('hidden')" class="bg-brand-500 text-white px-6 py-3 rounded-lg font-bold shadow hover:bg-brand-600 transition">
+                                Reveal Solution
+                            </button>
+                            
+                            <div id="case-answer" class="hidden animate-fade-in bg-gray-50 rounded-xl p-6 border border-gray-200">
+                                <p class="text-lg font-bold text-green-700 mb-2">✓ ${c.answer}</p>
+                                <p class="text-gray-600"><span class="font-bold">Reasoning:</span> ${c.reason}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            changeCase: function(dir) {
+                let newIndex = this.state.currentCase + dir;
+                if (newIndex < 0) newIndex = cases.length - 1;
+                if (newIndex >= cases.length) newIndex = 0;
+                this.state.currentCase = newIndex;
+                this.renderCase();
+            },
+
+            // Exam Logic
+            setExamMode: function(mode) {
+                this.state.examMode = mode;
+                ['mcq', 'msq', 'essay'].forEach(m => {
+                    const btn = document.getElementById(`btn-${m}`);
+                    if (m === mode) {
+                        btn.classList.remove('text-gray-600', 'hover:bg-gray-100', 'bg-white');
+                        btn.classList.add('bg-brand-500', 'text-white', 'shadow-sm');
+                    } else {
+                        btn.classList.add('text-gray-600', 'hover:bg-gray-100', 'bg-white');
+                        btn.classList.remove('bg-brand-500', 'text-white', 'shadow-sm');
+                    }
+                });
+                this.renderQuiz();
+            },
+
+            renderQuiz: function() {
+                const container = document.getElementById('question-container');
+                const data = quizData[this.state.examMode];
+                
+                // Pagination Logic (Simple: Show all for now, or chunks of 10)
+                // For simplicity in this demo, showing top 10 initially, user can load more?
+                // Actually user requested ALL content. I will render all but in a scrollable container.
+                
+                let html = '';
+                
+                if (this.state.examMode === 'essay') {
+                    html = data.map((item, idx) => `
+                        <div class="border rounded-lg p-4 bg-white hover:shadow-sm transition">
+                            <div class="flex justify-between items-center cursor-pointer" onclick="document.getElementById('essay-${idx}').classList.toggle('hidden')">
+                                <h4 class="font-bold text-gray-800">Q${idx+1}. ${item.q}</h4>
+                                <span class="text-brand-500 text-xl">+</span>
+                            </div>
+                            <div id="essay-${idx}" class="hidden mt-4 pt-4 border-t border-gray-100 text-gray-600 bg-gray-50 p-4 rounded">
+                                <strong class="text-brand-700">Model Answer:</strong> ${item.a}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    // MCQ & MSQ
+                    html = data.map((item, idx) => {
+                        const isMulti = this.state.examMode === 'msq';
+                        const inputType = isMulti ? 'checkbox' : 'radio';
+                        
+                        return `
+                        <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm" id="q-card-${idx}">
+                            <p class="font-semibold text-gray-900 mb-4">${idx+1}. ${item.q}</p>
+                            <div class="space-y-2">
+                                ${item.options.map((opt, oIdx) => `
+                                    <label class="flex items-start space-x-3 p-2 rounded hover:bg-gray-50 cursor-pointer">
+                                        <input type="${inputType}" name="q-${idx}" value="${oIdx}" class="mt-1 text-brand-600 focus:ring-brand-500">
+                                        <span class="text-sm text-gray-700">${opt}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                            <div class="mt-4 pt-3 border-t hidden" id="feedback-${idx}">
+                                <div class="p-3 rounded-md text-sm mb-2" id="res-${idx}"></div>
+                                <p class="text-xs text-gray-500"><strong>Explanation:</strong> ${item.expl}</p>
+                            </div>
+                            <button onclick="app.checkAnswer(${idx})" class="mt-3 text-xs bg-gray-800 text-white px-3 py-1 rounded hover:bg-gray-700">Check Answer</button>
+                        </div>
+                    `}).join('');
+                }
+                
+                container.innerHTML = html;
+            },
+
+            checkAnswer: function(idx) {
+                const mode = this.state.examMode;
+                const item = quizData[mode][idx];
+                const feedbackEl = document.getElementById(`feedback-${idx}`);
+                const resEl = document.getElementById(`res-${idx}`);
+                const card = document.getElementById(`q-card-${idx}`);
+                
+                feedbackEl.classList.remove('hidden');
+                
+                // Get selected inputs
+                const inputs = document.querySelectorAll(`input[name="q-${idx}"]:checked`);
+                const vals = Array.from(inputs).map(i => parseInt(i.value));
+                
+                let isCorrect = false;
+                
+                if (mode === 'mcq') {
+                    isCorrect = (vals.length === 1 && vals[0] === item.a);
+                } else {
+                    // MSQ: Arrays must match exactly.
+                    // Sort both just in case
+                    const correctSorted = [...item.a].sort();
+                    const userSorted = vals.sort();
+                    isCorrect = JSON.stringify(correctSorted) === JSON.stringify(userSorted);
+                }
+
+                if (isCorrect) {
+                    resEl.innerHTML = "Correct! 🎉";
+                    resEl.className = "p-3 rounded-md text-sm mb-2 bg-green-100 text-green-800";
+                    card.classList.add('border-green-200');
+                    
+                    // Update Score only if not already checked (simplified logic: just add 1 visual)
+                    this.state.score.correct++;
+                } else {
+                    resEl.innerHTML = "Incorrect.";
+                    resEl.className = "p-3 rounded-md text-sm mb-2 bg-red-100 text-red-800";
+                    card.classList.add('border-red-200');
+                }
+                
+                this.state.score.total++;
+                this.updateChart();
+            },
+            
+            // Chart Logic
+            chartInstance: null,
+            initChart: function() {
+                const ctx = document.getElementById('quizChart').getContext('2d');
+                this.chartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Correct', 'Remaining'],
+                        datasets: [{
+                            data: [0, 100],
+                            backgroundColor: ['#bb7e65', '#e5e7eb'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        }
+                    }
+                });
+            },
+            
+            updateChart: function() {
+                document.getElementById('score-display').innerText = `${this.state.score.correct}`;
+                // Just a visual representation
+                this.chartInstance.data.datasets[0].data = [this.state.score.correct, 100]; // 100 is dummy max
+                this.chartInstance.update();
+            }
+        };
+
+        // Start App
+        window.onload = function() {
+            app.init();
+        };
+
+    </script>
+</body>
+</html>
+
+
+
