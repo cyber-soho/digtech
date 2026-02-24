@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Business Cases | Graduate Program</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f4; /* Stone-100 */
+            color: #1c1917; /* Stone-900 */
+        }
+
+        /* Chart Container Strict Styling */
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            height: 300px;
+            max-height: 400px;
+            margin: 0 auto;
+        }
+
+        .chart-wrapper-small {
+            height: 200px;
+        }
+
+        /* Custom Scrollbar for dashboard feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e7e5e4;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #a8a29e;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #78716c;
+        }
+
+        .interactive-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .interactive-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-active {
+            border-bottom: 2px solid #0f766e; /* Teal-700 */
+            color: #0f766e;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            color: #57534e; /* Stone-600 */
+        }
+        .tab-inactive:hover {
+            color: #1c1917;
+        }
+        
+        .stage-connector::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -1rem;
+            width: 1rem;
+            height: 2px;
+            background-color: #d6d3d1;
+            z-index: 0;
+        }
+        .stage-connector:last-child::after {
+            display: none;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals (Stone) with Teal (Data/Success), Amber (Warning), and Indigo (Tech) accents. -->
+    <!-- Application Structure Plan: 
+         1. Hero: Overview of the 5 companies and the core thesis (Data as Asset).
+         2. The Factory: Interactive visualization of the 6-Stage McKinsey Value Chain.
+         3. The Control Room (Main Interaction): A tabbed dashboard allowing deep dives into each of the 5 companies.
+            - Amazon: Revenue vs Profit paradox charts.
+            - Netflix: Recommendation metrics & impact.
+            - Google: Interactive GSP Auction simulator.
+            - Uber: Dynamic Pricing simulator (slider inputs).
+            - Airbnb: Network effects loop.
+         4. Analytics Center: Cross-company KPI comparison and Data Scientist career path/salary data.
+         5. Future Trends: Card-based summary of emerging technologies.
+         Rationale: This structure moves from theory (Value Chain) to application (Company Cases) to analysis (Metrics/Career), mirroring the graduate program's learning journey.
+    -->
+    <!-- Visualization & Content Choices:
+         - Amazon: Pie vs Bar chart to show the "AWS Paradox" (Revenue share vs Profit share). Goal: Inform/Startle.
+         - Google: Bar chart updating in real-time based on user bid inputs. Goal: Demonstrate GSP mechanism.
+         - Uber: Line chart or Gauge showing price surge relative to Demand/Supply ratio. Goal: Explain dynamic pricing logic.
+         - Career: Horizontal Bar chart for salary premiums. Goal: Compare skills.
+         - Logic: JS handles all math (auctions, surge pricing) and updates Chart.js instances.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="antialiased selection:bg-teal-100 selection:text-teal-900">
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-stone-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-stone-800 tracking-tight">Cyber.SoHo | <span class="text-teal-700 font-normal">Digital Science</span></span>
+                </div>
+                <div class="hidden sm:flex items-center space-x-8">
+                    <a href="#pipeline" class="text-stone-600 hover:text-stone-900 text-sm font-medium">The Pipeline</a>
+                    <a href="#cases" class="text-stone-600 hover:text-stone-900 text-sm font-medium">Company Cases</a>
+                    <a href="#analytics" class="text-stone-600 hover:text-stone-900 text-sm font-medium">Analytics & Careers</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-stone-50 py-12 border-b border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <span class="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-xs font-semibold uppercase tracking-wide mb-4">Graduate Program Module</span>
+            <h1 class="text-4xl font-extrabold text-stone-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
+                Leading Digital Company <br> Business Cases
+            </h1>
+            <p class="mt-5 max-w-2xl mx-auto text-xl text-stone-500">
+                Understanding how Amazon, Google, Netflix, Uber, and Airbnb turn data into a strategic moat.
+            </p>
+            <div class="mt-8 flex justify-center gap-4 text-sm text-stone-400">
+                <span>&#10003; Data Flywheels</span>
+                <span>&#10003; Platform Economics</span>
+                <span>&#10003; ML Production</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 1: The Value Chain (McKinsey Framework) -->
+    <section id="pipeline" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 text-center">
+                <h2 class="text-3xl font-bold text-stone-900">The Digital Value Chain</h2>
+                <p class="mt-2 text-stone-600 max-w-3xl mx-auto">
+                    Every digital company follows a 6-stage pipeline to convert raw data into business value. Click a stage to explore its components.
+                </p>
+            </div>
+
+            <!-- Interactive Pipeline Diagram -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+                <button onclick="updatePipeline(0)" class="stage-btn p-4 rounded-lg bg-stone-100 hover:bg-teal-50 border border-stone-200 hover:border-teal-300 transition text-left group focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <div class="text-xs text-stone-400 font-mono mb-1">01</div>
+                    <div class="font-bold text-stone-800 group-hover:text-teal-700">Collection</div>
+                </button>
+                <button onclick="updatePipeline(1)" class="stage-btn p-4 rounded-lg bg-stone-100 hover:bg-teal-50 border border-stone-200 hover:border-teal-300 transition text-left group focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <div class="text-xs text-stone-400 font-mono mb-1">02</div>
+                    <div class="font-bold text-stone-800 group-hover:text-teal-700">Storage</div>
+                </button>
+                <button onclick="updatePipeline(2)" class="stage-btn p-4 rounded-lg bg-stone-100 hover:bg-teal-50 border border-stone-200 hover:border-teal-300 transition text-left group focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <div class="text-xs text-stone-400 font-mono mb-1">03</div>
+                    <div class="font-bold text-stone-800 group-hover:text-teal-700">Processing</div>
+                </button>
+                <button onclick="updatePipeline(3)" class="stage-btn p-4 rounded-lg bg-stone-100 hover:bg-teal-50 border border-stone-200 hover:border-teal-300 transition text-left group focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <div class="text-xs text-stone-400 font-mono mb-1">04</div>
+                    <div class="font-bold text-stone-800 group-hover:text-teal-700">Modeling</div>
+                </button>
+                <button onclick="updatePipeline(4)" class="stage-btn p-4 rounded-lg bg-stone-100 hover:bg-teal-50 border border-stone-200 hover:border-teal-300 transition text-left group focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <div class="text-xs text-stone-400 font-mono mb-1">05</div>
+                    <div class="font-bold text-stone-800 group-hover:text-teal-700">Deployment</div>
+                </button>
+                <button onclick="updatePipeline(5)" class="stage-btn p-4 rounded-lg bg-stone-100 hover:bg-teal-50 border border-stone-200 hover:border-teal-300 transition text-left group focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <div class="text-xs text-stone-400 font-mono mb-1">06</div>
+                    <div class="font-bold text-stone-800 group-hover:text-teal-700">Value</div>
+                </button>
+            </div>
+
+            <!-- Pipeline Detail View -->
+            <div class="bg-stone-900 rounded-xl p-8 text-white shadow-lg relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <span class="text-9xl font-bold" id="pipeline-bg-num">1</span>
+                </div>
+                <h3 class="text-2xl font-bold mb-4 text-teal-400" id="pipeline-title">Data Collection</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="text-sm uppercase tracking-wider text-stone-400 mb-2">Key Activities</h4>
+                        <ul class="space-y-2" id="pipeline-activities">
+                            <li class="flex items-start"><span class="text-teal-500 mr-2">&#8227;</span> Raw events from interactions</li>
+                            <li class="flex items-start"><span class="text-teal-500 mr-2">&#8227;</span> Streaming vs Batch collection</li>
+                        </ul>
+                    </div>
+                    <div class="bg-stone-800 p-4 rounded border-l-4 border-teal-500">
+                        <h4 class="text-sm font-bold text-stone-300 mb-1">Why it matters</h4>
+                        <p class="text-stone-400 text-sm italic" id="pipeline-insight">Garbage in, garbage out. The quality of your raw data limits the potential of your AI models.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: The Control Room (Company Deep Dives) -->
+    <section id="cases" class="py-16 bg-stone-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-900">Business Model Control Room</h2>
+                <p class="mt-2 text-stone-600">
+                    Select a tech giant to analyze their data strategy, economic engines, and algorithms.
+                </p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex flex-wrap border-b border-stone-300 mb-8 gap-x-6">
+                <button onclick="switchTab('amazon')" class="case-tab tab-active pb-3 px-1 text-lg transition" id="tab-amazon">Amazon</button>
+                <button onclick="switchTab('netflix')" class="case-tab tab-inactive pb-3 px-1 text-lg transition" id="tab-netflix">Netflix</button>
+                <button onclick="switchTab('google')" class="case-tab tab-inactive pb-3 px-1 text-lg transition" id="tab-google">Google</button>
+                <button onclick="switchTab('uber')" class="case-tab tab-inactive pb-3 px-1 text-lg transition" id="tab-uber">Uber</button>
+                <button onclick="switchTab('airbnb')" class="case-tab tab-inactive pb-3 px-1 text-lg transition" id="tab-airbnb">Airbnb</button>
+            </div>
+
+            <!-- Content Area -->
+            
+            <!-- AMAZON VIEW -->
+            <div id="view-amazon" class="case-view animate-fade-in block">
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <!-- Left: Strategy -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-stone-800 mb-2">The AWS Paradox</h3>
+                            <p class="text-stone-600 text-sm leading-relaxed mb-4">
+                                Amazon is effectively a cloud infrastructure company that runs a retail business to generate data and test scale.
+                            </p>
+                            <div class="p-4 bg-orange-50 rounded-lg border border-orange-100">
+                                <span class="block text-xs font-bold text-orange-800 uppercase">Key Stat</span>
+                                <span class="text-2xl font-bold text-stone-900">35%</span>
+                                <span class="block text-sm text-stone-600">of revenue driven by recommendations</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-sm font-bold text-stone-500 uppercase mb-3">Core Algorithm</h3>
+                            <div class="text-stone-800 font-semibold mb-1">Collaborative Filtering (CF)</div>
+                            <p class="text-xs text-stone-500 mb-3">"Customers who bought X also bought Y"</p>
+                            <div class="h-1 w-full bg-stone-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-teal-600 w-3/4"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Right: Visualization -->
+                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-lg font-bold text-stone-800 mb-6">Revenue vs. Profit Breakdown (2024)</h3>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="text-center text-sm font-semibold text-stone-500 mb-2">Where Revenue Comes From</h4>
+                                <div class="chart-wrapper">
+                                    <canvas id="amazonRevChart"></canvas>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-center text-sm font-semibold text-stone-500 mb-2">Where Profit Comes From</h4>
+                                <div class="chart-wrapper">
+                                    <canvas id="amazonProfitChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-xs text-center text-stone-400">AWS makes up only 15% of revenue but generates 58% of operating profit, funding retail expansion.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NETFLIX VIEW -->
+            <div id="view-netflix" class="case-view hidden animate-fade-in">
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-stone-800 mb-2">Retention Engine</h3>
+                            <p class="text-stone-600 text-sm leading-relaxed mb-4">
+                                Netflix competes on "hours watched." Accurate personalization prevents churn, which is the biggest threat to their subscription model.
+                            </p>
+                            <div class="p-4 bg-red-50 rounded-lg border border-red-100">
+                                <span class="block text-xs font-bold text-red-800 uppercase">Value Capture</span>
+                                <span class="text-2xl font-bold text-stone-900">$1B+</span>
+                                <span class="block text-sm text-stone-600">Annual savings from churn reduction</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-lg font-bold text-stone-800 mb-4">The Cost of Bad Recommendations</h3>
+                        <p class="text-sm text-stone-500 mb-6">Explore how recommendation accuracy impacts churn and revenue loss.</p>
+                        
+                        <!-- Interactive Churn Calc -->
+                        <div class="bg-stone-50 p-6 rounded-lg border border-stone-200 mb-6">
+                            <label class="block text-sm font-medium text-stone-700 mb-2">Recommendation Accuracy Scenario:</label>
+                            <input type="range" min="50" max="100" value="90" class="w-full h-2 bg-stone-300 rounded-lg appearance-none cursor-pointer accent-red-600" id="netflixSlider" oninput="updateNetflixCalc(this.value)">
+                            <div class="flex justify-between text-xs text-stone-500 mt-2">
+                                <span>Poor (50%)</span>
+                                <span>Current State (~90%)</span>
+                                <span>Perfect (100%)</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div class="p-4 bg-white border border-stone-200 rounded shadow-sm">
+                                <div class="text-xs text-stone-500 uppercase">Est. Churn Rate</div>
+                                <div class="text-2xl font-bold text-red-600" id="nf-churn-val">2.5%</div>
+                            </div>
+                            <div class="p-4 bg-white border border-stone-200 rounded shadow-sm">
+                                <div class="text-xs text-stone-500 uppercase">Annual Revenue Risk</div>
+                                <div class="text-2xl font-bold text-stone-800" id="nf-loss-val">$0B</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GOOGLE VIEW -->
+            <div id="view-google" class="case-view hidden animate-fade-in">
+                <div class="grid lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-4 space-y-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-stone-800 mb-2">GSP Auction</h3>
+                            <p class="text-stone-600 text-sm leading-relaxed mb-4">
+                                Google's "Generalized Second-Price" auction incentivizes truthful bidding. You don't pay your bid; you pay just enough to beat the next person.
+                            </p>
+                            <ul class="text-sm space-y-2 text-stone-600">
+                                <li><strong>Ad Rank</strong> = Bid × Quality Score</li>
+                                <li><strong>Price</strong> = (Next Rank / Your Quality) + $0.01</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-8 bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-lg font-bold text-stone-800 mb-4">Live Auction Simulator</h3>
+                        
+                        <!-- Inputs -->
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="bg-blue-50 p-3 rounded border border-blue-100">
+                                <div class="font-bold text-blue-800 mb-2">Advertiser A</div>
+                                <label class="block text-xs text-stone-500">Max Bid ($)</label>
+                                <input type="number" id="bidA" value="5.00" step="0.5" class="w-full mb-2 p-1 border rounded text-sm" onchange="runAuction()">
+                                <label class="block text-xs text-stone-500">Quality (1-10)</label>
+                                <input type="number" id="qsA" value="8" min="1" max="10" class="w-full p-1 border rounded text-sm" onchange="runAuction()">
+                            </div>
+                            <div class="bg-green-50 p-3 rounded border border-green-100">
+                                <div class="font-bold text-green-800 mb-2">Advertiser B</div>
+                                <label class="block text-xs text-stone-500">Max Bid ($)</label>
+                                <input type="number" id="bidB" value="3.00" step="0.5" class="w-full mb-2 p-1 border rounded text-sm" onchange="runAuction()">
+                                <label class="block text-xs text-stone-500">Quality (1-10)</label>
+                                <input type="number" id="qsB" value="10" min="1" max="10" class="w-full p-1 border rounded text-sm" onchange="runAuction()">
+                            </div>
+                            <div class="bg-purple-50 p-3 rounded border border-purple-100">
+                                <div class="font-bold text-purple-800 mb-2">Advertiser C</div>
+                                <label class="block text-xs text-stone-500">Max Bid ($)</label>
+                                <input type="number" id="bidC" value="2.50" step="0.5" class="w-full mb-2 p-1 border rounded text-sm" onchange="runAuction()">
+                                <label class="block text-xs text-stone-500">Quality (1-10)</label>
+                                <input type="number" id="qsC" value="9" min="1" max="10" class="w-full p-1 border rounded text-sm" onchange="runAuction()">
+                            </div>
+                        </div>
+
+                        <!-- Results -->
+                        <div class="chart-wrapper">
+                            <canvas id="googleAuctionChart"></canvas>
+                        </div>
+                        <div class="mt-4 p-3 bg-stone-50 text-sm text-stone-600 border-l-4 border-stone-400" id="auction-winner-text">
+                            Result pending...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UBER VIEW -->
+            <div id="view-uber" class="case-view hidden animate-fade-in">
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-xl font-bold text-stone-800 mb-2">Dynamic Pricing</h3>
+                            <p class="text-stone-600 text-sm leading-relaxed mb-4">
+                                "Surge" isn't just about profit; it's a mechanism to balance supply (drivers) and demand (riders) in real-time (every 1-2 seconds).
+                            </p>
+                            <div class="p-4 bg-stone-900 rounded-lg text-white">
+                                <div class="text-xs text-stone-400 font-mono">Formula</div>
+                                <div class="font-mono text-sm mt-1">Multiplier = 1.0 + ((D/S) - 2.0) × 0.25</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-lg font-bold text-stone-800 mb-6">Supply/Demand Balancer</h3>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mb-8">
+                            <div>
+                                <label class="block text-sm font-bold text-stone-700 mb-2">Demand (Riders)</label>
+                                <input type="range" min="10" max="200" value="100" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-stone-800" id="uberDemand" oninput="updateUberPricing()">
+                                <div class="text-right text-stone-500 font-mono mt-1" id="valDemand">100</div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-stone-700 mb-2">Supply (Drivers)</label>
+                                <input type="range" min="5" max="100" value="25" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-stone-800" id="uberSupply" oninput="updateUberPricing()">
+                                <div class="text-right text-stone-500 font-mono mt-1" id="valSupply">25</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div class="p-4 bg-stone-50 rounded border border-stone-200">
+                                <div class="text-xs text-stone-500 uppercase">Ratio (D/S)</div>
+                                <div class="text-xl font-bold text-stone-800" id="uberRatio">4.0</div>
+                            </div>
+                            <div class="p-4 bg-stone-50 rounded border border-stone-200">
+                                <div class="text-xs text-stone-500 uppercase">Surge Multiplier</div>
+                                <div class="text-xl font-bold text-stone-800" id="uberMult">1.5x</div>
+                            </div>
+                            <div class="p-4 bg-stone-900 rounded text-white shadow-lg">
+                                <div class="text-xs text-stone-400 uppercase">Final Price ($10 Base)</div>
+                                <div class="text-2xl font-bold text-teal-400" id="uberPrice">$15.00</div>
+                            </div>
+                        </div>
+                        <div class="mt-6 chart-wrapper-small">
+                            <canvas id="uberTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- AIRBNB VIEW -->
+             <div id="view-airbnb" class="case-view hidden animate-fade-in">
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-xl font-bold text-stone-800 mb-4">Network Effects Flywheel</h3>
+                        <p class="text-stone-600 mb-6">In a two-sided marketplace, growth on one side (Hosts) fuels value for the other (Guests), creating a self-reinforcing cycle.</p>
+                        
+                        <div class="relative py-10 px-4">
+                            <!-- Simple CSS Diagram -->
+                            <div class="flex flex-col items-center space-y-4">
+                                <div class="w-48 p-3 bg-teal-600 text-white text-center rounded-lg shadow-lg font-bold">More Hosts</div>
+                                <div class="text-2xl text-stone-300">↓</div>
+                                <div class="w-48 p-3 bg-stone-100 text-stone-800 text-center rounded border border-stone-300">More Listings</div>
+                                <div class="text-2xl text-stone-300">↓</div>
+                                <div class="w-48 p-3 bg-stone-100 text-stone-800 text-center rounded border border-stone-300">More Guests</div>
+                                <div class="text-2xl text-stone-300">↓</div>
+                                <div class="w-48 p-3 bg-teal-600 text-white text-center rounded-lg shadow-lg font-bold">More Revenue</div>
+                            </div>
+                            <!-- Connecting Line visualization via Border -->
+                            <div class="absolute top-0 bottom-0 left-1/2 w-0.5 bg-stone-100 -z-10 transform -translate-x-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-lg font-bold text-stone-800 mb-4">Key Marketplace Metrics</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-3 border-b border-stone-100">
+                                <span class="text-stone-600">Active Listings</span>
+                                <span class="font-mono font-bold text-stone-900">14M+</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 border-b border-stone-100">
+                                <span class="text-stone-600">Repeat Booking Rate</span>
+                                <span class="font-mono font-bold text-teal-600">70%</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 border-b border-stone-100">
+                                <span class="text-stone-600">Annual Revenue</span>
+                                <span class="font-mono font-bold text-stone-900">$9.9B</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 border-b border-stone-100">
+                                <span class="text-stone-600">Gross Merchandise Value</span>
+                                <span class="font-mono font-bold text-stone-900">$75B+</span>
+                            </div>
+                        </div>
+                        <div class="mt-6 p-4 bg-teal-50 text-teal-800 text-sm rounded-lg">
+                            <strong>Insight:</strong> Airbnb optimizes explicitly for the "Host" side first, knowing demand (Guests) follows supply in travel.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Section 3: Analytics & Career -->
+    <section id="analytics" class="py-16 bg-white border-t border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-stone-900 mb-8">Data Science Career Landscape</h2>
+            
+            <div class="grid lg:grid-cols-2 gap-12">
+                <!-- Salary Chart -->
+                <div>
+                    <h3 class="text-lg font-bold text-stone-800 mb-4">Salary Premium by Skill</h3>
+                    <p class="text-sm text-stone-500 mb-4">Base skill (Python) vs specialized knowledge.</p>
+                    <div class="chart-wrapper">
+                        <canvas id="salaryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Roles Table -->
+                <div>
+                    <h3 class="text-lg font-bold text-stone-800 mb-4">Career Progression</h3>
+                    <div class="overflow-hidden border border-stone-200 rounded-lg">
+                        <table class="min-w-full divide-y divide-stone-200">
+                            <thead class="bg-stone-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Level</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Focus</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider">Comp</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-stone-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">Junior</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-500">Execution & Tooling</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-900 text-right">$120-150K</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">Mid-Level</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-500">End-to-End Projects</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-900 text-right">$160-200K</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">Senior</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-500">Strategy & Teams</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-900 text-right">$210-280K</td>
+                                </tr>
+                                <tr class="bg-teal-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-teal-900">Principal</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-teal-700">Company Impact</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-teal-900 text-right font-bold">$300-450K</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Future Trends -->
+            <div class="mt-16">
+                <h3 class="text-lg font-bold text-stone-800 mb-6">Emerging Trends (2026+)</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-100">
+                        <div class="text-teal-600 font-bold mb-2">Real-Time Inference</div>
+                        <p class="text-sm text-stone-600">Moving from daily batch updates to microsecond updates. Key for personalization.</p>
+                    </div>
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-100">
+                        <div class="text-teal-600 font-bold mb-2">Privacy vs. ML</div>
+                        <p class="text-sm text-stone-600">Federated learning and differential privacy becoming mandatory due to regulation.</p>
+                    </div>
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-100">
+                        <div class="text-teal-600 font-bold mb-2">Responsible AI</div>
+                        <p class="text-sm text-stone-600">Focus shifting from pure accuracy to fairness, explainability, and bias reduction.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-stone-900 text-stone-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p class="mb-2">© 2026 Cyber.SoHo. Digital Science & Technology Graduate Program.</p>
+            <p></p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // State Management
+        let currentTab = 'amazon';
+        let charts = {};
+
+        // 1. Pipeline Data
+        const pipelineData = [
+            { title: "Data Collection", activities: ["Raw events from user interactions", "Streaming vs Batch collection"], insight: "Garbage in, garbage out. The quality of raw data limits model potential." },
+            { title: "Storage & Infra", activities: ["Data Lakes & Warehouses", "Cloud vs On-premise"], insight: "Scalability is key. Cloud offers elastic growth (AWS)." },
+            { title: "Data Processing", activities: ["ETL (Extract, Transform, Load)", "Cleaning & Validation"], insight: "80% of a data scientist's time is spent here." },
+            { title: "ML Modeling", activities: ["Algorithm Selection", "Training & Optimization"], insight: "From Linear Regression to Deep Neural Networks." },
+            { title: "Deployment", activities: ["Real-time Inference", "A/B Testing"], insight: "A model on a laptop provides no value. It must be in production." },
+            { title: "Value Capture", activities: ["Revenue Impact", "User Experience"], insight: "Measure success in dollars and retention, not just accuracy." }
+        ];
+
+        function updatePipeline(index) {
+            const data = pipelineData[index];
+            document.getElementById('pipeline-title').innerText = data.title;
+            document.getElementById('pipeline-bg-num').innerText = index + 1;
+            document.getElementById('pipeline-insight').innerText = data.insight;
+            
+            const list = document.getElementById('pipeline-activities');
+            list.innerHTML = '';
+            data.activities.forEach(act => {
+                const li = document.createElement('li');
+                li.className = "flex items-start";
+                li.innerHTML = `<span class="text-teal-500 mr-2">&#8227;</span> ${act}`;
+                list.appendChild(li);
+            });
+        }
+
+        // 2. Tab Switching
+        function switchTab(tabId) {
+            // Hide all views
+            document.querySelectorAll('.case-view').forEach(el => {
+                el.classList.add('hidden');
+            });
+            // Show selected view
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            
+            // Update Tab Styles
+            document.querySelectorAll('.case-tab').forEach(el => {
+                el.classList.remove('tab-active');
+                el.classList.add('tab-inactive');
+            });
+            document.getElementById(`tab-${tabId}`).classList.add('tab-active');
+            document.getElementById(`tab-${tabId}`).classList.remove('tab-inactive');
+
+            // Resize charts if needed
+            if(charts[tabId]) {
+               // charts[tabId].resize(); // Usually automatic with Chart.js + wrapper
+            }
+        }
+
+        // 3. Amazon Charts
+        function initAmazonCharts() {
+            const ctxRev = document.getElementById('amazonRevChart').getContext('2d');
+            charts['amazonRev'] = new Chart(ctxRev, {
+                type: 'pie',
+                data: {
+                    labels: ['Retail (NA)', 'Retail (Intl)', 'AWS', 'Ads', 'Subs'],
+                    datasets: [{
+                        data: [62, 23, 15, 8, 7], // % values approx
+                        backgroundColor: ['#d6d3d1', '#a8a29e', '#0f766e', '#57534e', '#e7e5e4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            const ctxProf = document.getElementById('amazonProfitChart').getContext('2d');
+            charts['amazonProf'] = new Chart(ctxProf, {
+                type: 'bar',
+                data: {
+                    labels: ['Retail', 'AWS', 'Ads/Other'],
+                    datasets: [{
+                        label: 'Operating Margin %',
+                        data: [4, 58, 40],
+                        backgroundColor: ['#d6d3d1', '#0f766e', '#57534e']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 70 } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // 4. Netflix Calculator
+        function updateNetflixCalc(accuracy) {
+            // Logic: 90% is baseline. 50% is bad.
+            // Baseline Churn: 2.5%. Max Churn (at 50% acc): ~8%.
+            // Linear interpolation for simplicity
+            const minChurn = 2.5;
+            const maxChurn = 8.0;
+            const range = maxChurn - minChurn;
+            
+            // Invert slider: Higher accuracy = Lower churn
+            const percentBad = (100 - accuracy) / 50; // 0 at 100%, 1 at 50%
+            const currentChurn = minChurn + (range * percentBad);
+            
+            // Revenue Loss Calc (Rough est: 300M subs * $130 ARPU = $39B rev)
+            // 1% churn increase = approx $390M-500M loss/reacquisition cost
+            // Let's use report stat: 50% acc -> $2-3B loss
+            const loss = percentBad * 3; // in Billions
+
+            document.getElementById('nf-churn-val').innerText = currentChurn.toFixed(1) + "%";
+            document.getElementById('nf-loss-val').innerText = "$" + loss.toFixed(1) + "B";
+            
+            // Visual feedback color
+            const lossEl = document.getElementById('nf-loss-val');
+            if(loss > 1) lossEl.classList.add('text-red-600');
+            else lossEl.classList.remove('text-red-600');
+        }
+
+        // 5. Google Auction Logic
+        let auctionChart;
+        function initGoogleChart() {
+            const ctx = document.getElementById('googleAuctionChart').getContext('2d');
+            auctionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Company A', 'Company B', 'Company C'],
+                    datasets: [
+                        {
+                            label: 'Ad Rank Score',
+                            data: [40, 30, 22.5],
+                            backgroundColor: '#e7e5e4',
+                            order: 2
+                        },
+                        {
+                            label: 'Price Paid ($)',
+                            data: [3.13, 0, 0], // Only winner pays
+                            backgroundColor: '#0f766e',
+                            type: 'bar',
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+            runAuction(); // initial run
+        }
+
+        function runAuction() {
+            const bids = [
+                { id: 'A', bid: parseFloat(document.getElementById('bidA').value), qs: parseFloat(document.getElementById('qsA').value) },
+                { id: 'B', bid: parseFloat(document.getElementById('bidB').value), qs: parseFloat(document.getElementById('qsB').value) },
+                { id: 'C', bid: parseFloat(document.getElementById('bidC').value), qs: parseFloat(document.getElementById('qsC').value) }
+            ];
+
+            // Calculate Rank
+            bids.forEach(b => b.rank = b.bid * b.qs);
+            
+            // Sort by Rank DESC
+            const sorted = [...bids].sort((a,b) => b.rank - a.rank);
+            const winner = sorted[0];
+            const second = sorted[1];
+            
+            // Calc Price: Second Rank / Winner QS
+            // Note: report says "Pricing = Pay second-highest bid (not your own bid)". 
+            // Formula in slide 7: Price = (Second Highest Ad Rank) / Winner's Quality Score
+            const pricePaid = second.rank / winner.qs;
+
+            // Update Text
+            const text = document.getElementById('auction-winner-text');
+            text.innerHTML = `<strong>Winner:</strong> Advertiser ${winner.id} (Rank ${winner.rank})<br>
+                              <strong>Pays:</strong> $${pricePaid.toFixed(2)} (vs Bid $${winner.bid.toFixed(2)})<br>
+                              <span class="text-xs">Reason: Only needs to beat Advertiser ${second.id}'s rank of ${second.rank}.</span>`;
+
+            // Update Chart
+            auctionChart.data.datasets[0].data = [bids[0].rank, bids[1].rank, bids[2].rank];
+            
+            const priceData = [0,0,0];
+            const winnerIndex = bids.findIndex(b => b.id === winner.id);
+            priceData[winnerIndex] = pricePaid; // Use logic price, not bar height scale exactly
+            
+            // Visualize Price Paid relative to rank for visual effect? 
+            // Actually, better to just show price paid on a separate axis or just the rank bars.
+            // Let's keep Rank bars, and highlight winner.
+            auctionChart.data.datasets[1].data = priceData;
+            auctionChart.update();
+        }
+
+        // 6. Uber Logic
+        let uberChart;
+        function initUberChart() {
+             const ctx = document.getElementById('uberTrendChart').getContext('2d');
+             // Pre-generate a curve
+             const ratios = [1, 1.5, 2, 2.5, 3, 4, 5, 6];
+             const multipliers = ratios.map(r => r <= 2 ? 1 : 1.0 + ((r - 2.0) * 0.25));
+             
+             uberChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ratios,
+                    datasets: [{
+                        label: 'Surge Curve',
+                        data: multipliers,
+                        borderColor: '#1c1917',
+                        borderWidth: 2,
+                        fill: false,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: {display: false}, title: {display: true, text: "Surge Multiplier vs D/S Ratio"} },
+                    scales: { x: {title: {display:true, text: 'Ratio'}}, y: {title: {display:true, text: 'Multiplier'}}}
+                }
+             });
+        }
+
+        function updateUberPricing() {
+            const demand = parseInt(document.getElementById('uberDemand').value);
+            const supply = parseInt(document.getElementById('uberSupply').value);
+            
+            document.getElementById('valDemand').innerText = demand;
+            document.getElementById('valSupply').innerText = supply;
+
+            const ratio = demand / supply;
+            document.getElementById('uberRatio').innerText = ratio.toFixed(1);
+
+            // Formula: 1.0 + ((Demand/Supply Ratio) - 2.0) × 0.25
+            // Min multiplier is 1.0
+            let mult = 1.0;
+            if (ratio > 2.0) {
+                mult = 1.0 + ((ratio - 2.0) * 0.25);
+            }
+            
+            document.getElementById('uberMult').innerText = mult.toFixed(2) + "x";
+            
+            const basePrice = 10;
+            const final = basePrice * mult;
+            document.getElementById('uberPrice').innerText = "$" + final.toFixed(2);
+        }
+
+        // 7. Salary Chart
+        function initSalaryChart() {
+            const ctx = document.getElementById('salaryChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                indexAxis: 'y',
+                data: {
+                    labels: ['Python (Base)', 'SQL', 'Cloud (AWS)', 'ML/AI', 'Deep Learning'],
+                    datasets: [{
+                        label: 'Salary Premium (%)',
+                        data: [0, 10, 30, 50, 60],
+                        backgroundColor: ['#e7e5e4', '#d6d3d1', '#5eead4', '#2dd4bf', '#0f766e']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: {display: false} }
+                }
+            });
+        }
+
+        // Initialize Everything
+        window.addEventListener('DOMContentLoaded', () => {
+            initAmazonCharts();
+            initGoogleChart();
+            initUberChart();
+            updateUberPricing();
+            initSalaryChart();
+            updatePipeline(0); // Default open
+        });
+
+    </script>
+</body>
+</html>
+
+
+

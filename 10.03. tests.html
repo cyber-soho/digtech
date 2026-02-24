@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Strategy & Business Models - Study App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configure MathJax for LaTeX rendering
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            startup: {
+                typeset: false // We will manually typeset when rendering dynamic content
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Flashcard 3D Flip Effects */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .flip-card-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .flip-card-back { transform: rotateY(180deg); }
+        
+        /* Custom Scrollbar for longer content */
+        .card-content {
+            max-height: 100%;
+            overflow-y: auto;
+            width: 100%;
+            text-align: center;
+        }
+        .card-content::-webkit-scrollbar { width: 6px; }
+        .card-content::-webkit-scrollbar-track { background: transparent; }
+        .card-content::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-blue-600 text-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 py-6 text-center">
+            <h1 class="text-3xl font-bold">Digital Strategy & Business Cases</h1>
+            <p class="text-blue-100 mt-2">Interactive Study Companion</p>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="max-w-4xl mx-auto w-full px-4 mt-6">
+        <div class="flex space-x-2 border-b border-gray-200">
+            <button id="tab-flashcards" onclick="switchTab('flashcards')" class="px-6 py-3 font-medium text-sm rounded-t-lg focus:outline-none transition-colors duration-200 bg-white border-t border-l border-r border-gray-200 text-blue-600">
+                <i class="fa-solid fa-layer-group mr-2"></i> Flashcards (25)
+            </button>
+            <button id="tab-quiz" onclick="switchTab('quiz')" class="px-6 py-3 font-medium text-sm rounded-t-lg focus:outline-none transition-colors duration-200 text-gray-500 hover:text-gray-700 hover:bg-gray-100 border-b-2 border-transparent">
+                <i class="fa-solid fa-list-check mr-2"></i> Practice Quiz (10)
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow flex items-center justify-center p-4 max-w-4xl mx-auto w-full">
+        
+        <!-- FLASHCARDS TAB -->
+        <div id="content-flashcards" class="w-full flex flex-col items-center">
+            
+            <div class="mb-4 text-gray-500 font-medium">
+                Card <span id="fc-current">1</span> of <span id="fc-total">25</span>
+            </div>
+
+            <!-- Flashcard Container -->
+            <div class="perspective-1000 w-full max-w-2xl h-80 sm:h-96 cursor-pointer group" onclick="flipCard()">
+                <div id="flashcard-inner" class="flip-card-inner">
+                    <!-- Front -->
+                    <div class="flip-card-front bg-white border-t-4 border-blue-500">
+                        <span class="absolute top-4 right-4 text-blue-300 opacity-50"><i class="fa-solid fa-rotate"></i></span>
+                        <div id="fc-front-text" class="card-content text-2xl sm:text-3xl font-bold text-gray-800 flex items-center justify-center h-full">
+                            <!-- Front text injected here -->
+                        </div>
+                        <p class="text-sm text-gray-400 mt-4 absolute bottom-4">Click to flip</p>
+                    </div>
+                    <!-- Back -->
+                    <div class="flip-card-back bg-blue-50 border-t-4 border-green-500">
+                        <span class="absolute top-4 right-4 text-green-300 opacity-50"><i class="fa-solid fa-rotate"></i></span>
+                        <div id="fc-back-text" class="card-content text-lg sm:text-xl text-gray-700 whitespace-pre-wrap flex items-center justify-center h-full">
+                            <!-- Back text injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex space-x-4 mt-8 w-full max-w-2xl justify-between">
+                <button onclick="prevCard()" class="px-6 py-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 text-gray-700 font-medium transition flex items-center">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Previous
+                </button>
+                <button onclick="nextCard()" class="px-6 py-3 bg-blue-600 border border-blue-600 rounded-lg shadow-sm hover:bg-blue-700 text-white font-medium transition flex items-center">
+                    Next <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- QUIZ TAB -->
+        <div id="content-quiz" class="w-full hidden">
+            <div id="quiz-container" class="bg-white rounded-xl shadow-lg p-6 sm:p-8 border-t-4 border-purple-500">
+                
+                <div class="flex justify-between items-center mb-6 border-b pb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Knowledge Check</h2>
+                    <span class="text-sm font-medium bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
+                        Question <span id="quiz-current">1</span> / <span id="quiz-total">10</span>
+                    </span>
+                </div>
+
+                <!-- Score / End Screen -->
+                <div id="quiz-end-screen" class="hidden text-center py-8">
+                    <div class="text-6xl mb-4" id="quiz-emoji">🎉</div>
+                    <h3 class="text-3xl font-bold text-gray-800 mb-2">Quiz Complete!</h3>
+                    <p class="text-xl text-gray-600 mb-6">You scored <span id="quiz-score" class="font-bold text-blue-600">0</span> out of <span id="quiz-max">10</span>.</p>
+                    <button onclick="resetQuiz()" class="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition shadow-md">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Retake Quiz
+                    </button>
+                </div>
+
+                <!-- Question Area -->
+                <div id="quiz-active-area">
+                    <h3 id="quiz-question-text" class="text-lg sm:text-xl font-semibold text-gray-800 mb-6">
+                        <!-- Question text -->
+                    </h3>
+
+                    <!-- Hint -->
+                    <div class="mb-6">
+                        <button onclick="toggleHint()" class="text-sm text-yellow-600 font-medium hover:text-yellow-700 flex items-center focus:outline-none">
+                            <i class="fa-regular fa-lightbulb mr-2"></i> Show Hint
+                        </button>
+                        <div id="quiz-hint" class="hidden mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+                            <!-- Hint text -->
+                        </div>
+                    </div>
+
+                    <!-- Options -->
+                    <div id="quiz-options" class="space-y-3">
+                        <!-- Options generated here -->
+                    </div>
+
+                    <!-- Rationale / Feedback -->
+                    <div id="quiz-feedback" class="hidden mt-6 p-4 rounded-lg">
+                        <p id="quiz-rationale" class="text-sm sm:text-base"></p>
+                    </div>
+
+                    <!-- Next Question Button -->
+                    <div class="mt-8 flex justify-end">
+                        <button id="btn-next-question" onclick="nextQuestion()" class="hidden px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-lg font-medium transition shadow-md">
+                            Continue <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center py-6 text-gray-400 text-sm">
+        <p>Created for Digital Science & Technology Graduate Program</p>
+    </footer>
+
+    <!-- Application Data and Logic -->
+    <script>
+        // --- DATA ---
+        const flashcardsData = [
+            { front: "The 6 Stages of the Digital Value Chain", back: "1. Data Collection\n2. Data Storage & Infrastructure\n3. Data Processing\n4. ML Modeling\n5. Model Deployment\n6. Value Capture" },
+            { front: "Collaborative Filtering (CF)", back: "A recommendation approach that suggests items liked by similar users, based on the premise that users who agreed in the past will agree in the future." },
+            { front: "Content-Based Filtering (CBF)", back: "A recommendation approach that suggests items similar to those a user has liked in the past, based on item features like genre, keywords, or tags." },
+            { front: "The \"AWS Paradox\"", back: "The fact that AWS generates only 15% of Amazon's revenue but accounts for 58% of its operating margin, effectively funding the low-margin retail business." },
+            { front: "Ad Rank Formula (Google GSP Auction)", back: "$\\text{Ad Rank} = \\text{Max CPC Bid} \\times \\text{Quality Score}$" },
+            { front: "Price Paid Formula (Google GSP Auction)", back: "$\\text{Price} = \\frac{\\text{Next Bidder's Rank}}{\\text{Your Quality Score}}$" },
+            { front: "Primary Purpose of Uber's Surge Pricing", back: "To optimize supply and demand in real-time by dampening demand and incentivizing driver supply, ensuring availability during peak times." },
+            { front: "Network Effects", back: "A phenomenon where a product or service becomes more valuable to its users as more people use it, creating a self-reinforcing growth cycle." },
+            { front: "Churn Rate", back: "The percentage of subscribers who discontinue their subscription within a given time period; a critical metric for retention." },
+            { front: "Data Flywheel", back: "A cycle where more users generate more data, leading to better models and products, which in turn attract more users, creating a sustainable competitive advantage." },
+            { front: "CAPEX vs OPEX in Cloud Economics", back: "The shift from high upfront capital expenditures (CAPEX) for buying servers to variable operating expenses (OPEX) based on usage in the cloud." },
+            { front: "Cold-Start Problem", back: "The difficulty recommendation systems face when attempting to provide suggestions for new users or items that lack interaction history." },
+            { front: "Supervised Learning", back: "A type of machine learning where the model is trained on labeled data, consisting of input-output pairs, to learn a mapping function." },
+            { front: "Regularization in Machine Learning", back: "A technique used to prevent overfitting by adding a penalty term to the loss function that discourages complex models." },
+            { front: "Feature Engineering", back: "The process of using domain knowledge to transform raw data into features that better represent the underlying problem to predictive models." },
+            { front: "DAU/MAU Ratio", back: "The ratio of Daily Active Users to Monthly Active Users, used as a key metric to measure user engagement and the \"stickiness\" of a product." },
+            { front: "Customer Acquisition Cost (CAC)", back: "The total cost associated with acquiring a new customer, including marketing and sales expenses." },
+            { front: "Cosine Similarity Formula", back: "$\\text{Similarity} = \\frac{A \\cdot B}{||A|| \\times ||B||}$" },
+            { front: "Uber Surge Multiplier Formula", back: "$1.0 + ((\\frac{\\text{Demand}}{\\text{Supply}}) - 2.0) \\times 0.25$" },
+            { front: "Tier 1 Data Science Skills", back: "1. Python (Data manipulation)\n2. SQL & Databases (Data extraction)\n3. Statistics (Hypothesis testing)\n4. Machine Learning (Algorithms)" },
+            { front: "A/B Testing", back: "A statistical method of comparing two versions of a product or feature against each other to determine which one performs better." },
+            { front: "Precision vs. Recall", back: "Precision measures the proportion of recommended items that were relevant; Recall measures the proportion of relevant items that were recommended." },
+            { front: "Federated Learning", back: "A machine learning technique where models are trained across decentralized devices holding local data, improving privacy by not sharing raw data." },
+            { front: "Generalized Second-Price (GSP) Auction", back: "An auction mechanism where the highest bidder wins but pays a price determined by the second-highest bid, incentivizing truthful bidding." },
+            { front: "Hybrid Recommendation Approach", back: "Combining Collaborative Filtering (for serendipity) and Content-Based Filtering (for relevance) to maximize recommendation quality." }
+        ];
+
+        const quizData = [
+            {
+                question: "According to the 'AWS Paradox', why is Amazon's cloud infrastructure division critical to its retail strategy?",
+                hint: "Think about where the actual profit (operating margin) comes from, rather than just top-line revenue.",
+                options: [
+                    { text: "AWS generates the high operating margins (58%) needed to subsidize the low-margin retail business.", rationale: "This describes the core economic engine of Amazon: retail operates at near-zero margin to generate data and volume, while AWS generates the actual profit.", isCorrect: true },
+                    { text: "AWS provides the physical warehouses for storing retail inventory.", rationale: "AWS is a cloud computing service for digital infrastructure, not physical logistics or warehousing.", isCorrect: false },
+                    { text: "Retail revenue is significantly higher than AWS revenue, making AWS a loss leader.", rationale: "While retail revenue is higher, AWS is the profit engine, not a loss leader; retail is closer to being the loss leader.", isCorrect: false },
+                    { text: "AWS is primarily used to host competitors' websites to gather intelligence.", rationale: "While competitors do use AWS, the strategic value lies in the internal subsidy model and economies of scale, not espionage.", isCorrect: false }
+                ]
+            },
+            {
+                question: "A streaming service recommends a movie to User A because User B, who has a very similar viewing history to User A, liked that movie. Which recommendation approach is this?",
+                hint: "This method relies on the 'wisdom of the crowd' or finding a 'digital twin' rather than analyzing the movie's genre.",
+                options: [
+                    { text: "Collaborative Filtering (CF)", rationale: "Collaborative filtering relies on user-to-user similarities (social proof) rather than analyzing the specific features of the items themselves.", isCorrect: true },
+                    { text: "Content-Based Filtering (CBF)", rationale: "Content-based filtering would recommend a movie because it shares genre tags or actors with movies User A previously watched, not because User B watched it.", isCorrect: false },
+                    { text: "Demographic Filtering", rationale: "This would base recommendations on age, location, or gender, not on the specific intersection of viewing histories between two users.", isCorrect: false },
+                    { text: "Generalized Second-Price Auction", rationale: "This is an ad auction mechanism used by Google, not a recommendation algorithm.", isCorrect: false }
+                ]
+            },
+            {
+                question: "In a Google GSP auction, Advertiser X bids $5.00 with a Quality Score of 10. The next highest competitor (Advertiser Y) ends up with an Ad Rank of 40. What price does Advertiser X pay per click?",
+                hint: "Recall the formula: Price = $\\frac{\\text{Ad Rank of Runner Up}}{\\text{Your Quality Score}}$.",
+                options: [
+                    { text: "$4.00", rationale: "Price is calculated as (Rank of Next Bidder) / (Own Quality Score). Here, 40 / 10 = $4.00.", isCorrect: true },
+                    { text: "$5.00", rationale: "In a Second-Price auction, the winner rarely pays their full bid; paying the full bid suggests a First-Price auction model.", isCorrect: false },
+                    { text: "$3.13", rationale: "This appears to be a random number or derived from a different example; the math requires dividing the next rank (40) by the winner's quality (10).", isCorrect: false },
+                    { text: "$0.50", rationale: "This is likely too low; it would imply the runner-up had a very low rank or the winner had an impossibly high quality score.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Uber's surge pricing algorithm calculates a Demand/Supply ratio of 4.0 (e.g., 100 riders, 25 drivers). Using the standard formula provided ($1.0 + ((D/S) - 2.0) \\times 0.25$), what is the surge multiplier?",
+                hint: "First determine the 'excess' ratio above 2.0, scale it by 0.25, and add it to the base rate.",
+                options: [
+                    { text: "1.5x", rationale: "Calculation: Ratio is 4.0. Subtract 2.0 to get 2.0. Multiply by 0.25 to get 0.5. Add to base 1.0 to get 1.5x.", isCorrect: true },
+                    { text: "2.0x", rationale: "This would result if you forgot to multiply the excess demand by the sensitivity factor of 0.25.", isCorrect: false },
+                    { text: "1.25x", rationale: "This suggests a miscalculation in the order of operations, perhaps adding the 0.25 before handling the ratio difference.", isCorrect: false },
+                    { text: "4.0x", rationale: "This would imply the multiplier directly matches the Demand/Supply ratio, which would be too volatile and expensive.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Which of the following best describes the 'Cold Start' problem in recommendation systems?",
+                hint: "Think about what a system needs to know about you before it can say 'You might also like...'",
+                options: [
+                    { text: "The difficulty in providing recommendations for new users or items that have no prior interaction history.", rationale: "Collaborative filtering fails here because there are no vectors to compare; the system is 'cold' until data is generated.", isCorrect: true },
+                    { text: "The time delay required to boot up cloud servers when traffic spikes.", rationale: "This refers to infrastructure latency or auto-scaling lag, not a recommendation algorithm issue.", isCorrect: false },
+                    { text: "The inability of a model to predict user behavior during winter months due to seasonal changes.", rationale: "Seasonality is a real factor in data science, but 'Cold Start' specifically refers to the lack of initial data, not temperature.", isCorrect: false },
+                    { text: "The high cost of acquiring the first 1,000 users for a platform.", rationale: "This is a marketing or business challenge (CAC), not a technical algorithmic failure mode.", isCorrect: false }
+                ]
+            },
+            {
+                question: "What is the primary financial advantage of the Cloud (AWS) model over the traditional On-Premise model?",
+                hint: "Consider the difference between buying a house (capital expense) versus renting one (operating expense).",
+                options: [
+                    { text: "It shifts costs from high upfront CAPEX to variable OPEX, allowing for linear scaling.", rationale: "This allows companies to pay only for what they use and avoid large capital expenditures for capacity they might not need yet.", isCorrect: true },
+                    { text: "It guarantees 100% uptime with no maintenance costs.", rationale: "No system guarantees 100% uptime, and while maintenance is managed, the cost is embedded in the service fee.", isCorrect: false },
+                    { text: "It eliminates the need for data engineers.", rationale: "Cloud infrastructure actually increases the demand for specialized cloud engineers and architects.", isCorrect: false },
+                    { text: "It automatically cleans and validates data without human intervention.", rationale: "Cloud storage is just storage; data quality (ETL) still requires processing stages and engineering work.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Which metric is the strongest indicator of a platform's 'stickiness' or user engagement?",
+                hint: "If a user visits your app 30 days out of 30, this ratio would be 100%.",
+                options: [
+                    { text: "DAU/MAU Ratio", rationale: "This ratio measures the intensity of use: what percentage of monthly users return every single day.", isCorrect: true },
+                    { text: "CAC (Customer Acquisition Cost)", rationale: "CAC measures marketing efficiency and the cost of growth, not how engaged the users are once they arrive.", isCorrect: false },
+                    { text: "GMV (Gross Merchandise Value)", rationale: "GMV measures the total value of transactions (volume), which can be high even if engagement is low (e.g., infrequent expensive purchases).", isCorrect: false },
+                    { text: "ARPU (Average Revenue Per User)", rationale: "ARPU measures monetization; a user can generate high revenue (e.g., one big subscription) without high daily engagement.", isCorrect: false }
+                ]
+            },
+            {
+                question: "In the Digital Value Chain, what is the correct sequence of stages immediately following Data Collection?",
+                hint: "Think of the lifecycle: Raw ingredients must be put in the pantry, then chopped, then cooked, then served.",
+                options: [
+                    { text: "Storage -> Processing -> Modeling -> Deployment", rationale: "Data must be stored first, then cleaned/processed, then used to train a model, which is finally deployed to production.", isCorrect: true },
+                    { text: "Processing -> Modeling -> Storage -> Deployment", rationale: "You cannot process data that hasn't been persisted (stored) somewhere first, and you generally store processed features back before modeling.", isCorrect: false },
+                    { text: "Modeling -> Processing -> Deployment -> Storage", rationale: "You cannot model (train algorithms) on raw, unprocessed data; processing must come before modeling.", isCorrect: false },
+                    { text: "Deployment -> Modeling -> Processing -> Storage", rationale: "This is the reverse of the logical flow; deployment is the end state, not the beginning.", isCorrect: false }
+                ]
+            },
+            {
+                question: "How does Airbnb's two-sided marketplace achieve exponential growth?",
+                hint: "Consider why having more drivers on Uber makes the app better for riders, and vice versa.",
+                options: [
+                    { text: "Through network effects, where more hosts attract more guests, which in turn improves economics to attract more hosts.", rationale: "This positive feedback loop creates a flywheel effect that accelerates growth beyond what linear marketing spend could achieve.", isCorrect: true },
+                    { text: "By owning all the real estate properties listed on the platform.", rationale: "Airbnb is asset-light; they do not own the properties, which is key to their scalability.", isCorrect: false },
+                    { text: "By manually matching every guest to a host using human travel agents.", rationale: "This would be unscalable; the algorithmic search and matching allow the platform to handle millions of users.", isCorrect: false },
+                    { text: "By offering the lowest price in every market regardless of supply.", rationale: "Prices are set by hosts or dynamic algorithms, not fixed by the platform to be lowest; value is often in uniqueness, not just price.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Based on the salary data provided, which data science skill commands the highest premium?",
+                hint: "This skill involves neural networks and is often listed in 'Tier 3' difficulty but offers the highest financial reward.",
+                options: [
+                    { text: "Deep Learning / AI", rationale: "Deep Learning commands a +40-60% premium due to the specialized mathematical knowledge and high impact on advanced product features.", isCorrect: true },
+                    { text: "Python", rationale: "Python is considered a baseline requirement (+0% premium); it is expected of every data scientist.", isCorrect: false },
+                    { text: "SQL", rationale: "SQL is a fundamental skill with a modest premium (+5-10%), but it is less specialized than AI/ML.", isCorrect: false },
+                    { text: "Data Visualization", rationale: "While valuable for communication, visualization does not command the same technical scarcity premium as Deep Learning infrastructure.", isCorrect: false }
+                ]
+            }
+        ];
+
+        // --- APP LOGIC ---
+
+        // Tab Switching
+        function switchTab(tabId) {
+            // Update buttons
+            document.getElementById('tab-flashcards').className = tabId === 'flashcards' 
+                ? 'px-6 py-3 font-medium text-sm rounded-t-lg focus:outline-none transition-colors duration-200 bg-white border-t border-l border-r border-gray-200 text-blue-600'
+                : 'px-6 py-3 font-medium text-sm rounded-t-lg focus:outline-none transition-colors duration-200 text-gray-500 hover:text-gray-700 hover:bg-gray-100 border-b-2 border-transparent';
+            
+            document.getElementById('tab-quiz').className = tabId === 'quiz' 
+                ? 'px-6 py-3 font-medium text-sm rounded-t-lg focus:outline-none transition-colors duration-200 bg-white border-t border-l border-r border-gray-200 text-purple-600'
+                : 'px-6 py-3 font-medium text-sm rounded-t-lg focus:outline-none transition-colors duration-200 text-gray-500 hover:text-gray-700 hover:bg-gray-100 border-b-2 border-transparent';
+
+            // Update content visibility
+            document.getElementById('content-flashcards').classList.toggle('hidden', tabId !== 'flashcards');
+            document.getElementById('content-quiz').classList.toggle('hidden', tabId !== 'quiz');
+
+            // Render math if switching
+            if(window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // --- FLASHCARDS LOGIC ---
+        let currentCardIndex = 0;
+
+        function renderCard() {
+            const card = flashcardsData[currentCardIndex];
+            const inner = document.getElementById('flashcard-inner');
+            
+            // Remove flip state if transitioning
+            inner.classList.remove('rotate-y-180');
+            inner.parentElement.classList.remove('flipped');
+
+            setTimeout(() => {
+                document.getElementById('fc-front-text').innerHTML = card.front;
+                document.getElementById('fc-back-text').innerHTML = card.back;
+                document.getElementById('fc-current').innerText = currentCardIndex + 1;
+                
+                // Trigger MathJax processing for new content
+                if (window.MathJax) {
+                    MathJax.typesetPromise([document.getElementById('fc-front-text'), document.getElementById('fc-back-text')]);
+                }
+            }, 150); // slight delay to allow flip animation to reset if it was flipped
+        }
+
+        function flipCard() {
+            document.getElementById('flashcard-inner').parentElement.classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            currentCardIndex = (currentCardIndex + 1) % flashcardsData.length;
+            renderCard();
+        }
+
+        function prevCard() {
+            currentCardIndex = (currentCardIndex - 1 + flashcardsData.length) % flashcardsData.length;
+            renderCard();
+        }
+
+        // --- QUIZ LOGIC ---
+        let currentQuizIndex = 0;
+        let score = 0;
+        let quizAnswered = false;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function renderQuiz() {
+            const q = quizData[currentQuizIndex];
+            quizAnswered = false;
+
+            document.getElementById('quiz-current').innerText = currentQuizIndex + 1;
+            document.getElementById('quiz-total').innerText = quizData.length;
+            document.getElementById('quiz-question-text').innerHTML = q.question;
+            
+            // Hint Reset
+            document.getElementById('quiz-hint').innerHTML = q.hint;
+            document.getElementById('quiz-hint').classList.add('hidden');
+            
+            // Feedback Reset
+            const feedbackBox = document.getElementById('quiz-feedback');
+            feedbackBox.classList.add('hidden');
+            feedbackBox.classList.remove('bg-green-50', 'bg-red-50', 'text-green-800', 'text-red-800', 'border', 'border-green-200', 'border-red-200');
+            document.getElementById('btn-next-question').classList.add('hidden');
+
+            // Options Setup
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            // Copy and shuffle options to preserve original array
+            const shuffledOptions = shuffleArray([...q.options]);
+
+            shuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 rounded-lg border border-gray-200 hover:border-purple-400 hover:bg-purple-50 transition duration-200 bg-white focus:outline-none focus:ring-2 focus:ring-purple-300 relative';
+                btn.innerHTML = `
+                    <div class="flex items-start">
+                        <span class="flex-shrink-0 h-6 w-6 rounded-full border border-gray-300 flex items-center justify-center mr-3 mt-0.5" id="circle-${index}"></span>
+                        <span class="flex-grow">${opt.text}</span>
+                    </div>
+                `;
+                btn.onclick = () => selectOption(opt, index, shuffledOptions);
+                btn.id = `opt-btn-${index}`;
+                optionsContainer.appendChild(btn);
+            });
+
+            // Re-render math
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('quiz-active-area')]);
+            }
+        }
+
+        function toggleHint() {
+            document.getElementById('quiz-hint').classList.toggle('hidden');
+        }
+
+        function selectOption(selectedOpt, selectedIndex, allOptions) {
+            if (quizAnswered) return; // Prevent multiple clicks
+            quizAnswered = true;
+
+            const isCorrect = selectedOpt.isCorrect;
+            if (isCorrect) { score++; }
+
+            // Update UI for all buttons
+            allOptions.forEach((opt, idx) => {
+                const btn = document.getElementById(`opt-btn-${idx}`);
+                const circle = document.getElementById(`circle-${idx}`);
+                
+                btn.classList.remove('hover:border-purple-400', 'hover:bg-purple-50');
+                btn.style.cursor = 'default';
+
+                if (opt.isCorrect) {
+                    btn.classList.add('bg-green-50', 'border-green-500', 'text-green-900');
+                    circle.classList.add('bg-green-500', 'border-green-500');
+                    circle.innerHTML = '<i class="fa-solid fa-check text-white text-xs"></i>';
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.add('bg-red-50', 'border-red-500', 'text-red-900', 'opacity-90');
+                    circle.classList.add('bg-red-500', 'border-red-500');
+                    circle.innerHTML = '<i class="fa-solid fa-xmark text-white text-xs"></i>';
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            // Show Feedback/Rationale
+            const feedbackBox = document.getElementById('quiz-feedback');
+            const rationaleText = document.getElementById('quiz-rationale');
+            feedbackBox.classList.remove('hidden');
+            
+            if (isCorrect) {
+                feedbackBox.classList.add('bg-green-50', 'border', 'border-green-200', 'text-green-800');
+                rationaleText.innerHTML = `<strong>Correct!</strong> ${selectedOpt.rationale}`;
+            } else {
+                feedbackBox.classList.add('bg-red-50', 'border', 'border-red-200', 'text-red-800');
+                rationaleText.innerHTML = `<strong>Incorrect.</strong> ${selectedOpt.rationale}`;
+            }
+
+            // Show Next Button
+            document.getElementById('btn-next-question').classList.remove('hidden');
+            
+            if (window.MathJax) { MathJax.typesetPromise([feedbackBox]); }
+        }
+
+        function nextQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizData.length) {
+                renderQuiz();
+            } else {
+                showQuizEndScreen();
+            }
+        }
+
+        function showQuizEndScreen() {
+            document.getElementById('quiz-active-area').classList.add('hidden');
+            document.getElementById('quiz-end-screen').classList.remove('hidden');
+            
+            document.getElementById('quiz-score').innerText = score;
+            document.getElementById('quiz-max').innerText = quizData.length;
+
+            const percentage = score / quizData.length;
+            let emoji = '🎉';
+            if(percentage < 0.5) emoji = '📚';
+            else if(percentage < 0.8) emoji = '👍';
+            else emoji = '🏆';
+            
+            document.getElementById('quiz-emoji').innerText = emoji;
+        }
+
+        function resetQuiz() {
+            currentQuizIndex = 0;
+            score = 0;
+            document.getElementById('quiz-end-screen').classList.add('hidden');
+            document.getElementById('quiz-active-area').classList.remove('hidden');
+            renderQuiz();
+        }
+
+        // Initialize App
+        window.onload = () => {
+            renderCard();
+            renderQuiz();
+            
+            // Initial MathJax run after data is injected
+            if(window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+
+    </script>
+</body>
+</html>
+
+
+
