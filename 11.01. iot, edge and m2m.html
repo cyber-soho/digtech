@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emerging Technologies: IoT, Edge & M2M</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .active-tab { border-bottom: 2px solid #0f172a; color: #0f172a; font-weight: 600; }
+        .inactive-tab { color: #64748b; }
+        
+        .layer-card { transition: all 0.3s ease; cursor: pointer; }
+        .layer-card:hover { transform: translateX(5px); }
+        .layer-card.active { border-left: 4px solid #3b82f6; background-color: #eff6ff; }
+        
+        .step-circle { transition: all 0.3s ease; }
+        .step-line { transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Chosen Palette: Warm Neutrals (Stone) + Technical Accents (Blue, Amber, Indigo) -->
+    <!-- Application Structure Plan:
+         1. Hero & Concept Map: Sets the stage with the "Data Pipeline" concept (IoT->Edge->M2M).
+         2. Deep Dive Sections: Three main vertical sections corresponding to the lessons.
+            - IoT: Focus on Structure (4 Layers) and Scale (Growth Chart).
+            - Edge: Focus on Comparison (Cloud vs Edge Chart) and Logic (Decision Framework).
+            - M2M: Focus on Process (Interactive Scenario Walkthrough) and Autonomy.
+         3. Synthesis Dashboard: A unifying view with key stats and a searchable glossary.
+         Why: The user needs to understand the flow of data. Starting with the pipeline establishes context. 
+         Interactive diagrams (Layers, Scenarios) allow users to unpack complex concepts at their own pace.
+    -->
+    <!-- Visualization & Content Choices:
+         - IoT Growth: Bar Chart (Chart.js) -> Visualizes the massive scale (16B to 30B).
+         - IoT Architecture: Interactive List/Detail View (HTML/JS) -> Allows exploring the 4 layers without overwhelming text.
+         - Edge Latency: Bar Chart (Chart.js) -> Drastic comparison (800ms vs 20ms) proves the value of Edge.
+         - M2M Scenario: Interactive Stepper (HTML/JS) -> Breaks down the "Smart Fleet" conversation step-by-step to show autonomy.
+         - Glossary: Searchable Grid (JS Filter) -> Quick reference for the heavy acronym load.
+         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">⚡</span>
+                    <span class="font-bold text-xl tracking-tight text-slate-900">EmergingTech<span class="text-indigo-600">.Ed</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="scrollToSection('hero')" class="text-sm font-medium text-slate-600 hover:text-indigo-600 transition">Start</button>
+                    <button onclick="scrollToSection('iot')" class="text-sm font-medium text-slate-600 hover:text-indigo-600 transition">IoT (Sense)</button>
+                    <button onclick="scrollToSection('edge')" class="text-sm font-medium text-slate-600 hover:text-indigo-600 transition">Edge (Process)</button>
+                    <button onclick="scrollToSection('m2m')" class="text-sm font-medium text-slate-600 hover:text-indigo-600 transition">M2M (Act)</button>
+                    <button onclick="scrollToSection('glossary')" class="text-sm font-medium text-slate-600 hover:text-indigo-600 transition">Glossary</button>
+                </div>
+                <!-- Mobile menu button placeholder (functional implementation omitted for brevity in single file constraint, utilizing simple layout) -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="hero" class="pt-16 pb-12 bg-gradient-to-b from-stone-100 to-stone-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-indigo-600 uppercase bg-indigo-50 rounded-full">
+                Digital Technology Program | 2026
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+                Emerging Technologies: <br>
+                <span class="text-indigo-600">The Connected Story</span>
+            </h1>
+            <p class="max-w-2xl mx-auto text-lg text-slate-600 mb-10">
+                From billions of sensors to autonomous machines. Explore the data pipeline that powers smart factories, intelligent cities, and the future of industry.
+            </p>
+            
+            <!-- The Big Picture: Interactive Pipeline Map -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 max-w-5xl mx-auto border border-stone-100">
+                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-6 text-left">The Data Pipeline</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+                    <!-- Connector Line (Desktop) -->
+                    <div class="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-gradient-to-r from-blue-200 via-amber-200 to-indigo-200 -z-0 transform -translate-y-1/2"></div>
+
+                    <!-- Step 1: IoT -->
+                    <div onclick="scrollToSection('iot')" class="relative z-10 bg-white group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+                        <div class="flex flex-col items-center p-6 border-2 border-blue-100 rounded-xl hover:border-blue-400 hover:shadow-lg transition-all bg-white">
+                            <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
+                                📡
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">1. IoT</h3>
+                            <p class="text-sm text-blue-600 font-medium mb-2">The Senses</p>
+                            <p class="text-sm text-slate-500 text-center">Generates the ocean of data via billions of sensors.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Edge -->
+                    <div onclick="scrollToSection('edge')" class="relative z-10 bg-white group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+                        <div class="flex flex-col items-center p-6 border-2 border-amber-100 rounded-xl hover:border-amber-400 hover:shadow-lg transition-all bg-white">
+                            <div class="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
+                                ⚡
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">2. Edge</h3>
+                            <p class="text-sm text-amber-600 font-medium mb-2">The Brain</p>
+                            <p class="text-sm text-slate-500 text-center">Processes data locally for low latency and privacy.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: M2M -->
+                    <div onclick="scrollToSection('m2m')" class="relative z-10 bg-white group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+                        <div class="flex flex-col items-center p-6 border-2 border-indigo-100 rounded-xl hover:border-indigo-400 hover:shadow-lg transition-all bg-white">
+                            <div class="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
+                                🤖
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">3. M2M</h3>
+                            <p class="text-sm text-indigo-600 font-medium mb-2">The Hands</p>
+                            <p class="text-sm text-slate-500 text-center">Machines act autonomously without human bottlenecks.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- SECTION 1: IOT -->
+    <section id="iot" class="py-16 border-t border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Intro Block -->
+            <div class="flex flex-col md:flex-row gap-12 mb-12">
+                <div class="md:w-1/2">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4 flex items-center">
+                        <span class="bg-blue-100 text-blue-600 w-10 h-10 rounded-lg flex items-center justify-center mr-3 text-xl">1</span>
+                        Internet of Things (IoT)
+                    </h2>
+                    <p class="text-lg text-slate-600 mb-6 leading-relaxed">
+                        IoT connects the physical world to the digital world. It is the foundation of the emerging tech stack. Without sensors generating data ("The Senses"), there is nothing to process or act upon. 
+                        By 2030, over 30 billion objects—from soil probes to factory valves—will communicate over networks.
+                    </p>
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                        <p class="text-sm text-blue-900 italic">"The best way to predict the future is to invent it." — Alan Kay</p>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <!-- Chart Container for IoT Growth -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100">
+                        <h3 class="text-sm font-semibold text-slate-500 uppercase mb-4 text-center">Global Connected Devices Projection</h3>
+                        <div class="chart-container">
+                            <canvas id="iotGrowthChart"></canvas>
+                        </div>
+                        <p class="text-xs text-center text-slate-400 mt-2">Source: IoT Analytics</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Architecture Explorer -->
+            <div class="bg-white rounded-2xl shadow-lg border border-stone-200 overflow-hidden">
+                <div class="p-6 border-b border-stone-100 bg-stone-50">
+                    <h3 class="text-xl font-bold text-slate-800">The Four-Layer IoT Architecture</h3>
+                    <p class="text-sm text-slate-500">Click a layer to explore how data moves from the ground up.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2">
+                    <!-- Left: Interactive Layers List -->
+                    <div class="p-6 space-y-3 bg-white">
+                        <div onclick="showLayer('layer4')" id="tab-layer4" class="layer-card p-4 rounded-lg border border-stone-200 hover:border-blue-300">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-slate-700">Layer 4: Application</span>
+                                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Act</span>
+                            </div>
+                            <div class="text-xs text-slate-500 mt-1">"What do we do about it?"</div>
+                        </div>
+                        
+                        <div onclick="showLayer('layer3')" id="tab-layer3" class="layer-card p-4 rounded-lg border border-stone-200 hover:border-blue-300">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-slate-700">Layer 3: Processing</span>
+                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">Analyse</span>
+                            </div>
+                            <div class="text-xs text-slate-500 mt-1">"What does the data mean?"</div>
+                        </div>
+
+                        <div onclick="showLayer('layer2')" id="tab-layer2" class="layer-card p-4 rounded-lg border border-stone-200 hover:border-blue-300">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-slate-700">Layer 2: Network</span>
+                                <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Transmit</span>
+                            </div>
+                            <div class="text-xs text-slate-500 mt-1">"How do we get data there?"</div>
+                        </div>
+
+                        <div onclick="showLayer('layer1')" id="tab-layer1" class="layer-card p-4 rounded-lg border border-stone-200 hover:border-blue-300 active">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-slate-700">Layer 1: Perception</span>
+                                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Sense</span>
+                            </div>
+                            <div class="text-xs text-slate-500 mt-1">"What is happening right now?"</div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Details Pane -->
+                    <div class="p-8 bg-stone-50 flex flex-col justify-center">
+                        <div id="layer-content">
+                            <!-- Dynamic Content Injected Here -->
+                            <div class="text-center text-slate-400">Select a layer to view details</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Protocols Quick Ref -->
+            <div class="mt-12">
+                <h3 class="text-lg font-bold text-slate-800 mb-4">Essential IoT Protocols</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200 text-center">
+                        <div class="font-bold text-blue-600">MQTT</div>
+                        <div class="text-xs text-slate-500 mt-1">Lightweight Pub/Sub</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200 text-center">
+                        <div class="font-bold text-slate-700">CoAP</div>
+                        <div class="text-xs text-slate-500 mt-1">Constrained REST</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200 text-center">
+                        <div class="font-bold text-slate-700">AMQP</div>
+                        <div class="text-xs text-slate-500 mt-1">Enterprise Messaging</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200 text-center">
+                        <div class="font-bold text-slate-700">HTTP</div>
+                        <div class="text-xs text-slate-500 mt-1">Web APIs</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200 text-center">
+                        <div class="font-bold text-slate-700">BLE</div>
+                        <div class="text-xs text-slate-500 mt-1">Short Range</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200 text-center">
+                        <div class="font-bold text-slate-700">LoRaWAN</div>
+                        <div class="text-xs text-slate-500 mt-1">Long Range</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: EDGE COMPUTING -->
+    <section id="edge" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row gap-12">
+                <div class="md:w-1/2 order-2 md:order-1">
+                    <!-- Chart Container for Latency -->
+                    <div class="bg-stone-50 p-6 rounded-xl shadow-sm border border-stone-200">
+                        <h3 class="text-sm font-semibold text-slate-500 uppercase mb-4 text-center">Round-Trip Latency Comparison</h3>
+                        <div class="chart-container">
+                            <canvas id="latencyChart"></canvas>
+                        </div>
+                        <div class="mt-4 text-center text-sm text-slate-600">
+                            <span class="font-bold text-amber-600">40x - 100x Faster</span> than Cloud-Only
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="md:w-1/2 order-1 md:order-2">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4 flex items-center">
+                        <span class="bg-amber-100 text-amber-600 w-10 h-10 rounded-lg flex items-center justify-center mr-3 text-xl">2</span>
+                        Edge Computing
+                    </h2>
+                    <p class="text-lg text-slate-600 mb-6 leading-relaxed">
+                        Why send all data to a distant cloud? It's too slow, expensive, and risky. Edge Computing brings the "Brain" to the data. 
+                        By processing data on-premise, we achieve ultra-low latency, save 90%+ bandwidth, and ensure privacy compliance.
+                    </p>
+                    
+                    <!-- Interactive Decision Framework -->
+                    <div class="bg-amber-50 rounded-lg p-6 border border-amber-100">
+                        <h3 class="font-bold text-amber-900 mb-3">When to use Edge vs. Cloud?</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="text-sm font-bold text-amber-800 uppercase tracking-wide mb-2">Choose EDGE For:</h4>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="bg-white p-2 rounded border border-amber-200 text-sm flex items-center"><span class="mr-2">⚡</span> Real-time Robotics</div>
+                                    <div class="bg-white p-2 rounded border border-amber-200 text-sm flex items-center"><span class="mr-2">🔒</span> Privacy (GDPR)</div>
+                                    <div class="bg-white p-2 rounded border border-amber-200 text-sm flex items-center"><span class="mr-2">💰</span> Bandwidth Cost</div>
+                                    <div class="bg-white p-2 rounded border border-amber-200 text-sm flex items-center"><span class="mr-2">🔋</span> Offline Resilience</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Example: Smart Retail -->
+            <div class="mt-12 bg-stone-900 text-white rounded-2xl p-8 shadow-2xl">
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl font-bold mb-2">Real-Life Example: Smart Retail Checkout</h3>
+                    <p class="text-stone-400">Toggle to see the difference in data flow.</p>
+                </div>
+                
+                <div class="flex justify-center mb-8">
+                    <div class="bg-stone-800 p-1 rounded-lg inline-flex">
+                        <button onclick="setRetailMode('cloud')" id="btn-cloud" class="px-6 py-2 rounded-md text-sm font-medium transition-colors bg-stone-800 text-stone-400 hover:text-white">Cloud-Only Approach</button>
+                        <button onclick="setRetailMode('edge')" id="btn-edge" class="px-6 py-2 rounded-md text-sm font-medium transition-colors bg-amber-600 text-white shadow-lg">Edge Approach</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center items-center" id="flow-diagram">
+                    <!-- Dynamic content managed by JS -->
+                </div>
+                
+                <div id="flow-stats" class="mt-8 pt-6 border-t border-stone-700 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <!-- Dynamic stats -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: M2M -->
+    <section id="m2m" class="py-16 bg-stone-50 border-t border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Intro -->
+            <div class="max-w-3xl mx-auto text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4 inline-flex items-center justify-center">
+                    <span class="bg-indigo-100 text-indigo-600 w-10 h-10 rounded-lg flex items-center justify-center mr-3 text-xl">3</span>
+                    Machine-to-Machine (M2M)
+                </h2>
+                <p class="text-lg text-slate-600">
+                    What changes when machines cut humans out of the loop? 
+                    While IoT keeps humans informed via dashboards, M2M enables machines to negotiate, decide, and execute autonomously.
+                </p>
+            </div>
+
+            <!-- Comparison Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">📊</div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">IoT Approach</h3>
+                    <ul class="space-y-3 text-slate-600">
+                        <li class="flex items-start"><span class="text-blue-500 mr-2">👤</span> <strong>Human</strong> is the end consumer.</li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-2">📡</span> Many devices -> Cloud -> Dashboard.</li>
+                        <li class="flex items-start"><span class="text-blue-500 mr-2">⏱️</span> Action waits for human review.</li>
+                    </ul>
+                </div>
+                <div class="bg-indigo-600 text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🤖</div>
+                    <h3 class="text-xl font-bold mb-4">M2M Approach</h3>
+                    <ul class="space-y-3 text-indigo-100">
+                        <li class="flex items-start"><span class="text-indigo-300 mr-2">⚡</span> <strong>Machine</strong> is the consumer.</li>
+                        <li class="flex items-start"><span class="text-indigo-300 mr-2">↔️</span> Device <-> Device (Point-to-Point).</li>
+                        <li class="flex items-start"><span class="text-indigo-300 mr-2">🚀</span> Autonomous execution (No waiting).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Interactive Scenario: Smart Fleet -->
+            <div class="bg-white rounded-2xl shadow-xl border border-stone-200 overflow-hidden max-w-4xl mx-auto">
+                <div class="p-6 bg-indigo-50 border-b border-indigo-100">
+                    <h3 class="text-lg font-bold text-indigo-900">Simulation: Autonomous Supply Chain</h3>
+                    <p class="text-sm text-indigo-700">Step through a fully autonomous delivery. Zero human interventions.</p>
+                </div>
+                
+                <div class="p-8">
+                    <!-- Progress Bar -->
+                    <div class="flex items-center justify-between mb-8 relative">
+                        <div class="absolute top-1/2 left-0 w-full h-1 bg-stone-200 -z-0"></div>
+                        <div id="progress-bar" class="absolute top-1/2 left-0 h-1 bg-indigo-600 -z-0 transition-all duration-300" style="width: 0%"></div>
+                        
+                        <!-- Steps dots generated by JS -->
+                        <div id="step-dots" class="w-full flex justify-between z-10">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Scene Display -->
+                    <div class="bg-stone-50 rounded-xl p-8 min-h-[200px] flex items-center justify-center text-center relative border border-stone-200">
+                        <div id="scenario-content" class="transition-all duration-300">
+                            <!-- Content injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="flex justify-between mt-6">
+                        <button onclick="prevStep()" class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-800 disabled:opacity-30" id="btn-prev">Previous</button>
+                        <button onclick="nextStep()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-md transition-all font-medium" id="btn-next">Next Interaction</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: SYNTHESIS & GLOSSARY -->
+    <section id="glossary" class="py-16 bg-white border-t border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8 text-center">Synthesis & Vocabulary</h2>
+
+            <!-- Key Takeaways Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="bg-stone-50 p-6 rounded-lg text-center border border-stone-100">
+                    <div class="text-4xl mb-2">📡</div>
+                    <h3 class="font-bold text-slate-800">IoT</h3>
+                    <p class="text-sm text-slate-500">Provides the DATA</p>
+                </div>
+                <div class="bg-stone-50 p-6 rounded-lg text-center border border-stone-100">
+                    <div class="text-4xl mb-2">⚡</div>
+                    <h3 class="font-bold text-slate-800">Edge</h3>
+                    <p class="text-sm text-slate-500">Provides the SPEED</p>
+                </div>
+                <div class="bg-stone-50 p-6 rounded-lg text-center border border-stone-100">
+                    <div class="text-4xl mb-2">🤖</div>
+                    <h3 class="font-bold text-slate-800">M2M</h3>
+                    <p class="text-sm text-slate-500">Provides the AUTONOMY</p>
+                </div>
+            </div>
+
+            <!-- Searchable Glossary -->
+            <div class="bg-white border border-stone-200 rounded-xl shadow-sm p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <h3 class="text-lg font-bold text-slate-800">Acronym Reference</h3>
+                    <input type="text" id="searchInput" onkeyup="filterGlossary()" placeholder="Search terms (e.g., MQTT, GDPR)..." class="w-full sm:w-64 px-4 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-left text-sm" id="glossaryTable">
+                        <thead class="bg-stone-50 text-slate-500 uppercase tracking-wider font-semibold">
+                            <tr>
+                                <th class="px-4 py-3 rounded-tl-lg">Term</th>
+                                <th class="px-4 py-3 rounded-tr-lg">Definition / Context</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-stone-100 text-slate-700" id="glossaryBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-stone-900 text-stone-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="mb-4 text-stone-200 font-medium">Cyber.SoHo | Digital Technology Program</p>
+            <p class="text-sm">© 2026, Educational Material</p>
+            <p class="text-xs mt-4 text-stone-600">Disclaimer: All material provided for educational purposes only. Verify external links before visiting.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- DATA & STATE ---
+
+        // Glossary Data
+        const glossaryData = [
+            { term: "IoT", def: "Internet of Things: Objects with sensors exchanging data." },
+            { term: "IIoT", def: "Industrial Internet of Things: IoT applied to manufacturing/supply chains." },
+            { term: "Edge Computing", def: "Processing data near the source (local) rather than in the cloud." },
+            { term: "M2M", def: "Machine-to-Machine: Autonomous communication between devices." },
+            { term: "MQTT", def: "Message Queuing Telemetry Transport: Lightweight pub/sub protocol." },
+            { term: "CoAP", def: "Constrained Application Protocol: RESTful comms for limited devices." },
+            { term: "LoRaWAN", def: "Long-Range Wide-Area Network: Kilometre-range sensor networks." },
+            { term: "BLE", def: "Bluetooth Low Energy: Short-range, low-power pairing." },
+            { term: "GDPR", def: "General Data Protection Regulation: EU data privacy laws." },
+            { term: "Latency", def: "Time delay between cause and effect (e.g., sending data and getting a response)." },
+            { term: "V2V / V2I", def: "Vehicle-to-Vehicle / Vehicle-to-Infrastructure communication." },
+            { term: "RFID", def: "Radio-Frequency Identification: Tags for tracking items." },
+            { term: "OPC-UA", def: "Open Platform Communications Unified Architecture: Industrial interoperability." }
+        ];
+
+        // Layer Data
+        const layerData = {
+            layer1: {
+                title: "Layer 1: Perception (The Senses)",
+                content: "Physical sensors and actuators interacting with the real world. Examples: Temperature probes, GPS receivers, RFID readers.",
+                icon: "🌡️"
+            },
+            layer2: {
+                title: "Layer 2: Network (The Nervous System)",
+                content: "Communication protocols carrying raw data to processing centres. Includes Wi-Fi, BLE, LoRaWAN, 4G/5G.",
+                icon: "📶"
+            },
+            layer3: {
+                title: "Layer 3: Processing (The Brain)",
+                content: "Cloud or on-premise servers that store, clean, and analyse incoming data using rules engines or ML.",
+                icon: "🧠"
+            },
+            layer4: {
+                title: "Layer 4: Application (The Hands)",
+                content: "Dashboards, mobile apps, and automated actuators delivering value. Example: Farmer sees soil chart, valve opens.",
+                icon: "📱"
+            }
+        };
+
+        // M2M Scenario Steps
+        const m2mSteps = [
+            { 
+                title: "Scenario Start", 
+                text: "A delivery truck approaches a smart city intersection. It is carrying perishable cargo.",
+                icon: "🚚"
+            },
+            { 
+                title: "Step 1: Truck -> Signal", 
+                text: "Truck transmits: 'I am arriving in 90 seconds, cargo is perishable.'",
+                icon: "📡"
+            },
+            { 
+                title: "Step 2: Signal -> Truck", 
+                text: "Signal decides: 'Extended green phase granted. Use Lane 2.' (Traffic flow optimized autonomously)",
+                icon: "🚦"
+            },
+            { 
+                title: "Step 3: Truck -> Warehouse", 
+                text: "Truck updates Warehouse: 'ETA 4 minutes. Requesting Bay 3.'",
+                icon: "🏭"
+            },
+            { 
+                title: "Step 4: Warehouse -> Truck", 
+                text: "Warehouse confirms: 'Bay 3 confirmed. Conveyor belt pre-positioned.'",
+                icon: "✅"
+            },
+            { 
+                title: "Step 5: Warehouse -> Fuel Pump", 
+                text: "Warehouse triggers Pump: 'Refuel Truck #47, 120L. Auto-bill to PO.'",
+                icon: "⛽"
+            },
+            { 
+                title: "Step 6: Payment Complete", 
+                text: "Pump dispenses and bills €206.40 automatically. Zero human interaction.",
+                icon: "💳"
+            }
+        ];
+
+        let currentStep = 0;
+
+        // --- INITIALIZATION ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initIoTChart();
+            initLatencyChart();
+            showLayer('layer1'); // Default layer
+            renderGlossary(glossaryData);
+            renderScenario();
+            setRetailMode('cloud'); // Default retail mode
+        });
+
+        // --- NAVIGATION ---
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- CHARTS (Chart.js) ---
+
+        function initIoTChart() {
+            const ctx = document.getElementById('iotGrowthChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['2023', '2030 (Proj)'],
+                    datasets: [{
+                        label: 'Connected Devices (Billions)',
+                        data: [16, 30],
+                        backgroundColor: ['#93c5fd', '#2563eb'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.raw + ' Billion Devices';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Billions' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initLatencyChart() {
+            const ctx = document.getElementById('latencyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Cloud-Only', 'Edge Computing'],
+                    datasets: [{
+                        label: 'Round-Trip Latency (ms)',
+                        data: [800, 20], // Using avg/representative values from slides
+                        backgroundColor: ['#cbd5e1', '#d97706'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Horizontal bar for better label readability
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.raw + ' ms';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'logarithmic', // Log scale because 800 vs 20 is huge
+                            title: { display: true, text: 'Milliseconds (Log Scale)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- INTERACTIVITY: IOT LAYERS ---
+
+        function showLayer(layerId) {
+            // Reset Tabs
+            document.querySelectorAll('.layer-card').forEach(el => {
+                el.classList.remove('active', 'border-l-4', 'border-blue-500', 'bg-blue-50');
+                el.classList.add('border-stone-200');
+            });
+
+            // Activate Tab
+            const activeTab = document.getElementById('tab-' + layerId);
+            activeTab.classList.add('active');
+
+            // Update Content
+            const data = layerData[layerId];
+            const contentDiv = document.getElementById('layer-content');
+            
+            // Fade effect
+            contentDiv.style.opacity = 0;
+            setTimeout(() => {
+                contentDiv.innerHTML = `
+                    <div class="text-center md:text-left animate-fade-in">
+                        <div class="text-6xl mb-4 text-center">${data.icon}</div>
+                        <h4 class="text-2xl font-bold text-slate-800 mb-3">${data.title}</h4>
+                        <p class="text-lg text-slate-600 leading-relaxed">${data.content}</p>
+                    </div>
+                `;
+                contentDiv.style.opacity = 1;
+            }, 200);
+        }
+
+        // --- INTERACTIVITY: EDGE RETAIL DEMO ---
+
+        function setRetailMode(mode) {
+            const btnCloud = document.getElementById('btn-cloud');
+            const btnEdge = document.getElementById('btn-edge');
+            const diagram = document.getElementById('flow-diagram');
+            const stats = document.getElementById('flow-stats');
+
+            // Button Styles
+            if (mode === 'cloud') {
+                btnCloud.className = "px-6 py-2 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white shadow-lg";
+                btnEdge.className = "px-6 py-2 rounded-md text-sm font-medium transition-colors bg-stone-800 text-stone-400 hover:text-white";
+                
+                diagram.innerHTML = `
+                    <div class="bg-stone-700 p-4 rounded-lg"><div class="text-3xl">📷</div><div class="text-xs mt-2">Camera</div></div>
+                    <div class="text-blue-400 font-mono text-xs">Raw Video<br>---------></div>
+                    <div class="bg-blue-900 p-4 rounded-lg border border-blue-500"><div class="text-3xl">☁️</div><div class="text-xs mt-2">Cloud Server</div></div>
+                    <div class="text-blue-400 font-mono text-xs">Response<br><---------</div>
+                `;
+                
+                stats.innerHTML = `
+                    <div><div class="text-2xl font-bold text-red-400">800ms+</div><div class="text-xs text-stone-500 uppercase">Latency</div></div>
+                    <div><div class="text-2xl font-bold text-red-400">High</div><div class="text-xs text-stone-500 uppercase">Bandwidth</div></div>
+                    <div><div class="text-2xl font-bold text-red-400">Risky</div><div class="text-xs text-stone-500 uppercase">Privacy</div></div>
+                    <div><div class="text-2xl font-bold text-red-400">Fails</div><div class="text-xs text-stone-500 uppercase">Offline</div></div>
+                `;
+
+            } else {
+                btnEdge.className = "px-6 py-2 rounded-md text-sm font-medium transition-colors bg-amber-600 text-white shadow-lg";
+                btnCloud.className = "px-6 py-2 rounded-md text-sm font-medium transition-colors bg-stone-800 text-stone-400 hover:text-white";
+
+                diagram.innerHTML = `
+                    <div class="bg-stone-700 p-4 rounded-lg"><div class="text-3xl">📷</div><div class="text-xs mt-2">Camera</div></div>
+                    <div class="text-amber-400 font-mono text-xs">Raw Data<br>-></div>
+                    <div class="bg-amber-900 p-4 rounded-lg border border-amber-500"><div class="text-3xl">⚡</div><div class="text-xs mt-2">Local Edge</div></div>
+                    <div class="text-stone-500 font-mono text-xs">Metadata Only<br>---------> ☁️</div>
+                `;
+
+                stats.innerHTML = `
+                    <div><div class="text-2xl font-bold text-green-400">20ms</div><div class="text-xs text-stone-500 uppercase">Latency</div></div>
+                    <div><div class="text-2xl font-bold text-green-400">Low</div><div class="text-xs text-stone-500 uppercase">Bandwidth</div></div>
+                    <div><div class="text-2xl font-bold text-green-400">Safe</div><div class="text-xs text-stone-500 uppercase">Privacy</div></div>
+                    <div><div class="text-2xl font-bold text-green-400">Works</div><div class="text-xs text-stone-500 uppercase">Offline</div></div>
+                `;
+            }
+        }
+
+        // --- INTERACTIVITY: M2M SCENARIO ---
+
+        function renderScenario() {
+            const data = m2mSteps[currentStep];
+            const content = document.getElementById('scenario-content');
+            const dotsContainer = document.getElementById('step-dots');
+            const progressBar = document.getElementById('progress-bar');
+            
+            // Update Text
+            content.style.opacity = 0;
+            setTimeout(() => {
+                content.innerHTML = `
+                    <div>
+                        <div class="text-5xl mb-4 animate-bounce">${data.icon}</div>
+                        <h4 class="text-xl font-bold text-indigo-900 mb-2">${data.title}</h4>
+                        <p class="text-slate-600">${data.text}</p>
+                    </div>
+                `;
+                content.style.opacity = 1;
+            }, 150);
+
+            // Update Progress Bar
+            const percent = (currentStep / (m2mSteps.length - 1)) * 100;
+            progressBar.style.width = `${percent}%`;
+
+            // Update Dots
+            dotsContainer.innerHTML = '';
+            m2mSteps.forEach((_, index) => {
+                const dot = document.createElement('div');
+                const isActive = index <= currentStep;
+                const isCurrent = index === currentStep;
+                
+                dot.className = `w-4 h-4 rounded-full border-2 transition-all duration-300 z-20 ${
+                    isActive ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-stone-300'
+                } ${isCurrent ? 'scale-125 ring-4 ring-indigo-200' : ''}`;
+                
+                dotsContainer.appendChild(dot);
+            });
+
+            // Button State
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            const nextBtn = document.getElementById('btn-next');
+            if (currentStep === m2mSteps.length - 1) {
+                nextBtn.innerText = "Restart Simulation";
+                nextBtn.classList.replace('bg-indigo-600', 'bg-slate-800');
+            } else {
+                nextBtn.innerText = "Next Interaction";
+                nextBtn.classList.replace('bg-slate-800', 'bg-indigo-600');
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < m2mSteps.length - 1) {
+                currentStep++;
+            } else {
+                currentStep = 0; // Restart
+            }
+            renderScenario();
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderScenario();
+            }
+        }
+
+        // --- GLOSSARY SEARCH ---
+
+        function renderGlossary(data) {
+            const tbody = document.getElementById('glossaryBody');
+            tbody.innerHTML = data.map(item => `
+                <tr class="hover:bg-stone-50 transition-colors">
+                    <td class="px-4 py-3 font-bold text-slate-800 border-b border-stone-100">${item.term}</td>
+                    <td class="px-4 py-3 text-slate-600 border-b border-stone-100">${item.def}</td>
+                </tr>
+            `).join('');
+        }
+
+        function filterGlossary() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = glossaryData.filter(item => 
+                item.term.toLowerCase().includes(term) || 
+                item.def.toLowerCase().includes(term)
+            );
+            renderGlossary(filtered);
+        }
+
+    </script>
+</body>
+</html>
+
+
+
+

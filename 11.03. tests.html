@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emerging Tech Study Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Flashcard Flip Animation Styles */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .transition-transform-600 {
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+        
+        /* Custom scrollbar for rationale text if it gets too long */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen font-sans">
+
+    <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">Emerging Technologies Study Tool</h1>
+            <p class="text-slate-600">IoT, Edge Computing & M2M</p>
+        </header>
+
+        <!-- Tabs -->
+        <div class="flex border-b border-slate-300 mb-6 justify-center space-x-4">
+            <button id="tab-btn-flashcards" onclick="switchTab('flashcards')" class="px-6 py-3 text-lg font-medium text-blue-600 border-b-2 border-blue-600 hover:text-blue-800 transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-layer-group"></i> Flashcards
+            </button>
+            <button id="tab-btn-quiz" onclick="switchTab('quiz')" class="px-6 py-3 text-lg font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700 hover:border-slate-300 transition-colors flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-question"></i> Practice Quiz
+            </button>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 min-h-[500px] relative">
+            
+            <!-- ================= FLASHCARDS TAB ================= -->
+            <div id="tab-flashcards" class="block">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-slate-800">Concept Review</h2>
+                    <span id="flashcard-counter" class="text-sm font-medium bg-blue-100 text-blue-800 py-1 px-3 rounded-full">1 / 20</span>
+                </div>
+
+                <!-- Flashcard Container -->
+                <div class="perspective-1000 w-full max-w-2xl mx-auto h-[300px] cursor-pointer group" onclick="flipCard()">
+                    <div id="flashcard-inner" class="relative w-full h-full text-center transition-transform-600 transform-style-3d shadow-md hover:shadow-lg rounded-2xl">
+                        
+                        <!-- Front Face -->
+                        <div class="absolute w-full h-full backface-hidden bg-gradient-to-br from-blue-50 to-white rounded-2xl border-2 border-blue-100 flex flex-col items-center justify-center p-8">
+                            <span class="absolute top-4 left-4 text-xs font-bold tracking-wider text-blue-400 uppercase">Front</span>
+                            <p id="flashcard-front" class="text-2xl font-medium text-slate-800">Front text goes here</p>
+                            <span class="absolute bottom-4 right-4 text-slate-400 opacity-50 group-hover:opacity-100 transition-opacity"><i class="fa-solid fa-rotate"></i> Click to flip</span>
+                        </div>
+
+                        <!-- Back Face -->
+                        <div class="absolute w-full h-full backface-hidden bg-gradient-to-br from-indigo-50 to-white rounded-2xl border-2 border-indigo-100 flex flex-col items-center justify-center p-8 rotate-y-180">
+                            <span class="absolute top-4 left-4 text-xs font-bold tracking-wider text-indigo-400 uppercase">Back</span>
+                            <p id="flashcard-back" class="text-xl text-slate-700">Back text goes here</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex justify-center items-center gap-4 mt-8">
+                    <button onclick="prevCard()" class="p-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors focus:outline-none" title="Previous Card">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button onclick="shuffleCards()" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition-colors focus:outline-none flex items-center gap-2" title="Shuffle Cards">
+                        <i class="fa-solid fa-shuffle"></i> Shuffle
+                    </button>
+                    <button onclick="nextCard()" class="p-3 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 transition-colors focus:outline-none" title="Next Card">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= QUIZ TAB ================= -->
+            <div id="tab-quiz" class="hidden">
+                
+                <!-- Setup/Results View -->
+                <div id="quiz-intro" class="text-center py-12">
+                    <i class="fa-solid fa-graduation-cap text-6xl text-blue-500 mb-4"></i>
+                    <h2 class="text-2xl font-bold mb-2" id="quiz-intro-title">Ready to test your knowledge?</h2>
+                    <p class="text-slate-600 mb-8" id="quiz-intro-desc">10 multiple-choice questions on IoT, Edge, and M2M.</p>
+                    <button onclick="startQuiz()" class="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                        Start Quiz
+                    </button>
+                </div>
+
+                <!-- Active Question View -->
+                <div id="quiz-active" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <span id="quiz-counter" class="text-sm font-medium text-slate-500">Question 1 of 10</span>
+                        <span id="quiz-score" class="text-sm font-medium bg-green-100 text-green-800 py-1 px-3 rounded-full">Score: 0</span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-200 rounded-full h-2 mb-8">
+                        <div id="quiz-progress" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 10%"></div>
+                    </div>
+
+                    <!-- Question -->
+                    <h3 id="quiz-question-text" class="text-xl font-semibold text-slate-800 mb-6">Question text goes here?</h3>
+
+                    <!-- Hint Button -->
+                    <button onclick="toggleHint()" id="hint-btn" class="text-sm text-blue-600 hover:text-blue-800 mb-4 flex items-center gap-1">
+                        <i class="fa-regular fa-lightbulb"></i> Need a hint?
+                    </button>
+                    <div id="quiz-hint" class="hidden bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg mb-6 text-sm">
+                        Hint goes here.
+                    </div>
+
+                    <!-- Options -->
+                    <div id="quiz-options" class="space-y-3 mb-6">
+                        <!-- Options generated via JS -->
+                    </div>
+
+                    <!-- Rationale (Feedback) -->
+                    <div id="quiz-feedback" class="hidden p-4 rounded-lg mb-6 text-sm shadow-inner custom-scrollbar">
+                        <!-- Rationale goes here -->
+                    </div>
+
+                    <!-- Next Button -->
+                    <div class="text-right">
+                        <button id="btn-next-question" onclick="nextQuestion()" class="hidden px-6 py-2 bg-slate-800 text-white font-medium rounded-lg hover:bg-slate-900 transition-colors">
+                            Next Question <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ================= DATA =================
+        const originalFlashcardsData = [
+            { front: "Core function of IoT (Internet of Things)", back: "To connect physical objects to the digital world, allowing them to sense, communicate, and act." },
+            { front: "The 4 Layers of IoT Architecture", back: "1. Perception (Sense)\n2. Network (Transmit)\n3. Processing (Analyse)\n4. Application (Act)" },
+            { front: "IoT Layer 1: Perception", back: "The 'Senses' layer, consisting of physical sensors and actuators that interact with the real world (e.g., temperature probes, GPS)." },
+            { front: "MQTT", back: "Message Queuing Telemetry Transport; a lightweight pub/sub protocol ideal for sensors." },
+            { front: "CoAP", back: "Constrained Application Protocol; designed for RESTful communication on resource-limited devices." },
+            { front: "LoRaWAN", back: "Long-Range Wide-Area Network; a protocol used for kilometre-range sensor networks." },
+            { front: "Edge Computing", back: "A distributed paradigm where data is processed at or near the physical location where it is generated, rather than in a centralised cloud." },
+            { front: "Three primary drivers for adopting Edge Computing", back: "1. Latency (speed)\n2. Bandwidth Cost (volume of data)\n3. Privacy & Compliance (data residency)" },
+            { front: "Latency Comparison: Cloud vs. Edge", back: "Cloud-only: 800–2,000 ms\nEdge: 5–20 ms (40–100x faster)" },
+            { front: "Fog Computing", back: "Processing that occurs at a regional node between the edge and the cloud (e.g., a city-wide traffic aggregator)." },
+            { front: "Mist Computing", back: "Computation that happens inside the sensor chip itself (e.g., MCU running TinyML)." },
+            { front: "Primary difference between IoT and M2M consumers", back: "In IoT, the human is the end consumer (viewing dashboards). In M2M, the machine is the end consumer (acting autonomously)." },
+            { front: "M2M (Machine-to-Machine)", back: "Direct communication between devices where machines negotiate, decide, and execute autonomously without human intervention." },
+            { front: "DSRC", back: "Dedicated Short-Range Communications; a protocol used for Vehicle-to-Vehicle (V2V) and Vehicle-to-Infrastructure (V2I) communication." },
+            { front: "OPC-UA", back: "Open Platform Communications — Unified Architecture; a standard for industrial interoperability." },
+            { front: "The Data Pipeline Concept (IoT → Edge → M2M)", back: "IoT generates the data (Perception); Edge processes the data locally (Speed); M2M acts on the data autonomously (Action)." },
+            { front: "Projected number of IoT devices by 2030", back: "Over 30 billion connected devices." },
+            { front: "Data generation of one autonomous vehicle", back: "Approximately 4 Terabytes (TB) of sensor data per day." },
+            { front: "Edge Computing Formula", back: "Edge = Low Latency + Bandwidth Savings + Privacy Compliance + Offline Resilience" },
+            { front: "IIoT", back: "Industrial Internet of Things; the application of IoT, Edge, and M2M in manufacturing and supply chains." }
+        ];
+
+        const originalQuizData = [
+            {
+                question: "In the context of the four-layer IoT architecture, a soil moisture probe in a smart greenhouse belongs to which layer?",
+                hint: "Think about the layer responsible for answering the question: 'What is happening right now?' in the physical world.",
+                options: [
+                    { text: "Perception Layer", rationale: "This layer consists of physical sensors and actuators that interact directly with the real world to capture raw data.", isCorrect: true },
+                    { text: "Network Layer", rationale: "The Network layer is responsible for transmitting data via protocols like Wi-Fi or LoRaWAN, not capturing the physical phenomenon itself.", isCorrect: false },
+                    { text: "Processing Layer", rationale: "The Processing layer analyzes and cleans data, typically on a server or cloud platform, after it has been captured and transmitted.", isCorrect: false },
+                    { text: "Application Layer", rationale: "The Application layer involves the user interface or dashboard where humans interact with the insights, rather than the raw data collection.", isCorrect: false }
+                ]
+            },
+            {
+                question: "You are designing a system for a battery-operated sensor that needs to send small packets of data occasionally. Which protocol is most suitable?",
+                hint: "Consider the protocol described as 'lightweight' and commonly associated with the 'pub/sub' model for sensors.",
+                options: [
+                    { text: "MQTT", rationale: "MQTT is designed as a lightweight publish/subscribe protocol specifically for sensors with limited power and bandwidth.", isCorrect: true },
+                    { text: "HTTP/REST", rationale: "HTTP is a general-purpose web protocol that is often too heavy and power-intensive for constrained battery-operated sensors.", isCorrect: false },
+                    { text: "AMQP", rationale: "AMQP is typically used for enterprise-level message brokering and is generally heavier than what is needed for simple sensor reporting.", isCorrect: false },
+                    { text: "DSRC", rationale: "DSRC is specifically designed for vehicle-to-vehicle communication, not general-purpose sensor networks.", isCorrect: false }
+                ]
+            },
+            {
+                question: "A factory implementation requires data processing to happen inside the sensor chip itself to minimize response time to under 1 millisecond. Which computing paradigm does this describe?",
+                hint: "This term refers to the most granular level of computing, even closer to the source than 'Fog' or general 'Edge'.",
+                options: [
+                    { text: "Mist Computing", rationale: "Mist computing pushes computation to the extreme edge, occurring directly on the microcontroller unit or sensor chip.", isCorrect: true },
+                    { text: "Fog Computing", rationale: "Fog computing occurs at a regional node, such as a LAN gateway or traffic aggregator, rather than on the device itself.", isCorrect: false },
+                    { text: "Cloud Computing", rationale: "Cloud computing takes place in distant data centers, resulting in much higher latency than 1 millisecond.", isCorrect: false },
+                    { text: "Edge Computing", rationale: "While Mist is a subset of Edge, Edge is a broader term usually implying a local server or gateway, whereas Mist is specifically 'on-chip'.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Which of the following scenarios best illustrates the primary advantage of Edge Computing over Cloud Computing?",
+                hint: "Focus on the scenario where a delay of a few hundred milliseconds could have immediate, dangerous physical consequences.",
+                options: [
+                    { text: "An autonomous vehicle braking for a pedestrian.", rationale: "This requires ultra-low latency (5-20ms) for safety, which Cloud computing (800ms+) cannot reliably provide.", isCorrect: true },
+                    { text: "Training a massive deep-learning model using historical data.", rationale: "Training large models requires the virtually unlimited elastic compute resources found in the Cloud, not the Edge.", isCorrect: false },
+                    { text: "Storing ten years of financial records for auditing.", rationale: "Long-term warehousing is a classic Cloud use case due to scale and cost-efficiency, whereas Edge has limited storage.", isCorrect: false },
+                    { text: "Generating a monthly sales report for a global retail chain.", rationale: "Business analytics and reporting are best handled in the Cloud where data from all regions can be aggregated.", isCorrect: false }
+                ]
+            },
+            {
+                question: "What is the fundamental distinction between an IoT application and an M2M (Machine-to-Machine) application?",
+                hint: "Consider who or what is the final 'decision maker' in the process: a person looking at a screen or a device executing a rule.",
+                options: [
+                    { text: "In M2M, machines negotiate and act autonomously; in IoT, humans are often the end consumers of data.", rationale: "M2M removes the human from the loop for routine transactions, whereas IoT typically aggregates data for human insight via dashboards.", isCorrect: true },
+                    { text: "M2M requires a cloud connection, while IoT operates entirely offline.", rationale: "This is reversed; IoT is often cloud-centric, whereas M2M can operate via direct point-to-point links (like RF or serial) without the internet.", isCorrect: false },
+                    { text: "IoT is used for industrial purposes, while M2M is only for consumer smart homes.", rationale: "M2M has deep roots in industrial utilities (telemetry) and automotive sectors, while IoT spans both consumer and industrial domains.", isCorrect: false },
+                    { text: "M2M uses sensors, whereas IoT does not.", rationale: "Both paradigms rely heavily on sensors to generate the data that drives the system.", isCorrect: false }
+                ]
+            },
+            {
+                question: "In a smart fleet scenario, a truck communicates directly with a traffic signal to request a longer green light. This is an example of which technology?",
+                hint: "Look for the acronym that describes communication between a moving car/truck and stationary road elements.",
+                options: [
+                    { text: "V2I (Vehicle-to-Infrastructure)", rationale: "This specific interaction involves a vehicle (the truck) talking to physical infrastructure (the traffic signal), a core M2M concept.", isCorrect: true },
+                    { text: "Cloud Analytics", rationale: "Sending the request to the cloud and back would introduce latency; M2M relies on direct point-to-point communication.", isCorrect: false },
+                    { text: "Perception Layer processing", rationale: "Perception involves sensing the environment, but the negotiation for a green light is an active communication and actuation process.", isCorrect: false },
+                    { text: "Mist Computing", rationale: "This involves communication between two distinct assets (truck and signal), not processing inside a single sensor chip.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Why might a healthcare provider strictly prefer Edge Computing over Cloud Computing for a patient monitoring system?",
+                hint: "Think about the legal implications of sending sensitive medical data across international borders or the public internet.",
+                options: [
+                    { text: "To ensure compliance with data residency and privacy regulations (GDPR).", rationale: "Processing biometric data on-premise avoids the legal and privacy risks associated with transferring sensitive data across borders to a cloud server.", isCorrect: true },
+                    { text: "To utilize unlimited storage for patient history.", rationale: "Unlimited storage is a benefit of the Cloud, not the Edge.", isCorrect: false },
+                    { text: "To reduce the power consumption of the hospital grid.", rationale: "While edge devices can be efficient, the primary driver in healthcare is usually privacy and latency, not grid power consumption.", isCorrect: false },
+                    { text: "Because the hospital has no internet connection.", rationale: "While Edge provides offline resilience, hospitals generally have connectivity; the preference is driven by privacy and regulation.", isCorrect: false }
+                ]
+            },
+            {
+                question: "Which protocol is standard for interoperability in industrial manufacturing, allowing CNC machines to exchange job schedules?",
+                hint: "This acronym is often associated with the 'Unified Architecture' used in smart factories.",
+                options: [
+                    { text: "OPC-UA", rationale: "Open Platform Communications Unified Architecture is the standard for industrial interoperability and M2M communication in factories.", isCorrect: true },
+                    { text: "CoAP", rationale: "CoAP is used for resource-constrained devices, but OPC-UA is the specific standard for complex industrial machine interoperability.", isCorrect: false },
+                    { text: "BLE", rationale: "Bluetooth is for short-range pairing, not for managing complex job schedules between heavy industrial machinery.", isCorrect: false },
+                    { text: "LoRaWAN", rationale: "LoRaWAN is for long-range, low-power sensing, not for the high-speed, complex data exchange required by CNC machines.", isCorrect: false }
+                ]
+            },
+            {
+                question: "According to the 'Data Pipeline' concept, what is the distinct role of M2M compared to IoT and Edge?",
+                hint: "IoT gives us the 'eyes' (sensors), Edge gives us the 'brain' (speed), so what does M2M give us in terms of execution?",
+                options: [
+                    { text: "It provides the autonomy.", rationale: "M2M allows machines to act on data without human intervention, completing the pipeline that starts with sensing (IoT) and processing (Edge).", isCorrect: true },
+                    { text: "It generates the data.", rationale: "Generating data is the primary role of IoT (Perception layer).", isCorrect: false },
+                    { text: "It provides the speed.", rationale: "Speed (low latency) is the primary value proposition of Edge Computing.", isCorrect: false },
+                    { text: "It provides unlimited storage.", rationale: "Unlimited storage is a characteristic of Cloud computing.", isCorrect: false }
+                ]
+            },
+            {
+                question: "A retail chain wants to upload 4K video from every security camera to the cloud for analysis. What is the most likely barrier they will face?",
+                hint: "Consider the sheer volume of data involved in 4K video and the cost associated with moving that volume over the internet.",
+                options: [
+                    { text: "Bandwidth Cost", rationale: "Streaming terabytes of raw video daily is prohibitively expensive and clogs the network, which is a primary driver for moving to Edge processing.", isCorrect: true },
+                    { text: "Lack of Cloud storage space", rationale: "The Cloud has virtually unlimited storage; the bottleneck is the pipe (bandwidth) to get the data there.", isCorrect: false },
+                    { text: "Inability of cameras to record 4K", rationale: "Modern cameras easily record 4K; the issue is data transmission, not capture capability.", isCorrect: false },
+                    { text: "Lack of processing power in the cloud", rationale: "The Cloud has immense processing power; the issue is the cost and latency of getting the raw data to that power.", isCorrect: false }
+                ]
+            }
+        ];
+
+        // Deep copy state arrays to allow resetting
+        let flashcardsData = [...originalFlashcardsData];
+        let quizData = [...originalQuizData];
+
+        // ================= TAB NAVIGATION =================
+        function switchTab(tabId) {
+            // Update buttons
+            document.getElementById('tab-btn-flashcards').className = tabId === 'flashcards' 
+                ? "px-6 py-3 text-lg font-medium text-blue-600 border-b-2 border-blue-600 hover:text-blue-800 transition-colors flex items-center gap-2"
+                : "px-6 py-3 text-lg font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700 hover:border-slate-300 transition-colors flex items-center gap-2";
+            
+            document.getElementById('tab-btn-quiz').className = tabId === 'quiz' 
+                ? "px-6 py-3 text-lg font-medium text-blue-600 border-b-2 border-blue-600 hover:text-blue-800 transition-colors flex items-center gap-2"
+                : "px-6 py-3 text-lg font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700 hover:border-slate-300 transition-colors flex items-center gap-2";
+
+            // Update content visibility
+            document.getElementById('tab-flashcards').style.display = tabId === 'flashcards' ? 'block' : 'none';
+            document.getElementById('tab-quiz').style.display = tabId === 'quiz' ? 'block' : 'none';
+        }
+
+        // ================= FLASHCARDS LOGIC =================
+        let currentCardIndex = 0;
+        let isCardFlipped = false;
+
+        function renderFlashcard() {
+            const card = flashcardsData[currentCardIndex];
+            document.getElementById('flashcard-front').innerText = card.front;
+            
+            // Handle newlines in the back text
+            document.getElementById('flashcard-back').innerHTML = card.back.replace(/\n/g, '<br>');
+            
+            document.getElementById('flashcard-counter').innerText = `${currentCardIndex + 1} / ${flashcardsData.length}`;
+            
+            // Reset flip state
+            isCardFlipped = false;
+            document.getElementById('flashcard-inner').classList.remove('rotate-y-180');
+        }
+
+        function flipCard() {
+            isCardFlipped = !isCardFlipped;
+            const cardInner = document.getElementById('flashcard-inner');
+            if (isCardFlipped) {
+                cardInner.classList.add('rotate-y-180');
+            } else {
+                cardInner.classList.remove('rotate-y-180');
+            }
+        }
+
+        function nextCard() {
+            if (currentCardIndex < flashcardsData.length - 1) {
+                currentCardIndex++;
+            } else {
+                currentCardIndex = 0; // Loop back
+            }
+            renderFlashcard();
+        }
+
+        function prevCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+            } else {
+                currentCardIndex = flashcardsData.length - 1; // Loop to end
+            }
+            renderFlashcard();
+        }
+
+        function shuffleCards() {
+            // Fisher-Yates shuffle
+            for (let i = flashcardsData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [flashcardsData[i], flashcardsData[j]] = [flashcardsData[j], flashcardsData[i]];
+            }
+            currentCardIndex = 0;
+            renderFlashcard();
+        }
+
+        // Initialize flashcards
+        renderFlashcard();
+
+        // ================= QUIZ LOGIC =================
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let hasAnswered = false;
+
+        function startQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            hasAnswered = false;
+            
+            // Shuffle quiz questions and their options
+            quizData.sort(() => Math.random() - 0.5);
+            quizData.forEach(q => q.options.sort(() => Math.random() - 0.5));
+
+            document.getElementById('quiz-intro').classList.add('hidden');
+            document.getElementById('quiz-active').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            hasAnswered = false;
+            const q = quizData[currentQuizIndex];
+            
+            // Update UI Counters
+            document.getElementById('quiz-counter').innerText = `Question ${currentQuizIndex + 1} of ${quizData.length}`;
+            document.getElementById('quiz-score').innerText = `Score: ${quizScore}`;
+            document.getElementById('quiz-progress').style.width = `${((currentQuizIndex) / quizData.length) * 100}%`;
+            
+            // Render Question Text
+            document.getElementById('quiz-question-text').innerText = q.question;
+            
+            // Reset and load Hint
+            document.getElementById('quiz-hint').innerText = q.hint;
+            document.getElementById('quiz-hint').classList.add('hidden');
+            document.getElementById('hint-btn').classList.remove('hidden');
+
+            // Render Options
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 option-btn";
+                btn.onclick = () => selectOption(index, btn);
+                
+                // Add letter prefix (A, B, C, D)
+                const letter = String.fromCharCode(65 + index);
+                btn.innerHTML = `<span class="font-bold mr-2 text-slate-500">${letter}.</span> ${opt.text}`;
+                
+                optionsContainer.appendChild(btn);
+            });
+
+            // Hide feedback and next button
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('btn-next-question').classList.add('hidden');
+        }
+
+        function toggleHint() {
+            document.getElementById('quiz-hint').classList.toggle('hidden');
+            document.getElementById('hint-btn').classList.toggle('hidden');
+        }
+
+        function selectOption(selectedIndex, buttonElement) {
+            if (hasAnswered) return; // Prevent multiple selections
+            hasAnswered = true;
+
+            const q = quizData[currentQuizIndex];
+            const selectedOption = q.options[selectedIndex];
+            const isCorrect = selectedOption.isCorrect;
+
+            // Update Score
+            if (isCorrect) quizScore++;
+            document.getElementById('quiz-score').innerText = `Score: ${quizScore}`;
+            document.getElementById('quiz-progress').style.width = `${((currentQuizIndex + 1) / quizData.length) * 100}%`;
+
+            // Style options
+            const allButtons = document.querySelectorAll('.option-btn');
+            allButtons.forEach((btn, idx) => {
+                btn.classList.remove('hover:bg-slate-100');
+                btn.disabled = true;
+                btn.classList.add('cursor-default');
+
+                const optionData = q.options[idx];
+                
+                if (optionData.isCorrect) {
+                    btn.classList.add('bg-green-50', 'border-green-400', 'text-green-900');
+                    btn.classList.remove('bg-slate-50', 'border-slate-200');
+                    // Add checkmark
+                    btn.innerHTML += '<i class="fa-solid fa-check float-right text-green-600 mt-1"></i>';
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.add('bg-red-50', 'border-red-400', 'text-red-900');
+                    btn.classList.remove('bg-slate-50', 'border-slate-200');
+                    // Add cross
+                    btn.innerHTML += '<i class="fa-solid fa-xmark float-right text-red-600 mt-1"></i>';
+                } else {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            // Show Feedback/Rationale
+            const feedbackBox = document.getElementById('quiz-feedback');
+            feedbackBox.classList.remove('hidden');
+            
+            if (isCorrect) {
+                feedbackBox.className = 'p-4 rounded-lg mb-6 text-sm shadow-inner bg-green-50 border border-green-200 text-green-800';
+                feedbackBox.innerHTML = `<strong>Correct!</strong> <br> ${selectedOption.rationale}`;
+            } else {
+                feedbackBox.className = 'p-4 rounded-lg mb-6 text-sm shadow-inner bg-red-50 border border-red-200 text-red-800';
+                feedbackBox.innerHTML = `<strong>Incorrect.</strong> <br> ${selectedOption.rationale}`;
+            }
+
+            // Hide hint if shown
+            document.getElementById('quiz-hint').classList.add('hidden');
+            document.getElementById('hint-btn').classList.add('hidden');
+
+            // Show Next Button or Finish
+            const nextBtn = document.getElementById('btn-next-question');
+            nextBtn.classList.remove('hidden');
+            if (currentQuizIndex === quizData.length - 1) {
+                nextBtn.innerHTML = 'See Results <i class="fa-solid fa-flag-checkered ml-2"></i>';
+            } else {
+                nextBtn.innerHTML = 'Next Question <i class="fa-solid fa-arrow-right ml-2"></i>';
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuizIndex < quizData.length - 1) {
+                currentQuizIndex++;
+                renderQuestion();
+            } else {
+                showQuizResults();
+            }
+        }
+
+        function showQuizResults() {
+            document.getElementById('quiz-active').classList.add('hidden');
+            const introDiv = document.getElementById('quiz-intro');
+            introDiv.classList.remove('hidden');
+            
+            document.getElementById('quiz-intro-title').innerText = "Quiz Completed!";
+            document.getElementById('quiz-intro-desc').innerHTML = `You scored <strong class="text-blue-600 text-xl">${quizScore}</strong> out of ${quizData.length}.`;
+            
+            const startBtn = introDiv.querySelector('button');
+            startBtn.innerText = "Retake Quiz";
+            startBtn.onclick = startQuiz;
+        }
+
+        // Add keyboard support for flashcards
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('tab-flashcards').style.display !== 'none') {
+                if (e.key === 'ArrowRight') nextCard();
+                if (e.key === 'ArrowLeft') prevCard();
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    flipCard();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
+
