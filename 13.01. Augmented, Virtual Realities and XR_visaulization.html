@@ -1,0 +1,2427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 13: AR, VR & XR — Faculty of Digital Science</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #040c1a;
+  --surface: #071628;
+  --surface2: #0a1f35;
+  --primary: #00e5ff;
+  --secondary: #7c3aed;
+  --accent: #ff6b35;
+  --green: #00ff88;
+  --yellow: #f0b429;
+  --red: #ff4757;
+  --text: #dde8f0;
+  --muted: #4a6278;
+  --border: rgba(0,229,255,0.15);
+  --glow: 0 0 20px rgba(0,229,255,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  font-size:15px;
+  line-height:1.7;
+  overflow-x:hidden;
+}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:#040c1a;}
+::-webkit-scrollbar-thumb{background:var(--primary);border-radius:3px;}
+
+/* PROGRESS BAR */
+#progress-bar{
+  position:fixed;top:0;left:0;height:3px;
+  background:linear-gradient(90deg,var(--primary),var(--secondary));
+  z-index:9999;width:0%;transition:width 0.1s;
+}
+
+/* NAV */
+#main-nav{
+  position:fixed;top:3px;left:0;right:0;
+  background:rgba(4,12,26,0.92);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  z-index:1000;
+  padding:0 2rem;
+  display:flex;align-items:center;gap:0.5rem;
+  height:52px;
+}
+.nav-logo{
+  font-family:'Exo 2',sans-serif;
+  font-weight:900;font-size:1rem;
+  color:var(--primary);
+  margin-right:1rem;
+  letter-spacing:2px;
+  white-space:nowrap;
+}
+.nav-links{display:flex;gap:0.2rem;align-items:center;overflow-x:auto;flex:1;}
+.nav-link{
+  color:var(--muted);
+  text-decoration:none;
+  font-size:0.78rem;
+  font-weight:500;
+  padding:0.35rem 0.7rem;
+  border-radius:4px;
+  white-space:nowrap;
+  transition:all 0.2s;
+  letter-spacing:0.5px;
+}
+.nav-link:hover,.nav-link.active{color:var(--primary);background:rgba(0,229,255,0.08);}
+.nav-badge{
+  font-size:0.65rem;padding:2px 6px;
+  border-radius:10px;margin-left:0.3rem;
+  font-weight:700;
+}
+.badge-ar{background:rgba(0,229,255,0.2);color:var(--primary);}
+.badge-vr{background:rgba(124,58,237,0.3);color:#a78bfa;}
+.badge-xr{background:rgba(255,107,53,0.2);color:#ff6b35;}
+
+/* HERO */
+#hero{
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  padding:6rem 2rem 4rem;
+}
+#hero-canvas{
+  position:absolute;inset:0;
+  pointer-events:none;
+}
+.hero-content{
+  position:relative;z-index:1;
+  max-width:900px;width:100%;
+  text-align:center;
+}
+.hero-tag{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;
+  color:var(--primary);
+  border:1px solid var(--border);
+  padding:0.3rem 1rem;
+  border-radius:20px;
+  margin-bottom:1.5rem;
+  letter-spacing:3px;
+  background:rgba(0,229,255,0.05);
+  animation:fadeInDown 0.8s ease;
+}
+.hero-title{
+  font-family:'Exo 2',sans-serif;
+  font-weight:900;
+  font-size:clamp(2.5rem,6vw,5rem);
+  line-height:1.05;
+  margin-bottom:1rem;
+  animation:fadeInUp 0.8s ease 0.2s both;
+}
+.hero-title span{
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-subtitle{
+  font-size:1rem;color:var(--muted);
+  margin-bottom:2rem;
+  animation:fadeInUp 0.8s ease 0.4s both;
+  letter-spacing:1px;
+}
+.hero-quote{
+  background:rgba(0,229,255,0.05);
+  border-left:3px solid var(--primary);
+  padding:1.2rem 1.5rem;
+  border-radius:0 8px 8px 0;
+  font-style:italic;
+  color:#a0c4d8;
+  font-size:0.95rem;
+  max-width:600px;
+  margin:0 auto 2.5rem;
+  animation:fadeInUp 0.8s ease 0.6s both;
+}
+.hero-quote cite{display:block;font-style:normal;color:var(--muted);font-size:0.8rem;margin-top:0.5rem;}
+.hero-stats{
+  display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;
+  animation:fadeInUp 0.8s ease 0.8s both;
+}
+.hero-stat{
+  text-align:center;
+  background:rgba(0,229,255,0.06);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:1rem 1.5rem;
+  min-width:120px;
+}
+.hero-stat-val{
+  font-family:'Exo 2',sans-serif;
+  font-size:1.8rem;font-weight:900;
+  color:var(--primary);display:block;
+}
+.hero-stat-lbl{font-size:0.72rem;color:var(--muted);letter-spacing:1px;}
+.scroll-cue{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  animation:bounce 2s infinite;
+  color:var(--muted);font-size:1.5rem;
+}
+
+/* SECTION BASE */
+.section{padding:5rem 2rem;max-width:1100px;margin:0 auto;}
+.section-header{
+  text-align:center;margin-bottom:3.5rem;
+  opacity:0;transform:translateY(30px);
+  transition:all 0.7s ease;
+}
+.section-header.visible{opacity:1;transform:translateY(0);}
+.section-eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;letter-spacing:3px;
+  color:var(--primary);
+  text-transform:uppercase;
+  margin-bottom:0.8rem;
+  display:block;
+}
+.section-title{
+  font-family:'Exo 2',sans-serif;
+  font-weight:900;
+  font-size:clamp(1.8rem,3.5vw,3rem);
+  line-height:1.1;
+  margin-bottom:1rem;
+}
+.section-desc{color:var(--muted);max-width:650px;margin:0 auto;font-size:0.95rem;}
+
+/* CONTENT CARDS */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2rem;
+  margin-bottom:2rem;
+  opacity:0;transform:translateY(25px);
+  transition:all 0.6s ease;
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--primary),var(--secondary));
+  opacity:0;transition:opacity 0.3s;
+}
+.card:hover::before{opacity:1;}
+.card.visible{opacity:1;transform:translateY(0);}
+.card-title{
+  font-family:'Exo 2',sans-serif;
+  font-weight:700;font-size:1.2rem;
+  color:var(--primary);margin-bottom:1rem;
+  display:flex;align-items:center;gap:0.6rem;
+}
+
+/* LESSON DIVIDERS */
+.lesson-divider{
+  width:100%;
+  border:none;
+  border-top:1px solid var(--border);
+  margin:4rem 0;
+  position:relative;
+}
+
+/* AR SECTION COLORS */
+.ar-accent{color:var(--primary);}
+.vr-accent{color:#a78bfa;}
+.xr-accent{color:var(--accent);}
+
+/* LESSON BADGES */
+.lesson-badge{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  font-family:'Exo 2',sans-serif;
+  font-weight:700;font-size:1rem;
+  padding:0.5rem 1.2rem;
+  border-radius:30px;
+  margin-bottom:1.5rem;
+}
+.lesson-badge-ar{background:rgba(0,229,255,0.1);color:var(--primary);border:1px solid rgba(0,229,255,0.3);}
+.lesson-badge-vr{background:rgba(124,58,237,0.15);color:#a78bfa;border:1px solid rgba(124,58,237,0.3);}
+.lesson-badge-xr{background:rgba(255,107,53,0.1);color:var(--accent);border:1px solid rgba(255,107,53,0.3);}
+
+/* ARCHITECTURE DIAGRAM */
+.arch-diagram{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:2rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.82rem;
+  position:relative;
+}
+.arch-flow{
+  display:flex;
+  align-items:center;
+  gap:0;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-bottom:1.5rem;
+}
+.arch-box{
+  background:rgba(0,229,255,0.08);
+  border:1px solid rgba(0,229,255,0.25);
+  border-radius:8px;
+  padding:1rem 1.2rem;
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.3s;
+  min-width:140px;
+}
+.arch-box:hover,.arch-box.active{
+  background:rgba(0,229,255,0.18);
+  border-color:var(--primary);
+  box-shadow:var(--glow);
+  transform:translateY(-3px);
+}
+.arch-box-icon{font-size:1.5rem;margin-bottom:0.3rem;}
+.arch-box-title{font-weight:700;font-size:0.8rem;color:var(--primary);letter-spacing:1px;}
+.arch-box-sub{font-size:0.68rem;color:var(--muted);margin-top:0.2rem;}
+.arch-arrow{
+  color:var(--primary);font-size:1.5rem;
+  margin:0 0.5rem;opacity:0.6;
+}
+.arch-detail{
+  background:rgba(0,0,0,0.3);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:1rem 1.2rem;
+  font-size:0.8rem;
+  color:#a0c4d8;
+  min-height:60px;
+  transition:all 0.3s;
+  display:none;
+}
+.arch-detail.show{display:block;}
+.arch-algo-list{
+  display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1rem;
+}
+.algo-chip{
+  background:rgba(124,58,237,0.15);
+  border:1px solid rgba(124,58,237,0.3);
+  border-radius:20px;
+  padding:0.25rem 0.8rem;
+  font-size:0.72rem;
+  color:#a78bfa;
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* PIPELINE */
+.pipeline{display:flex;flex-direction:column;gap:0;}
+.pipeline-step{
+  display:flex;align-items:flex-start;gap:1rem;
+  padding:1rem;
+  border-left:2px solid var(--border);
+  margin-left:1.5rem;
+  position:relative;
+  transition:all 0.3s;
+}
+.pipeline-step:hover{border-left-color:var(--primary);}
+.pipeline-dot{
+  position:absolute;left:-7px;top:1.2rem;
+  width:12px;height:12px;
+  border-radius:50%;
+  background:var(--surface);
+  border:2px solid var(--muted);
+  transition:all 0.3s;
+}
+.pipeline-step:hover .pipeline-dot{
+  border-color:var(--primary);
+  box-shadow:0 0 10px var(--primary);
+  background:var(--primary);
+}
+.pipeline-content{flex:1;}
+.pipeline-label{
+  font-family:'Exo 2',sans-serif;
+  font-weight:700;font-size:0.85rem;
+  color:var(--primary);margin-bottom:0.2rem;
+  letter-spacing:1px;
+}
+.pipeline-sub{font-size:0.78rem;color:var(--muted);}
+
+/* TABLES */
+.data-table{
+  width:100%;border-collapse:collapse;
+  font-size:0.82rem;
+}
+.data-table th{
+  background:rgba(0,229,255,0.1);
+  color:var(--primary);
+  font-family:'Exo 2',sans-serif;
+  font-weight:700;
+  padding:0.8rem 1rem;
+  text-align:left;
+  letter-spacing:1px;
+  font-size:0.75rem;
+  border-bottom:1px solid var(--border);
+}
+.data-table td{
+  padding:0.7rem 1rem;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  color:#a0c4d8;
+  vertical-align:top;
+}
+.data-table tr:hover td{background:rgba(0,229,255,0.03);}
+.data-table a{color:var(--primary);text-decoration:none;font-weight:500;}
+.data-table a:hover{text-decoration:underline;}
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);}
+
+/* CODE BLOCKS */
+.code-container{
+  background:#020b17;
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  margin-top:1.5rem;
+}
+.code-header{
+  background:var(--surface2);
+  padding:0.75rem 1.2rem;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);
+}
+.code-filename{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.78rem;color:var(--primary);
+}
+.code-lang{
+  font-size:0.68rem;padding:2px 8px;
+  background:rgba(124,58,237,0.2);
+  color:#a78bfa;border-radius:4px;
+  font-family:'JetBrains Mono',monospace;
+  margin-left:0.5rem;
+}
+.copy-btn{
+  background:rgba(0,229,255,0.1);
+  border:1px solid var(--border);
+  color:var(--primary);
+  font-size:0.72rem;
+  padding:0.3rem 0.8rem;
+  border-radius:6px;
+  cursor:pointer;
+  font-family:'JetBrains Mono',monospace;
+  transition:all 0.2s;
+}
+.copy-btn:hover{background:rgba(0,229,255,0.2);}
+.code-body{
+  padding:1.5rem;
+  overflow-x:auto;
+  max-height:400px;
+  overflow-y:auto;
+}
+pre{font-family:'JetBrains Mono',monospace;font-size:0.78rem;line-height:1.6;white-space:pre;}
+.code-toggle{
+  background:var(--surface2);
+  border:none;border-top:1px solid var(--border);
+  color:var(--muted);
+  padding:0.6rem 1.2rem;
+  width:100%;text-align:center;
+  cursor:pointer;font-size:0.78rem;
+  transition:all 0.2s;
+}
+.code-toggle:hover{color:var(--primary);background:rgba(0,229,255,0.05);}
+
+/* SYNTAX HIGHLIGHT */
+.kw{color:#ff7eb3;}
+.fn{color:#7ee8ff;}
+.st{color:#a8ff78;}
+.cm{color:#4a6278;font-style:italic;}
+.nb{color:#ffcc44;}
+.op{color:#ff6b35;}
+.cls{color:#ffd700;}
+
+/* PILLARS */
+.pillars-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;}
+.pillar-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2rem;
+  transition:all 0.4s;
+  cursor:pointer;
+  position:relative;overflow:hidden;
+}
+.pillar-card::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(124,58,237,0.05),transparent);
+  opacity:0;transition:opacity 0.3s;
+}
+.pillar-card:hover{
+  transform:translateY(-6px);
+  border-color:rgba(124,58,237,0.5);
+  box-shadow:0 20px 40px rgba(0,0,0,0.3),0 0 30px rgba(124,58,237,0.15);
+}
+.pillar-card:hover::after{opacity:1;}
+.pillar-num{
+  font-family:'Exo 2',sans-serif;
+  font-size:3rem;font-weight:900;
+  color:rgba(124,58,237,0.2);
+  line-height:1;margin-bottom:0.5rem;
+}
+.pillar-title{
+  font-family:'Exo 2',sans-serif;
+  font-weight:700;font-size:1.1rem;
+  color:#a78bfa;margin-bottom:0.8rem;
+  letter-spacing:1px;
+}
+.pillar-items{list-style:none;padding:0;}
+.pillar-items li{
+  padding:0.35rem 0;
+  color:#8090b0;
+  font-size:0.83rem;
+  display:flex;align-items:flex-start;gap:0.5rem;
+}
+.pillar-items li::before{content:'▸';color:#a78bfa;flex-shrink:0;margin-top:2px;}
+
+/* CONTINUUM */
+.continuum-wrap{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2rem;
+  text-align:center;
+}
+.continuum-bar{
+  position:relative;
+  height:80px;
+  display:flex;
+  align-items:center;
+  margin:2rem 0;
+}
+.continuum-line{
+  position:absolute;
+  top:50%;left:0;right:0;
+  height:4px;
+  background:linear-gradient(90deg,#fff,var(--primary),var(--secondary),#a78bfa,#4a0080);
+  border-radius:2px;
+}
+.continuum-items{
+  display:flex;
+  justify-content:space-between;
+  width:100%;
+  position:relative;z-index:1;
+}
+.cont-item{
+  display:flex;flex-direction:column;align-items:center;gap:0.5rem;
+  cursor:pointer;
+}
+.cont-dot{
+  width:20px;height:20px;border-radius:50%;
+  border:3px solid;
+  background:var(--bg);
+  transition:all 0.3s;
+}
+.cont-item:hover .cont-dot{transform:scale(1.5);}
+.cont-label{
+  font-family:'Exo 2',sans-serif;
+  font-size:0.72rem;font-weight:700;
+  letter-spacing:1px;
+  white-space:nowrap;
+}
+.cont-sub{font-size:0.65rem;color:var(--muted);white-space:nowrap;text-align:center;}
+.cont-detail-panel{
+  background:rgba(0,0,0,0.4);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:1.5rem;
+  text-align:left;
+  transition:all 0.3s;
+  min-height:100px;
+}
+.cont-detail-title{
+  font-family:'Exo 2',sans-serif;
+  font-weight:700;font-size:1.1rem;
+  margin-bottom:0.5rem;
+}
+.cont-detail-text{color:#8090b0;font-size:0.85rem;}
+
+/* SPATIAL UI PRINCIPLES */
+.principles-grid{display:flex;flex-direction:column;gap:1rem;}
+.principle-row{
+  display:flex;gap:1.2rem;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:1.2rem 1.5rem;
+  align-items:flex-start;
+  transition:all 0.3s;
+  cursor:pointer;
+}
+.principle-row:hover{
+  border-color:rgba(255,107,53,0.4);
+  background:rgba(255,107,53,0.04);
+}
+.principle-num{
+  font-family:'Exo 2',sans-serif;
+  font-weight:900;font-size:2rem;
+  color:rgba(255,107,53,0.3);
+  line-height:1;
+  min-width:50px;
+}
+.principle-content{}
+.principle-title{
+  font-family:'Exo 2',sans-serif;
+  font-weight:700;color:var(--accent);
+  font-size:0.95rem;letter-spacing:1px;
+  margin-bottom:0.4rem;
+}
+.principle-text{color:#8090b0;font-size:0.83rem;}
+
+/* GLOSSARY */
+.glossary-search{
+  width:100%;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:0.8rem 1.2rem;
+  color:var(--text);
+  font-size:0.9rem;
+  margin-bottom:1.5rem;
+  outline:none;
+  font-family:'Inter',sans-serif;
+}
+.glossary-search:focus{border-color:var(--primary);}
+.glossary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0.8rem;}
+.glossary-item{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:0.9rem 1.1rem;
+  transition:all 0.2s;
+}
+.glossary-item:hover{border-color:rgba(0,229,255,0.3);}
+.glossary-term{
+  font-family:'JetBrains Mono',monospace;
+  font-weight:600;color:var(--primary);
+  font-size:0.85rem;margin-bottom:0.2rem;
+}
+.glossary-full{font-size:0.78rem;color:var(--muted);margin-bottom:0.3rem;font-style:italic;}
+.glossary-def{font-size:0.8rem;color:#8090b0;}
+.glossary-item.hidden{display:none;}
+
+/* XR SPATIAL DEMO */
+#xr-demo-wrap{
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  height:520px;
+  position:relative;
+  background:#0a0a1a;
+}
+#xr-demo-frame{
+  width:100%;height:100%;
+  border:none;
+  display:block;
+}
+
+/* REFERENCES */
+.ref-filter{
+  display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.2rem;
+}
+.ref-filter-btn{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  color:var(--muted);
+  padding:0.3rem 0.8rem;
+  border-radius:20px;
+  font-size:0.75rem;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.ref-filter-btn.active,.ref-filter-btn:hover{
+  background:rgba(0,229,255,0.1);
+  border-color:var(--primary);
+  color:var(--primary);
+}
+
+/* DISCLAIMER */
+#disclaimer-section{
+  background:rgba(255,71,87,0.03);
+  border-top:1px solid rgba(255,71,87,0.1);
+  padding:4rem 2rem;
+}
+.disclaimer-box{
+  max-width:900px;margin:0 auto;
+  background:var(--surface);
+  border:1px solid rgba(255,71,87,0.15);
+  border-radius:16px;
+  padding:2.5rem;
+}
+.disclaimer-title{
+  font-family:'Exo 2',sans-serif;
+  font-weight:900;color:var(--red);
+  font-size:1.1rem;margin-bottom:0.5rem;
+  letter-spacing:1px;
+}
+.disclaimer-text{color:#8090b0;font-size:0.82rem;margin-bottom:1rem;}
+.disclaimer-text ul{padding-left:1.2rem;}
+.disclaimer-text li{margin-bottom:0.3rem;}
+
+/* FOOTER */
+#footer{
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  padding:2rem;
+  text-align:center;
+}
+.footer-text{font-size:0.78rem;color:var(--muted);}
+.footer-brand{color:var(--primary);font-weight:700;font-family:'Exo 2',sans-serif;}
+
+/* ANIMATIONS */
+@keyframes fadeInDown{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-10px);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+@keyframes glow-pulse{0%,100%{box-shadow:0 0 10px rgba(0,229,255,0.3);}50%{box-shadow:0 0 25px rgba(0,229,255,0.6),0 0 50px rgba(0,229,255,0.2);}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+
+.glow{animation:glow-pulse 3s infinite;}
+.float{animation:float 4s ease-in-out infinite;}
+
+/* TASK BOX */
+.task-box{
+  background:rgba(0,229,255,0.04);
+  border:1px solid rgba(0,229,255,0.2);
+  border-left:4px solid var(--primary);
+  border-radius:0 12px 12px 0;
+  padding:1.5rem;
+  margin-bottom:1.5rem;
+}
+.task-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem;letter-spacing:2px;
+  color:var(--primary);margin-bottom:0.8rem;
+}
+.task-title{
+  font-family:'Exo 2',sans-serif;
+  font-weight:700;font-size:1rem;
+  margin-bottom:0.6rem;
+}
+.task-text{color:#8090b0;font-size:0.85rem;}
+
+/* STEP EXPLANATION */
+.steps-list{display:flex;flex-direction:column;gap:1rem;}
+.step-item{
+  display:flex;gap:1rem;
+  padding:1rem;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  transition:all 0.2s;
+}
+.step-item:hover{border-color:rgba(0,229,255,0.25);}
+.step-num{
+  font-family:'Exo 2',sans-serif;
+  font-weight:900;font-size:1.4rem;
+  color:rgba(0,229,255,0.25);
+  min-width:40px;
+  line-height:1;
+}
+.step-content{}
+.step-title{
+  font-weight:600;color:var(--text);
+  font-size:0.88rem;margin-bottom:0.3rem;
+}
+.step-text{color:#8090b0;font-size:0.8rem;}
+
+/* DS APPLICATIONS */
+.ds-apps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;}
+.ds-app-card{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:1.2rem;
+  transition:all 0.3s;
+}
+.ds-app-card:hover{
+  border-color:var(--primary);
+  transform:translateY(-4px);
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+.ds-app-icon{font-size:1.8rem;margin-bottom:0.5rem;}
+.ds-app-title{font-weight:700;font-size:0.85rem;color:var(--primary);margin-bottom:0.3rem;}
+.ds-app-text{font-size:0.78rem;color:#8090b0;}
+
+/* FUTURE ITEMS */
+.future-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;}
+.future-card{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:1.2rem;
+  transition:all 0.3s;
+}
+.future-card:hover{border-color:var(--accent);transform:translateY(-3px);}
+.future-title{
+  font-family:'Exo 2',sans-serif;
+  font-weight:700;color:var(--accent);
+  font-size:0.88rem;margin-bottom:0.4rem;
+}
+.future-text{font-size:0.8rem;color:#8090b0;}
+.future-link{
+  display:inline-block;margin-top:0.5rem;
+  font-size:0.72rem;color:var(--primary);
+  text-decoration:none;
+}
+
+/* INVENTORY DEMO */
+#ar-demo{
+  background:#1a1a1a;
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  padding:1rem;
+}
+#ar-canvas{
+  width:100%;
+  border-radius:8px;
+  display:block;
+}
+
+/* TOC */
+#toc-section{
+  background:linear-gradient(135deg,rgba(0,229,255,0.05),rgba(124,58,237,0.05));
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:3rem 2rem;
+}
+.toc-inner{max-width:900px;margin:0 auto;}
+.toc-title{
+  font-family:'Exo 2',sans-serif;
+  font-weight:900;font-size:1.5rem;
+  text-align:center;margin-bottom:2rem;
+}
+.toc-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:1rem;
+}
+.toc-item{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:1.2rem 1.5rem;
+  text-decoration:none;
+  color:var(--text);
+  display:flex;gap:1rem;align-items:flex-start;
+  transition:all 0.3s;
+}
+.toc-item:hover{
+  border-color:var(--primary);
+  background:rgba(0,229,255,0.05);
+  transform:translateX(5px);
+}
+.toc-num{
+  font-family:'Exo 2',sans-serif;
+  font-weight:900;font-size:2rem;
+  color:rgba(0,229,255,0.2);
+  line-height:1;
+}
+.toc-content{}
+.toc-item-title{font-weight:700;font-size:0.9rem;color:var(--primary);margin-bottom:0.3rem;}
+.toc-item-sub{font-size:0.75rem;color:var(--muted);}
+
+/* TAGS */
+.tag{
+  display:inline-block;
+  font-size:0.68rem;
+  padding:2px 8px;border-radius:10px;
+  font-family:'JetBrains Mono',monospace;
+  margin:2px;
+}
+.tag-ar{background:rgba(0,229,255,0.15);color:var(--primary);}
+.tag-vr{background:rgba(124,58,237,0.15);color:#a78bfa;}
+.tag-xr{background:rgba(255,107,53,0.15);color:var(--accent);}
+.tag-code{background:rgba(0,255,136,0.1);color:var(--green);}
+.tag-data{background:rgba(240,180,41,0.1);color:var(--yellow);}
+
+/* BEFORE WE START */
+.callout{
+  background:linear-gradient(135deg,rgba(0,229,255,0.06),rgba(124,58,237,0.06));
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2rem;
+  font-size:0.9rem;
+  color:#a0c4d8;
+  position:relative;
+  overflow:hidden;
+}
+.callout::before{
+  content:'🧭';
+  position:absolute;right:1.5rem;top:1.5rem;
+  font-size:3rem;opacity:0.15;
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .arch-flow{flex-direction:column;}
+  .arch-arrow{transform:rotate(90deg);}
+  .continuum-items{gap:0.5rem;}
+  .cont-label{font-size:0.6rem;}
+  .cont-sub{display:none;}
+  #main-nav .nav-links{display:none;}
+}
+
+/* VR RENDERING PIPELINE */
+.vr-pipeline{
+  display:flex;flex-direction:column;gap:0;
+  padding:1.5rem;
+  background:var(--surface2);
+  border-radius:12px;
+  border:1px solid var(--border);
+}
+.vr-pipe-step{
+  display:flex;gap:1rem;
+  position:relative;
+  padding-bottom:1.2rem;
+  padding-left:1.5rem;
+  border-left:2px solid rgba(124,58,237,0.3);
+}
+.vr-pipe-step:last-child{border-left:2px solid transparent;padding-bottom:0;}
+.vr-pipe-dot{
+  position:absolute;
+  left:-7px;top:4px;
+  width:12px;height:12px;border-radius:50%;
+  background:#a78bfa;
+  box-shadow:0 0 8px rgba(167,139,250,0.5);
+}
+.vr-pipe-body{}
+.vr-pipe-name{
+  font-family:'Exo 2',sans-serif;
+  font-weight:700;color:#a78bfa;
+  font-size:0.88rem;margin-bottom:0.2rem;
+}
+.vr-pipe-desc{font-size:0.78rem;color:#8090b0;}
+.vr-pipe-tech{
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.68rem;color:var(--muted);
+  margin-top:0.2rem;
+}
+
+/* DOF */
+.dof-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1rem;
+}
+.dof-card{
+  background:rgba(124,58,237,0.08);
+  border:1px solid rgba(124,58,237,0.2);
+  border-radius:10px;
+  padding:1rem;
+}
+.dof-title{
+  font-family:'Exo 2',sans-serif;
+  font-weight:700;color:#a78bfa;
+  font-size:0.82rem;margin-bottom:0.6rem;
+  letter-spacing:1px;
+}
+.dof-item{
+  font-size:0.78rem;color:#8090b0;
+  padding:0.2rem 0;
+  display:flex;gap:0.5rem;align-items:center;
+}
+.dof-arrow{color:#a78bfa;font-size:1rem;}
+
+/* PAGE SECTION COLORS */
+.section-ar{border-top:3px solid rgba(0,229,255,0.3);}
+.section-vr{border-top:3px solid rgba(124,58,237,0.3);}
+.section-xr{border-top:3px solid rgba(255,107,53,0.3);}
+.section-ref{border-top:3px solid rgba(0,255,136,0.3);}
+
+/* STICKY TOC SIDE */
+.lesson-wrap{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:2rem;
+}
+
+/* CONCEPT REVIEW TABLE */
+.concept-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:0.6rem;
+}
+.concept-item{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:0.8rem 1rem;
+  display:flex;gap:0.8rem;align-items:flex-start;
+}
+.concept-term{
+  font-family:'JetBrains Mono',monospace;
+  font-weight:600;color:var(--primary);
+  font-size:0.82rem;
+  min-width:50px;
+}
+.concept-info{}
+.concept-full{font-size:0.7rem;color:var(--muted);font-style:italic;}
+.concept-def{font-size:0.75rem;color:#8090b0;margin-top:0.2rem;}
+</style>
+</head>
+<body>
+
+<!-- PROGRESS BAR -->
+<div id="progress-bar"></div>
+
+<!-- NAVIGATION -->
+<nav id="main-nav">
+  <div class="nav-logo">◈ XR</div>
+  <div class="nav-links">
+    <a href="#hero" class="nav-link">Home</a>
+    <a href="#lesson1" class="nav-link">AR<span class="nav-badge badge-ar">01</span></a>
+    <a href="#lesson2" class="nav-link">VR<span class="nav-badge badge-vr">02</span></a>
+    <a href="#lesson3" class="nav-link">XR<span class="nav-badge badge-xr">03</span></a>
+    <a href="#glossary" class="nav-link">Glossary</a>
+    <a href="#references" class="nav-link">References</a>
+    <a href="#disclaimer" class="nav-link">Legal</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-tag">🎓 FACULTY OF DIGITAL SCIENCE &nbsp;|&nbsp; GRADUATE PROGRAMME &nbsp;|&nbsp; DAY 13</div>
+    <h1 class="hero-title">
+      Augmented &amp; Virtual<br><span>Realities &amp; XR</span>
+    </h1>
+    <p class="hero-subtitle">Digital Technology · Emerging Technologies · Lecture Duration ~2 Hours</p>
+    <div class="hero-quote">
+      "The best way to predict the future is to invent it."
+      <cite>— Alan Kay, Computer Scientist &amp; Pioneer of Object-Oriented Programming</cite>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-val">3</span><span class="hero-stat-lbl">LESSONS</span></div>
+      <div class="hero-stat"><span class="hero-stat-val">3</span><span class="hero-stat-lbl">CODE DEMOS</span></div>
+      <div class="hero-stat"><span class="hero-stat-val">30</span><span class="hero-stat-lbl">REFERENCES</span></div>
+      <div class="hero-stat"><span class="hero-stat-val">22</span><span class="hero-stat-lbl">TERMS</span></div>
+    </div>
+  </div>
+  <div class="scroll-cue">⌄</div>
+</section>
+
+<!-- TABLE OF CONTENTS -->
+<div id="toc-section">
+  <div class="toc-inner">
+    <h2 class="toc-title">📋 Course Contents</h2>
+    <div class="toc-grid">
+      <a href="#lesson1" class="toc-item">
+        <div class="toc-num">01</div>
+        <div class="toc-content">
+          <div class="toc-item-title">Augmented Reality (AR)</div>
+          <div class="toc-item-sub">Definition · Technical Architecture · SLAM · AR in Industry · Code Demo</div>
+        </div>
+      </a>
+      <a href="#lesson2" class="toc-item">
+        <div class="toc-num">02</div>
+        <div class="toc-content">
+          <div class="toc-item-title">Virtual Reality (VR)</div>
+          <div class="toc-item-sub">Immersion Pillars · Rendering Pipeline · 6DOF · Head Tracking · Code Demo</div>
+        </div>
+      </a>
+      <a href="#lesson3" class="toc-item">
+        <div class="toc-num">03</div>
+        <div class="toc-content">
+          <div class="toc-item-title">XR — Extended Reality</div>
+          <div class="toc-item-sub">XR Umbrella · Milgram Continuum · Spatial UI · Live Dashboard Demo</div>
+        </div>
+      </a>
+      <a href="#glossary" class="toc-item">
+        <div class="toc-num">04</div>
+        <div class="toc-content">
+          <div class="toc-item-title">Quick Concept Review</div>
+          <div class="toc-item-sub">22 key terms with full forms and definitions</div>
+        </div>
+      </a>
+      <a href="#references" class="toc-item">
+        <div class="toc-num">05</div>
+        <div class="toc-content">
+          <div class="toc-item-title">Reference Links</div>
+          <div class="toc-item-sub">All 30 resources referenced in this lecture</div>
+        </div>
+      </a>
+      <a href="#disclaimer" class="toc-item">
+        <div class="toc-num">06</div>
+        <div class="toc-content">
+          <div class="toc-item-title">Disclaimer &amp; IP Notice</div>
+          <div class="toc-item-sub">Legal, copyright, ethics — Cyber.SoHo</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- BEFORE WE START -->
+<div style="padding:3rem 2rem;max-width:1100px;margin:0 auto;">
+  <div class="callout card visible" style="opacity:1;transform:none;">
+    <h3 style="font-family:'Exo 2',sans-serif;font-weight:700;color:var(--primary);margin-bottom:1rem;">🧭 Before We Start — A Quick Reality Check</h3>
+    <p>Raise your hand if you've ever tried on a pair of AR glasses, a VR headset, or used Snapchat filters that place dog ears on your face.</p>
+    <p style="margin-top:0.8rem;">Almost everyone. <strong style="color:var(--text);">You have already been living inside the subject of today's lecture without realising it.</strong></p>
+    <p style="margin-top:0.8rem;color:#8090b0;">This is exactly what makes <strong style="color:var(--primary);">emerging technologies</strong> so fascinating — they don't arrive with a grand announcement. They creep into daily life quietly, and then one morning you wake up and find that half the world is using them. Your job, as future digital scientists, is not simply to <em>use</em> these technologies. Your job is to <strong style="color:var(--text);">understand</strong> them deeply enough to <em>build, question, improve,</em> and <em>apply</em> them to data problems no one has solved yet.</p>
+  </div>
+</div>
+
+<!-- =================== LESSON 1: AR =================== -->
+<section id="lesson1" class="section-ar" style="padding-top:4rem;border-top:3px solid rgba(0,229,255,0.3);">
+  <div class="section" style="padding-top:3rem;">
+    <div class="section-header" id="ar-header">
+      <div class="lesson-badge lesson-badge-ar">🔵 Lesson 1 — Augmented Reality (AR)</div>
+      <h2 class="section-title">"Augmented Reality doesn't replace the world. It <span style="color:var(--primary);">enriches</span> it."</h2>
+      <p class="section-desc">Real world + digital overlay. The physical environment remains primary — the digital layer adds context, information, and enhancement.</p>
+    </div>
+
+    <!-- 1.1 What is AR -->
+    <div class="card" id="ar-what">
+      <div class="card-title">🔵 1.1 What is AR (Augmented Reality)?</div>
+      <p>Let's start with the word itself. <strong style="color:var(--primary);">Augment</strong> means <em>to make something greater by adding to it</em>. So AR is the practice of layering computer-generated content — images, sounds, text, 3D models, data overlays — on top of the real world as you experience it through a lens.</p>
+      <p style="margin-top:1rem;">The key distinguishing factor of AR is that the <strong>physical environment remains the primary experience</strong>. The digital layer is additive — it exists to provide <em>context, information, or enhancement</em>, not to replace what is already visible.</p>
+      <div style="background:rgba(0,229,255,0.06);border-left:3px solid var(--primary);padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin-top:1.2rem;font-style:italic;color:#a0c4d8;font-size:0.9rem;">
+        💡 <strong>Think of it like this:</strong> Imagine you're a doctor looking at a patient's arm. With AR, a digital overlay could show you the exact location of the vein beneath the skin before you insert a needle. The arm is still real. The overlay is digital. Together, they create a <em>richer experience</em> that results in better outcomes.
+      </div>
+    </div>
+
+    <!-- 1.2 Technical Architecture -->
+    <div class="card" id="ar-arch">
+      <div class="card-title">🔵 1.2 The Technical Architecture of AR — Four Pillars</div>
+      <p style="color:#8090b0;font-size:0.85rem;margin-bottom:1.5rem;">Click each pillar to learn more about how it works in a real AR system.</p>
+      <div class="arch-flow" id="ar-arch-flow">
+        <div class="arch-box" onclick="showArchDetail('sensing')" id="box-sensing">
+          <div class="arch-box-icon">📡</div>
+          <div class="arch-box-title">SENSING</div>
+          <div class="arch-box-sub">Camera · IMU · GPS</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box" onclick="showArchDetail('tracking')" id="box-tracking">
+          <div class="arch-box-icon">🗺️</div>
+          <div class="arch-box-title">TRACKING</div>
+          <div class="arch-box-sub">SLAM · Markers</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box" onclick="showArchDetail('rendering')" id="box-rendering">
+          <div class="arch-box-icon">🖥️</div>
+          <div class="arch-box-title">RENDERING</div>
+          <div class="arch-box-sub">3D Models · Holograms</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box" onclick="showArchDetail('display')" id="box-display">
+          <div class="arch-box-icon">👓</div>
+          <div class="arch-box-title">DISPLAY</div>
+          <div class="arch-box-sub">Screen · Glass · Projector</div>
+        </div>
+      </div>
+      <div class="arch-detail" id="arch-detail-sensing">
+        <strong style="color:var(--primary);">Pillar 1 — Sensing:</strong> Hardware captures the real world. Cameras capture visual data. IMU (Inertial Measurement Unit) sensors track orientation and movement. GPS (Global Positioning System) provides geographic position. This is the AR system's eyes and ears.
+      </div>
+      <div class="arch-detail" id="arch-detail-tracking">
+        <strong style="color:var(--primary);">Pillar 2 — Tracking:</strong> The system must <em>understand</em> where it is in the real world at all times. <strong>SLAM (Simultaneous Localisation And Mapping)</strong> is the algorithm most commonly used. It builds a map of the environment and locates the device within that map — simultaneously — in real time.
+        <div class="arch-algo-list">
+          <span class="algo-chip">SLAM</span>
+          <span class="algo-chip">ORB Feature Detection</span>
+          <span class="algo-chip">SIFT</span>
+          <span class="algo-chip">SURF</span>
+          <span class="algo-chip">PnP Solver</span>
+          <span class="algo-chip">LiDAR Depth</span>
+        </div>
+      </div>
+      <div class="arch-detail" id="arch-detail-rendering">
+        <strong style="color:var(--primary);">Pillar 3 — Rendering:</strong> Digital content is generated — 3D models, text labels, animated characters, data charts — and <strong>mathematically aligned</strong> to real-world coordinates. The rendering engine must run at 60+ FPS to avoid motion sickness.
+      </div>
+      <div class="arch-detail" id="arch-detail-display">
+        <strong style="color:var(--primary);">Pillar 4 — Display:</strong> The composited image (real world + digital layer) is shown to the user, either on a screen held in the hand or through <strong>transparent optics</strong> in a headset. Waveguide optics in smart glasses allow true see-through AR.
+      </div>
+    </div>
+
+    <!-- 1.3 AR in the World -->
+    <div class="card" id="ar-world">
+      <div class="card-title">🔵 1.3 AR in the World — Key Players</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Organisation</th><th>AR Application</th><th>Resource</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Microsoft</strong></td><td>HoloLens — AR headset for industry and medicine (Mixed Reality)</td><td><a href="https://www.microsoft.com/en-us/hololens" target="_blank">microsoft.com/hololens ↗</a></td></tr>
+            <tr><td><strong>Apple</strong></td><td>ARKit — AR framework for iOS developers</td><td><a href="https://developer.apple.com/augmented-reality/" target="_blank">developer.apple.com/ar ↗</a></td></tr>
+            <tr><td><strong>Google</strong></td><td>ARCore — AR platform for Android</td><td><a href="https://developers.google.com/ar" target="_blank">developers.google.com/ar ↗</a></td></tr>
+            <tr><td><strong>PTC Inc.</strong></td><td>Vuforia — industrial AR solutions</td><td><a href="https://www.ptc.com/en/technologies/augmented-reality" target="_blank">ptc.com/ar ↗</a></td></tr>
+            <tr><td><strong>Niantic</strong></td><td>Pokémon GO, Lightship ARDK — planet-scale AR</td><td><a href="https://nianticlabs.com/" target="_blank">nianticlabs.com ↗</a></td></tr>
+            <tr><td><strong>Meta</strong></td><td>Meta Reality Labs, Spark AR</td><td><a href="https://about.meta.com/realitylabs/" target="_blank">meta.com/realitylabs ↗</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 1.4 Real-Life Example -->
+    <div class="card" id="ar-example">
+      <div class="card-title">🔬 1.4 Real-Life Example — AR Inventory Overlay Pipeline</div>
+      <div class="task-box">
+        <div class="task-label">🏷️ TASK DEFINITION</div>
+        <div class="task-title">AR Inventory Management System</div>
+        <div class="task-text">Simulate how an AR system overlays real-time data annotations onto objects detected in a camera frame — as a data scientist working on a warehouse management system that uses AR to show inventory data above physical shelves.</div>
+        <div style="margin-top:0.8rem;">
+          <span class="tag tag-ar">AR</span>
+          <span class="tag tag-code">Python</span>
+          <span class="tag tag-data">Data Science</span>
+          <span class="tag tag-code">Pillow · NumPy</span>
+        </div>
+      </div>
+
+      <!-- Pipeline Diagram -->
+      <h4 style="font-family:'Exo 2',sans-serif;color:var(--primary);margin-bottom:1rem;font-size:0.9rem;letter-spacing:1px;">📊 AR DATA OVERLAY PIPELINE</h4>
+      <div class="pipeline">
+        <div class="pipeline-step"><div class="pipeline-dot"></div><div class="pipeline-content"><div class="pipeline-label">📦 WAREHOUSE SHELF (Physical World)</div><div class="pipeline-sub">Real camera feed — physical boxes visible through device lens</div></div></div>
+        <div class="pipeline-step"><div class="pipeline-dot"></div><div class="pipeline-content"><div class="pipeline-label">🤖 OBJECT DETECTION MODEL</div><div class="pipeline-sub">YOLOv8 / DETR — detects boxes + bounding box coordinates (x1,y1,x2,y2), running on device / edge</div></div></div>
+        <div class="pipeline-step"><div class="pipeline-dot"></div><div class="pipeline-content"><div class="pipeline-label">🗄️ DATABASE QUERY (Item ID → SKU)</div><div class="pipeline-sub">SQLite / REST API — Returns: Name, Stock Count, Expiry Date, Alert Status</div></div></div>
+        <div class="pipeline-step"><div class="pipeline-dot"></div><div class="pipeline-content"><div class="pipeline-label">🎨 RENDER OVERLAY TEXT</div><div class="pipeline-sub">OpenCV + PIL — "Apples | 40 left" in green, "Milk | 5 left ⚠️" in red for low stock</div></div></div>
+        <div class="pipeline-step"><div class="pipeline-dot"></div><div class="pipeline-content"><div class="pipeline-label">🥽 DISPLAY ON AR DEVICE</div><div class="pipeline-sub">Smart glasses / phone — composited frame at 30–60 FPS</div></div></div>
+      </div>
+
+      <!-- Live AR Demo Canvas -->
+      <h4 style="font-family:'Exo 2',sans-serif;color:var(--primary);margin:1.5rem 0 0.8rem;font-size:0.9rem;letter-spacing:1px;">🖥️ LIVE AR OVERLAY SIMULATION</h4>
+      <div id="ar-demo">
+        <canvas id="ar-canvas" height="280"></canvas>
+      </div>
+
+      <!-- Code Block -->
+      <div class="code-container" style="margin-top:1.5rem;">
+        <div class="code-header">
+          <div><span class="code-filename">lesson1_ar_inventory_overlay.py</span><span class="code-lang">Python</span></div>
+          <button class="copy-btn" onclick="copyCode('ar-code')">Copy</button>
+        </div>
+        <div class="code-body" id="ar-code">
+<pre><span class="cm"># ============================================================
+# LESSON 1 — AR INVENTORY OVERLAY SIMULATION
+# File: lesson1_ar_inventory_overlay.py
+# Requires: pip install pillow numpy
+# ============================================================</span>
+
+<span class="kw">from</span> PIL <span class="kw">import</span> Image, ImageDraw, ImageFont
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> random
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+<span class="cm"># ---- STEP 1: Define our "inventory database" ----
+# In a real system this would be a SQL or NoSQL database call.
+# Each key is an item ID (what an object detector would return)</span>
+
+<span class="cls">INVENTORY_DB</span> = {
+    <span class="st">"item_A"</span>: {<span class="st">"name"</span>: <span class="st">"Organic Apples"</span>,  <span class="st">"stock"</span>: <span class="nb">40</span>, <span class="st">"expiry"</span>: <span class="st">"2025-09-10"</span>, <span class="st">"alert"</span>: <span class="kw">False</span>},
+    <span class="st">"item_B"</span>: {<span class="st">"name"</span>: <span class="st">"Full-Fat Milk"</span>,    <span class="st">"stock"</span>: <span class="nb">5</span>,  <span class="st">"expiry"</span>: <span class="st">"2025-08-01"</span>, <span class="st">"alert"</span>: <span class="kw">True</span>},
+    <span class="st">"item_C"</span>: {<span class="st">"name"</span>: <span class="st">"Sourdough Bread"</span>,  <span class="st">"stock"</span>: <span class="nb">22</span>, <span class="st">"expiry"</span>: <span class="st">"2025-07-29"</span>, <span class="st">"alert"</span>: <span class="kw">False</span>},
+    <span class="st">"item_D"</span>: {<span class="st">"name"</span>: <span class="st">"Cheddar Cheese"</span>,  <span class="st">"stock"</span>: <span class="nb">3</span>,  <span class="st">"expiry"</span>: <span class="st">"2025-08-15"</span>, <span class="st">"alert"</span>: <span class="kw">True</span>},
+}
+
+<span class="cm"># ---- STEP 2: Simulated object detections ----
+# Format: (item_id, x1, y1, x2, y2) — bounding box corners
+# In production: output from YOLOv8 or DETR model</span>
+
+<span class="cls">DETECTED_OBJECTS</span> = [
+    (<span class="st">"item_A"</span>, <span class="nb">30</span>,  <span class="nb">80</span>, <span class="nb">200</span>, <span class="nb">220</span>),
+    (<span class="st">"item_B"</span>, <span class="nb">240</span>, <span class="nb">80</span>, <span class="nb">410</span>, <span class="nb">220</span>),
+    (<span class="st">"item_C"</span>, <span class="nb">450</span>, <span class="nb">80</span>, <span class="nb">620</span>, <span class="nb">220</span>),
+    (<span class="st">"item_D"</span>, <span class="nb">660</span>, <span class="nb">80</span>, <span class="nb">830</span>, <span class="nb">220</span>),
+]
+
+<span class="cm"># ---- STEP 6: THE AR OVERLAY RENDERING LOOP ----
+# For each detected object, query the inventory DB and
+# render the digital annotation above the physical box</span>
+
+<span class="kw">for</span> item_id, x1, y1, x2, y2 <span class="kw">in</span> <span class="cls">DETECTED_OBJECTS</span>:
+    item_data = <span class="cls">INVENTORY_DB</span>.get(item_id)
+    <span class="kw">if not</span> item_data: <span class="kw">continue</span>
+
+    overlay_colour = (<span class="nb">220</span>, <span class="nb">50</span>, <span class="nb">50</span>) <span class="kw">if</span> item_data[<span class="st">"alert"</span>] <span class="kw">else</span> (<span class="nb">30</span>, <span class="nb">140</span>, <span class="nb">60</span>)
+    centre_x = (x1 + x2) // <span class="nb">2</span>
+
+    <span class="cm"># Draw floating label above the physical box — classic AR UX pattern</span>
+    draw.rectangle([panel_x1, panel_y1, panel_x2, panel_y2],
+                   fill=(<span class="nb">20</span>, <span class="nb">20</span>, <span class="nb">20</span>), outline=overlay_colour, width=<span class="nb">2</span>)
+    draw.text((panel_x1 + <span class="nb">5</span>, panel_y1 + <span class="nb">5</span>), item_data[<span class="st">"name"</span>], fill=(<span class="nb">255</span>, <span class="nb">255</span>, <span class="nb">255</span>))
+    draw.text((panel_x1 + <span class="nb">5</span>, panel_y1 + <span class="nb">22</span>), stock_text, fill=overlay_colour)
+    draw.line([(centre_x, panel_y2), (centre_x, y1)], fill=overlay_colour, width=<span class="nb">1</span>)</pre>
+        </div>
+      </div>
+
+      <!-- Step explanation -->
+      <h4 style="font-family:'Exo 2',sans-serif;color:var(--primary);margin:1.5rem 0 1rem;font-size:0.9rem;letter-spacing:1px;">📖 Step-by-Step Code Explanation</h4>
+      <div class="steps-list">
+        <div class="step-item"><div class="step-num">01</div><div class="step-content"><div class="step-title">The Inventory Database (INVENTORY_DB)</div><div class="step-text">Simulates a real warehouse inventory system like those used by Amazon or IKEA. In a real AR deployment, this is queried via an API call over Wi-Fi every time the camera detects a new object.</div></div></div>
+        <div class="step-item"><div class="step-num">02</div><div class="step-content"><div class="step-title">Simulated Detections (DETECTED_OBJECTS)</div><div class="step-text">Real AR systems use computer vision models (YOLOv8, DETR) to detect objects and return bounding boxes. Hard-coded here to keep focus on overlay logic rather than the detection model itself.</div></div></div>
+        <div class="step-item"><div class="step-num">06</div><div class="step-content"><div class="step-title">The AR Overlay Loop (The Magic)</div><div class="step-text">For each detected object: look up data, choose colour (red for alerts, green for normal), calculate position for the floating label above the box, draw text panels with name/stock/expiry. The vertical anchor line is a UI pattern used in real AR headsets.</div></div></div>
+        <div class="step-item"><div class="step-num">07</div><div class="step-content"><div class="step-title">HUD Overlay</div><div class="step-text">A HUD (Heads-Up Display) is always present in professional AR systems — it shows mode, current time, and items tracked. Military pilots have used HUDs since the 1950s; AR brings the same concept to industrial workers.</div></div></div>
+      </div>
+    </div>
+
+    <!-- 1.5 AR in Data Science -->
+    <div class="card" id="ar-datascience">
+      <div class="card-title">🔵 1.5 AR in Data Science — Why Should You Care?</div>
+      <p style="color:#8090b0;margin-bottom:1.5rem;">AR is not just a novelty. It is a <strong style="color:var(--text);">data delivery mechanism</strong> — a way to bring your analysis results directly into the physical context where they are most useful.</p>
+      <div class="ds-apps-grid">
+        <div class="ds-app-card"><div class="ds-app-icon">🏥</div><div class="ds-app-title">Medical Imaging</div><div class="ds-app-text">Overlay tumour location data from MRI scans directly onto a patient during surgery — your ML model becomes the surgeon's sixth sense.</div></div>
+        <div class="ds-app-card"><div class="ds-app-icon">🌾</div><div class="ds-app-title">Agricultural Monitoring</div><div class="ds-app-text">Walk through a field with an AR headset overlaying soil moisture data and growth predictions above each crop row, powered by your ML model.</div></div>
+        <div class="ds-app-card"><div class="ds-app-icon">🌉</div><div class="ds-app-title">Infrastructure Inspection</div><div class="ds-app-text">Engineers wearing AR headsets see stress data from embedded sensors overlaid directly on the bridge structure they are walking across.</div></div>
+        <div class="ds-app-card"><div class="ds-app-icon">⚽</div><div class="ds-app-title">Sports Analytics</div><div class="ds-app-text">Coaches wearing AR glasses see player performance metrics overlaid above each player in real time during training sessions.</div></div>
+      </div>
+      <div style="background:rgba(0,229,255,0.04);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-top:1rem;font-size:0.85rem;color:#8090b0;">
+        💡 In every case, your job as a data scientist is to build the <strong style="color:var(--text);">data pipeline, the model, and the API</strong> that feeds the AR overlay. The AR device is simply the <em>display layer</em> for your analysis.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== LESSON 2: VR =================== -->
+<section id="lesson2" class="section-vr" style="padding-top:4rem;border-top:3px solid rgba(124,58,237,0.3);">
+  <div class="section" style="padding-top:3rem;">
+    <div class="section-header" id="vr-header">
+      <div class="lesson-badge lesson-badge-vr">🟣 Lesson 2 — Virtual Reality (VR)</div>
+      <h2 class="section-title">"VR is the ultimate <span style="color:#a78bfa;">empathy machine</span>. It doesn't just show you a story — it puts you inside one."</h2>
+      <p class="section-desc">— Chris Milk, VR filmmaker (TED Talk 2015)</p>
+    </div>
+
+    <!-- 2.1 What is VR -->
+    <div class="card">
+      <div class="card-title" style="color:#a78bfa;">🟣 2.1 What is VR (Virtual Reality)?</div>
+      <p>Where AR enriches the real world, <strong style="color:#a78bfa;">VR replaces it entirely</strong>.</p>
+      <p style="margin-top:0.8rem;">Put on a VR headset and your brain receives a completely different set of visual, auditory, and sometimes haptic signals. Your eyes see only the virtual world rendered inside the headset's displays. The physical room simply ceases to exist from your perceptual standpoint.</p>
+      <p style="margin-top:0.8rem;">The experience is called <strong>immersion</strong> — and achieving true immersion is both an art and a deeply technical science.</p>
+      <div style="background:rgba(124,58,237,0.08);border-left:3px solid #a78bfa;padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin-top:1.2rem;font-size:0.85rem;color:#a0c4d8;">
+        📜 <strong>Historical Note:</strong> The concept was first formally described by <a href="https://en.wikipedia.org/wiki/Ivan_Sutherland" target="_blank" style="color:#a78bfa;">Ivan Sutherland</a> at MIT in 1965, in a paper called <em>"The Ultimate Display"</em>. He described a room in which the computer could control the existence of matter. Sixty years later, we're still working on it — but we are remarkably close.
+      </div>
+    </div>
+
+    <!-- 2.2 Three Pillars -->
+    <div class="card">
+      <div class="card-title" style="color:#a78bfa;">🟣 2.2 The Three Pillars of Immersion</div>
+      <p style="color:#8090b0;font-size:0.85rem;margin-bottom:1.5rem;">When all three pillars are strong, your brain is genuinely fooled. Studies from <a href="https://vhil.stanford.edu/" target="_blank" style="color:#a78bfa;">Stanford's Virtual Human Interaction Lab</a> show VR experiences produce measurable changes in real-world behaviour.</p>
+      <div class="pillars-grid">
+        <div class="pillar-card">
+          <div class="pillar-num">01</div>
+          <div class="pillar-title">PRESENCE</div>
+          <p style="font-size:0.8rem;color:#8090b0;margin-bottom:0.8rem;">The feeling of "being there" — your brain accepting the virtual as real.</p>
+          <ul class="pillar-items">
+            <li>Wide FOV (Field of View) — 100°+ to match human vision</li>
+            <li>Low latency rendering (&lt; 20ms Motion-to-Photon)</li>
+            <li>High frame rate (72–120 FPS required)</li>
+            <li>Head tracking (6DOF — Six Degrees of Freedom)</li>
+          </ul>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-num">02</div>
+          <div class="pillar-title">INTERACTIVITY</div>
+          <p style="font-size:0.8rem;color:#8090b0;margin-bottom:0.8rem;">The ability to act on the virtual world — to reach out and change it.</p>
+          <ul class="pillar-items">
+            <li>Hand controllers (6DOF tracked)</li>
+            <li>Hand tracking (camera-based, no controllers)</li>
+            <li>Eye tracking (gaze-based selection)</li>
+            <li>Physics simulation (Bullet, PhysX engines)</li>
+          </ul>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-num">03</div>
+          <div class="pillar-title">PLAUSIBILITY</div>
+          <p style="font-size:0.8rem;color:#8090b0;margin-bottom:0.8rem;">The sense that the rules of this world make sense — consistent physics and cause-and-effect.</p>
+          <ul class="pillar-items">
+            <li>Spatial audio (3D positional sound)</li>
+            <li>Consistent physics (gravity, collisions, light)</li>
+            <li>Believable avatars and NPC AI</li>
+            <li>Haptic feedback (vibration, resistance)</li>
+          </ul>
+        </div>
+      </div>
+      <div style="background:rgba(124,58,237,0.05);border:1px solid rgba(124,58,237,0.2);border-radius:10px;padding:1rem;margin-top:1.2rem;font-size:0.84rem;color:#a0c4d8;">
+        🧠 <strong>Applied Neuroscience:</strong> People who experience poverty in VR are measurably more empathetic. People who see themselves ageing in VR save more money for retirement. This is not entertainment — this is applied neuroscience.
+      </div>
+    </div>
+
+    <!-- 2.3 Rendering Pipeline -->
+    <div class="card">
+      <div class="card-title" style="color:#a78bfa;">🟣 2.3 How VR Renders the World — The Graphics Pipeline</div>
+      <div class="vr-pipeline">
+        <div class="vr-pipe-step"><div class="vr-pipe-dot"></div><div class="vr-pipe-body"><div class="vr-pipe-name">🎮 GAME ENGINE (Scene Data)</div><div class="vr-pipe-desc">Unity3D or Unreal Engine 5 — the world is described here: meshes, textures, lights, physics</div></div></div>
+        <div class="vr-pipe-step"><div class="vr-pipe-dot"></div><div class="vr-pipe-body"><div class="vr-pipe-name">📐 HEAD POSE TRACKING</div><div class="vr-pipe-desc">IMU + Camera tracking determines where the player's head is in space — 6DOF: pitch, yaw, roll + X, Y, Z translation</div></div></div>
+        <div class="vr-pipe-step"><div class="vr-pipe-dot"></div><div class="vr-pipe-body"><div class="vr-pipe-name">👁️ STEREO RENDERING</div><div class="vr-pipe-desc">Two separate camera views rendered — one per eye with IPD offset to create stereoscopic 3D depth perception</div><div class="vr-pipe-tech">IPD = Inter-Pupillary Distance — typically 60–74mm</div></div></div>
+        <div class="vr-pipe-step"><div class="vr-pipe-dot"></div><div class="vr-pipe-body"><div class="vr-pipe-name">🔄 LENS WARP CORRECTION</div><div class="vr-pipe-desc">Barrel distortion correction applied to counteract the fisheye distortion of the fresnel lens optics</div></div></div>
+        <div class="vr-pipe-step"><div class="vr-pipe-dot"></div><div class="vr-pipe-body"><div class="vr-pipe-name">📺 DISPLAY OUTPUT</div><div class="vr-pipe-desc">LCD or OLED panels, one per eye, refreshing at 72Hz–120Hz. Perceived as a single seamless virtual world.</div></div></div>
+      </div>
+    </div>
+
+    <!-- 2.4 Key Players -->
+    <div class="card">
+      <div class="card-title" style="color:#a78bfa;">🟣 2.4 VR in the World — Key Players</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Organisation</th><th>Product / Platform</th><th>Resource</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Meta</strong></td><td>Meta Quest 3 headset, Horizon Worlds platform</td><td><a href="https://www.meta.com/quest/" target="_blank">meta.com/quest ↗</a></td></tr>
+            <tr><td><strong>Sony Interactive</strong></td><td>PlayStation VR2 — eye tracking, adaptive triggers</td><td><a href="https://www.playstation.com/en-us/ps-vr2/" target="_blank">playstation.com/psvr2 ↗</a></td></tr>
+            <tr><td><strong>Valve Corporation</strong></td><td>SteamVR platform, Index headset</td><td><a href="https://store.steampowered.com/vr" target="_blank">steampowered.com/vr ↗</a></td></tr>
+            <tr><td><strong>Unity Technologies</strong></td><td>Unity3D — industry standard VR development platform (70%+ of VR apps)</td><td><a href="https://unity.com/solutions/vr" target="_blank">unity.com/vr ↗</a></td></tr>
+            <tr><td><strong>Epic Games</strong></td><td>Unreal Engine 5 — photorealistic VR &amp; industrial sims</td><td><a href="https://www.unrealengine.com/en-US/vr" target="_blank">unrealengine.com/vr ↗</a></td></tr>
+            <tr><td><strong>Stanford VHIL</strong></td><td>Virtual Human Interaction Lab — world-leading academic VR research</td><td><a href="https://vhil.stanford.edu/" target="_blank">vhil.stanford.edu ↗</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2.5 Real-Life Example -->
+    <div class="card">
+      <div class="card-title" style="color:#a78bfa;">🔬 2.5 Real-Life Example — VR 6DOF Head Tracking Simulation</div>
+      <div class="task-box" style="border-color:rgba(124,58,237,0.4);background:rgba(124,58,237,0.04);">
+        <div class="task-label" style="color:#a78bfa;">🏷️ TASK DEFINITION</div>
+        <div class="task-title">VR Head-Tracking System</div>
+        <div class="task-text">Simulate the mathematical core of a VR head-tracking system. Use 3D rotation mathematics (quaternions and Euler angles) to calculate where the virtual camera should point based on IMU sensor readings. Head-tracking is the single most important technical component of any VR system — this is the exact maths that runs inside every VR headset, 72 times per second.</div>
+        <div style="margin-top:0.8rem;">
+          <span class="tag tag-vr">VR</span>
+          <span class="tag tag-code">Python</span>
+          <span class="tag tag-code">NumPy · Matplotlib</span>
+          <span class="tag tag-data">6DOF · IMU</span>
+        </div>
+      </div>
+
+      <!-- 6DOF Schematic -->
+      <h4 style="font-family:'Exo 2',sans-serif;color:#a78bfa;margin-bottom:1rem;font-size:0.9rem;letter-spacing:1px;">📊 6DOF HEAD TRACKING — SIX DEGREES OF FREEDOM</h4>
+      <div class="dof-grid">
+        <div class="dof-card">
+          <div class="dof-title">ROTATIONAL (3 DOF)</div>
+          <div class="dof-item"><span class="dof-arrow">↕</span> PITCH — Tilt head up/down — around X axis</div>
+          <div class="dof-item"><span class="dof-arrow">↔</span> YAW — Turn head left/right — around Y axis</div>
+          <div class="dof-item"><span class="dof-arrow">↻</span> ROLL — Tilt head sideways — around Z axis</div>
+        </div>
+        <div class="dof-card">
+          <div class="dof-title">TRANSLATIONAL (3 DOF)</div>
+          <div class="dof-item"><span class="dof-arrow">←→</span> SURGE — Move forward/backward — along Z</div>
+          <div class="dof-item"><span class="dof-arrow">↕</span> HEAVE — Move up/down — along Y axis</div>
+          <div class="dof-item"><span class="dof-arrow">↔</span> SWAY — Move left/right — along X axis</div>
+        </div>
+      </div>
+      <div style="background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.2);border-radius:10px;padding:1rem;margin-top:1rem;font-size:0.8rem;color:#8090b0;">
+        <strong style="color:#a78bfa;">HOW IT'S MEASURED:</strong> IMU chip (Inertial Measurement Unit) contains:
+        <strong style="color:#a0c4d8;"> Gyroscope</strong> → measures angular velocity · <strong style="color:#a0c4d8;">Accelerometer</strong> → measures linear acceleration · <strong style="color:#a0c4d8;">Magnetometer</strong> → measures orientation vs. Earth · <strong style="color:#a0c4d8;">Inside-Out Cameras</strong> → SLAM for translational tracking
+      </div>
+
+      <!-- VR Tracking Visualization -->
+      <h4 style="font-family:'Exo 2',sans-serif;color:#a78bfa;margin:1.5rem 0 0.8rem;font-size:0.9rem;letter-spacing:1px;">🌐 LIVE HEAD TRACKING PATH VISUALISATION</h4>
+      <div style="background:#0a0a1a;border:1px solid rgba(124,58,237,0.3);border-radius:12px;overflow:hidden;">
+        <canvas id="vr-tracking-canvas" width="800" height="300" style="width:100%;display:block;"></canvas>
+      </div>
+
+      <div class="code-container" style="margin-top:1.5rem;">
+        <div class="code-header">
+          <div><span class="code-filename">lesson2_vr_headtracking.py</span><span class="code-lang">Python</span></div>
+          <button class="copy-btn" onclick="copyCode('vr-code')">Copy</button>
+        </div>
+        <div class="code-body" id="vr-code">
+<pre><span class="cm"># ============================================================
+# LESSON 2 — VR HEAD-TRACKING SIMULATION
+# File: lesson2_vr_headtracking.py
+# Requires: pip install numpy matplotlib
+# ============================================================</span>
+
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">from</span> mpl_toolkits.mplot3d <span class="kw">import</span> Axes3D
+<span class="kw">import</span> math
+
+<span class="kw">def</span> <span class="fn">euler_to_rotation_matrix</span>(pitch_deg, yaw_deg, roll_deg):
+    <span class="st">"""
+    Convert pitch, yaw, roll (degrees) to a 3×3 rotation matrix.
+    This is the same conversion run in every VR headset's tracking firmware.
+    """</span>
+    p = math.<span class="fn">radians</span>(pitch_deg)
+    y = math.<span class="fn">radians</span>(yaw_deg)
+    r = math.<span class="fn">radians</span>(roll_deg)
+
+    Rx = np.<span class="fn">array</span>([[<span class="nb">1</span>, <span class="nb">0</span>, <span class="nb">0</span>],
+                    [<span class="nb">0</span>, math.<span class="fn">cos</span>(p), -math.<span class="fn">sin</span>(p)],
+                    [<span class="nb">0</span>, math.<span class="fn">sin</span>(p),  math.<span class="fn">cos</span>(p)]])
+
+    Ry = np.<span class="fn">array</span>([[ math.<span class="fn">cos</span>(y), <span class="nb">0</span>, math.<span class="fn">sin</span>(y)],
+                    [<span class="nb">0</span>, <span class="nb">1</span>, <span class="nb">0</span>],
+                    [-math.<span class="fn">sin</span>(y), <span class="nb">0</span>, math.<span class="fn">cos</span>(y)]])
+
+    Rz = np.<span class="fn">array</span>([[math.<span class="fn">cos</span>(r), -math.<span class="fn">sin</span>(r), <span class="nb">0</span>],
+                    [math.<span class="fn">sin</span>(r),  math.<span class="fn">cos</span>(r), <span class="nb">0</span>],
+                    [<span class="nb">0</span>, <span class="nb">0</span>, <span class="nb">1</span>]])
+
+    <span class="cm"># ZYX Euler convention — standard in aviation and VR tracking</span>
+    <span class="kw">return</span> Rz @ Ry @ Rx
+
+<span class="cm"># Simulate 120 timesteps (2 seconds at 60Hz)</span>
+<span class="cls">NUM_TIMESTEPS</span> = <span class="nb">120</span>
+imu_readings = []
+
+<span class="kw">for</span> t <span class="kw">in</span> <span class="fn">range</span>(<span class="cls">NUM_TIMESTEPS</span>):
+    progress = t / <span class="cls">NUM_TIMESTEPS</span>
+    pitch = <span class="nb">15.0</span> * math.<span class="fn">sin</span>(<span class="nb">2</span> * math.pi * progress)
+    yaw   = <span class="nb">60.0</span> * math.<span class="fn">sin</span>(math.pi * progress)
+    roll  = <span class="nb">5.0</span>  * math.<span class="fn">sin</span>(<span class="nb">4</span> * math.pi * progress)
+    imu_readings.<span class="fn">append</span>((t, pitch, yaw, roll))
+
+<span class="cm"># Process each IMU reading: compute rotation matrix → look direction</span>
+look_vectors = []
+<span class="kw">for</span> t, pitch, yaw, roll <span class="kw">in</span> imu_readings:
+    R = <span class="fn">euler_to_rotation_matrix</span>(pitch, yaw, roll)
+    default_forward = np.<span class="fn">array</span>([<span class="nb">0</span>, <span class="nb">0</span>, -<span class="nb">1</span>])   <span class="cm"># OpenGL convention</span>
+    look_dir = R @ default_forward
+    look_vectors.<span class="fn">append</span>(look_dir)</pre>
+        </div>
+      </div>
+
+      <!-- Step explanation -->
+      <h4 style="font-family:'Exo 2',sans-serif;color:#a78bfa;margin:1.5rem 0 1rem;font-size:0.9rem;letter-spacing:1px;">📖 Step-by-Step Code Explanation</h4>
+      <div class="steps-list">
+        <div class="step-item"><div class="step-num" style="color:rgba(167,139,250,0.3);">01</div><div class="step-content"><div class="step-title">euler_to_rotation_matrix() Function</div><div class="step-text">Euler angles (pitch, yaw, roll) are how humans describe head orientation. But GPUs need this as a 3×3 rotation matrix. Every VR headset does this conversion millions of times per second in C++ firmware. We use Python to make it readable.</div></div></div>
+        <div class="step-item"><div class="step-num" style="color:rgba(167,139,250,0.3);">02</div><div class="step-content"><div class="step-title">Simulating IMU Sensor Data</div><div class="step-text">Real VR headsets have physical IMU chips outputting orientation data at 1000Hz+. We simulate 120 readings (2 seconds at 60Hz) using sinusoidal functions to represent natural head movement — real head movements are smooth curves, not sharp jumps.</div></div></div>
+        <div class="step-item"><div class="step-num" style="color:rgba(167,139,250,0.3);">03</div><div class="step-content"><div class="step-title">Computing Look Direction Vectors</div><div class="step-text">We apply the rotation matrix to a "default forward vector" [0, 0, -1] — the OpenGL convention for looking straight ahead. After rotation, we have the actual direction the user is looking in the virtual world.</div></div></div>
+        <div class="step-item"><div class="step-num" style="color:rgba(167,139,250,0.3);">05</div><div class="step-content"><div class="step-title">3D Visualisation</div><div class="step-text">The 3D plot shows the path of the look direction vector on the surface of a unit sphere. The colour gradient from blue to red encodes time progression — this type of visualisation is used by VR UX designers as a "gaze heatmap" in 3D.</div></div></div>
+      </div>
+    </div>
+
+    <!-- 2.6 Beyond Entertainment -->
+    <div class="card">
+      <div class="card-title" style="color:#a78bfa;">🟣 2.6 VR Beyond Entertainment — The Serious Side</div>
+      <div class="ds-apps-grid">
+        <div class="ds-app-card" style="border-color:rgba(124,58,237,0.2);">
+          <div class="ds-app-icon">🏪</div>
+          <div class="ds-app-title" style="color:#a78bfa;">Training &amp; Simulation</div>
+          <div class="ds-app-text"><a href="https://corporate.walmart.com/news/2018/09/20/walmart-is-training-its-employees-with-vr" target="_blank" style="color:#a78bfa;">Walmart</a> trained 1M+ employees in VR. <a href="https://www.boeing.com" target="_blank" style="color:#a78bfa;">Boeing</a> uses VR for aircraft assembly. UCL medical students practice surgery in VR before touching a real patient.</div>
+        </div>
+        <div class="ds-app-card" style="border-color:rgba(124,58,237,0.2);">
+          <div class="ds-app-icon">🧠</div>
+          <div class="ds-app-title" style="color:#a78bfa;">Clinical Therapy</div>
+          <div class="ds-app-text"><a href="https://www.psych.ox.ac.uk/research/oxford-centre-for-anxiety-disorders-and-trauma" target="_blank" style="color:#a78bfa;">Oxford CDAT</a> published clinical trials showing VR-based exposure therapy reduces PTSD, paranoia, and anxiety with statistically significant results.</div>
+        </div>
+        <div class="ds-app-card" style="border-color:rgba(124,58,237,0.2);">
+          <div class="ds-app-icon">🏙️</div>
+          <div class="ds-app-title" style="color:#a78bfa;">Urban Planning</div>
+          <div class="ds-app-text"><a href="https://unhabitat.org/" target="_blank" style="color:#a78bfa;">UN-Habitat</a> uses VR to walk through proposed urban developments before a single brick is laid. Residents provide feedback by experiencing, not just reading blueprints.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== LESSON 3: XR =================== -->
+<section id="lesson3" class="section-xr" style="padding-top:4rem;border-top:3px solid rgba(255,107,53,0.3);">
+  <div class="section" style="padding-top:3rem;">
+    <div class="section-header" id="xr-header">
+      <div class="lesson-badge lesson-badge-xr">🌐 Lesson 3 — XR: Extended Reality</div>
+      <h2 class="section-title">"XR is not a technology. It is a new way of thinking about the <span style="color:var(--accent);">interface between human beings and information</span>."</h2>
+    </div>
+
+    <!-- 3.1 What is XR -->
+    <div class="card">
+      <div class="card-title" style="color:var(--accent);">🌐 3.1 What is XR (Extended Reality)?</div>
+      <p>XR is the <strong>umbrella term</strong> that encompasses AR, VR, and MR (Mixed Reality). It refers to all technologies that blend or replace the real world with digital content. The "X" in XR is intentionally generic — it is a variable placeholder that represents <em>any</em> level of reality modification.</p>
+      <p style="margin-top:1rem;color:#8090b0;">But XR is more than just a vocabulary term. It represents a <strong style="color:var(--text);">paradigm shift in UI design</strong> — a complete rethinking of how human beings interact with information and computers.</p>
+    </div>
+
+    <!-- 3.2 Reality-Virtuality Continuum -->
+    <div class="card">
+      <div class="card-title" style="color:var(--accent);">🌐 3.2 Milgram's Reality–Virtuality Continuum (1994)</div>
+      <p style="color:#8090b0;font-size:0.85rem;margin-bottom:1.5rem;">In 1994, researcher Paul Milgram published the most useful mental model for understanding the entire XR spectrum. Click each point on the continuum to explore.</p>
+
+      <div class="continuum-wrap">
+        <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:0.3rem;">
+          <span>◄ REAL WORLD</span>
+          <span>XR SPECTRUM</span>
+          <span>VIRTUAL WORLD ►</span>
+        </div>
+        <div class="continuum-bar">
+          <div class="continuum-line"></div>
+          <div class="continuum-items">
+            <div class="cont-item" onclick="showContinuum('real')">
+              <div class="cont-dot" style="border-color:#fff;"></div>
+              <div class="cont-label" style="color:#fff;">REAL</div>
+              <div class="cont-sub">Your room</div>
+            </div>
+            <div class="cont-item" onclick="showContinuum('ar')">
+              <div class="cont-dot" style="border-color:var(--primary);"></div>
+              <div class="cont-label" style="color:var(--primary);">AR</div>
+              <div class="cont-sub">Phone AR apps</div>
+            </div>
+            <div class="cont-item" onclick="showContinuum('mr')">
+              <div class="cont-dot" style="border-color:#a78bfa;"></div>
+              <div class="cont-label" style="color:#a78bfa;">MR</div>
+              <div class="cont-sub">HoloLens 2</div>
+            </div>
+            <div class="cont-item" onclick="showContinuum('vr')">
+              <div class="cont-dot" style="border-color:#7c3aed;"></div>
+              <div class="cont-label" style="color:#7c3aed;">VR</div>
+              <div class="cont-sub">Meta Quest 3</div>
+            </div>
+          </div>
+        </div>
+        <div class="cont-detail-panel" id="continuum-detail">
+          <div class="cont-detail-title" style="color:#8090b0;">← Click a point on the continuum above</div>
+          <div class="cont-detail-text">Explore how each reality modality differs in how it blends the real and virtual worlds.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3.3 MR -->
+    <div class="card">
+      <div class="card-title" style="color:var(--accent);">🌐 3.3 MR (Mixed Reality) — The Middle Ground</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div style="background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.2);border-radius:10px;padding:1.2rem;">
+          <div style="font-family:'Exo 2',sans-serif;font-weight:700;color:var(--primary);margin-bottom:0.6rem;font-size:0.9rem;">AR Example</div>
+          <p style="font-size:0.82rem;color:#8090b0;">A 3D model of a chair <em>floats on your screen</em> — it doesn't interact with the physical environment.</p>
+        </div>
+        <div style="background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.2);border-radius:10px;padding:1.2rem;">
+          <div style="font-family:'Exo 2',sans-serif;font-weight:700;color:#a78bfa;margin-bottom:0.6rem;font-size:0.9rem;">MR Example</div>
+          <p style="font-size:0.82rem;color:#8090b0;">The chair <strong>sits on your actual floor</strong>, casts a virtual shadow on it, and you can walk around it — it stays in place as you move. Digital objects are <em>spatially anchored</em> to real surfaces.</p>
+        </div>
+      </div>
+      <p style="margin-top:1rem;font-size:0.85rem;color:#8090b0;"><a href="https://www.apple.com/apple-vision-pro/" target="_blank" style="color:var(--accent);">Apple Vision Pro</a> (2024) and <a href="https://www.microsoft.com/en-us/hololens/hardware" target="_blank" style="color:var(--accent);">Microsoft HoloLens 2</a> are the most prominent MR devices. They use depth cameras and SLAM to precisely map the physical environment and anchor digital content to it.</p>
+    </div>
+
+    <!-- 3.4 XR as New UI Paradigm -->
+    <div class="card">
+      <div class="card-title" style="color:var(--accent);">🌐 3.4 XR as a New Paradigm in UI Design</div>
+      <p>Up until now, every interaction with a computer has been fundamentally <strong>flat</strong>. Screen → keyboard → mouse. Even touchscreens are flat. The entire history of GUI design — from Xerox PARC in the 1970s, through Windows and macOS, through iOS and Android — has been constrained to a rectangle.</p>
+      <p style="margin-top:1rem;"><strong style="color:var(--accent);">XR shatters that constraint.</strong></p>
+      <p style="margin-top:0.8rem;color:#8090b0;">In an XR environment, the UI is <strong style="color:var(--text);">spatial</strong>. Information exists in three-dimensional space around you. You reach out and grab a file. You turn your head to switch applications. You place your data dashboard on the wall to your left and your communication tools on your right.</p>
+      <div style="background:rgba(255,107,53,0.06);border:1px solid rgba(255,107,53,0.2);border-radius:10px;padding:1.2rem;margin-top:1rem;">
+        <strong style="color:var(--accent);">Spatial Computing</strong> — Apple's term for this paradigm — represents the most significant shift in human-computer interaction since the introduction of the touchscreen.
+      </div>
+    </div>
+
+    <!-- 3.5 Five Principles -->
+    <div class="card">
+      <div class="card-title" style="color:var(--accent);">🌐 3.5 The Five Principles of Spatial UI Design</div>
+      <p style="color:#8090b0;font-size:0.85rem;margin-bottom:1.5rem;">Designing for XR requires abandoning most of what you know about 2D UI design.</p>
+      <div class="principles-grid">
+        <div class="principle-row"><div class="principle-num">1</div><div class="principle-content"><div class="principle-title">DEPTH IS INFORMATION</div><div class="principle-text">Objects closer to the user feel more urgent/important. Use Z-axis distance to convey hierarchy and priority — depth replaces visual weight.</div></div></div>
+        <div class="principle-row"><div class="principle-num">2</div><div class="principle-content"><div class="principle-title">THE BODY IS THE CURSOR</div><div class="principle-text">Eyes, head pose, hands, and voice replace mouse and keyboard. Design for gaze-based hover, pinch-to-select, and voice commands.</div></div></div>
+        <div class="principle-row"><div class="principle-num">3</div><div class="principle-content"><div class="principle-title">COMFORT ZONES MATTER</div><div class="principle-text">Keep interactive elements within comfortable reach (0.5m–2m). Content below 0.5m or above 60° elevation causes neck strain — ergonomics is UI design.</div></div></div>
+        <div class="principle-row"><div class="principle-num">4</div><div class="principle-content"><div class="principle-title">CONTEXT COLLAPSES MENUS</div><div class="principle-text">In XR, menus are contextual — they appear near the relevant object. The concept of a "menu bar" disappears; interaction is in-place.</div></div></div>
+        <div class="principle-row"><div class="principle-num">5</div><div class="principle-content"><div class="principle-title">THE ENVIRONMENT IS THE CANVAS</div><div class="principle-text">Walls, floors, tables, and surfaces become valid UI real estate. A data visualisation can be as large as the room demands.</div></div></div>
+      </div>
+    </div>
+
+    <!-- 3.6 XR + Data Science -->
+    <div class="card">
+      <div class="card-title" style="color:var(--accent);">🌐 3.6 XR and Data Science — The Convergence</div>
+      <p style="margin-bottom:1rem;font-size:0.95rem;"><em>What happens when you take your data science outputs — your models, your dashboards, your predictions — and deliver them in XR?</em></p>
+      <p><strong>The answer: you transform data from something people stare at on a screen into something people <span style="color:var(--accent);">inhabit</span>.</strong></p>
+      <div style="background:rgba(255,107,53,0.04);border:1px solid rgba(255,107,53,0.15);border-radius:12px;padding:1.5rem;margin-top:1.2rem;">
+        <p style="font-size:0.85rem;color:#a0c4d8;">Consider a data scientist who has built a model that forecasts disease spread across a city. In a traditional setting, this model produces a chart — a flat map with coloured regions. <strong style="color:var(--text);">In XR</strong>, a public health official can stand inside the city map, walk between districts, watch the disease spread as an animated 3D flow, reach out and tap a neighbourhood for detailed statistics, and run simulations by verbally asking the XR system to model different intervention scenarios.</p>
+        <p style="margin-top:0.8rem;font-size:0.82rem;color:#8090b0;">The model is the same. The XR interface is not just a prettier dashboard — it is a fundamentally more powerful <strong style="color:var(--text);">cognitive tool</strong>.</p>
+      </div>
+    </div>
+
+    <!-- 3.7 Real-Life Example: XR Dashboard -->
+    <div class="card">
+      <div class="card-title" style="color:var(--accent);">🔬 3.7 Real-Life Example — XR Spatial Data Dashboard (Live Demo)</div>
+      <div class="task-box" style="border-color:rgba(255,107,53,0.4);background:rgba(255,107,53,0.04);">
+        <div class="task-label" style="color:var(--accent);">🏷️ TASK DEFINITION</div>
+        <div class="task-title">XR Spatial Analytics Dashboard</div>
+        <div class="task-text">A fully self-contained interactive HTML XR spatial data dashboard that simulates how a data scientist's analytics output would be presented in a spatial computing environment. A 3D scatter plot of student performance data in a navigable spatial interface, demonstrating all five spatial UI design principles.</div>
+        <div style="margin-top:0.8rem;">
+          <span class="tag tag-xr">XR</span>
+          <span class="tag tag-code">HTML/CSS/JS</span>
+          <span class="tag tag-code">CSS3D Transforms</span>
+          <span class="tag tag-data">Spatial UI · All 5 Principles</span>
+        </div>
+      </div>
+
+      <!-- XR Architecture -->
+      <h4 style="font-family:'Exo 2',sans-serif;color:var(--accent);margin-bottom:1rem;font-size:0.9rem;letter-spacing:1px;">📊 XR SPATIAL DASHBOARD ARCHITECTURE</h4>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">
+        <div style="background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.2);border-radius:10px;padding:1rem;text-align:center;">
+          <div style="font-family:'Exo 2',sans-serif;font-weight:700;color:var(--primary);font-size:0.8rem;margin-bottom:0.5rem;">DATA LAYER</div>
+          <div style="font-size:0.72rem;color:#8090b0;">CSV / JSON Dataset<br>→ 60 Student Records</div>
+        </div>
+        <div style="background:rgba(255,107,53,0.05);border:1px solid rgba(255,107,53,0.2);border-radius:10px;padding:1rem;text-align:center;">
+          <div style="font-family:'Exo 2',sans-serif;font-weight:700;color:var(--accent);font-size:0.8rem;margin-bottom:0.5rem;">UI LAYER (SPATIAL)</div>
+          <div style="font-size:0.72rem;color:#8090b0;">3D Scene Space<br>CSS3D + Anchored panels<br>Floating labels</div>
+        </div>
+        <div style="background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.2);border-radius:10px;padding:1rem;text-align:center;">
+          <div style="font-family:'Exo 2',sans-serif;font-weight:700;color:#a78bfa;font-size:0.8rem;margin-bottom:0.5rem;">INTERACTION LAYER</div>
+          <div style="font-size:0.72rem;color:#8090b0;">Gaze → Hover<br>Pinch → Select<br>Head turn → Navigate</div>
+        </div>
+      </div>
+
+      <!-- THE LIVE EMBEDDED XR DASHBOARD -->
+      <h4 style="font-family:'Exo 2',sans-serif;color:var(--accent);margin-bottom:0.8rem;font-size:0.9rem;letter-spacing:1px;">🌐 LIVE INTERACTIVE XR SPATIAL DASHBOARD</h4>
+      <p style="font-size:0.8rem;color:#8090b0;margin-bottom:1rem;">Drag to rotate · Hover over data points for contextual overlays · Use filter buttons to explore performance bands · This runs all five Spatial UI Principles simultaneously.</p>
+      <div id="xr-demo-wrap">
+        <div id="xr-scene-container" style="perspective:800px;width:100%;height:100%;position:relative;cursor:grab;background:#05080f;overflow:hidden;">
+          <!-- Starfield -->
+          <canvas id="xr-star-canvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+          <!-- 3D Scene -->
+          <div id="xr-scene" style="transform-style:preserve-3d;position:absolute;top:50%;left:50%;transform:translateX(-50%) translateY(-50%) rotateX(-20deg) rotateY(30deg);">
+            <!-- Data points injected here -->
+          </div>
+          <!-- HUD -->
+          <div id="xr-hud" style="position:absolute;inset:0;pointer-events:none;z-index:100;">
+            <div id="xr-info-panel" style="position:absolute;top:16px;left:16px;background:rgba(5,10,30,0.88);border:1px solid rgba(80,130,255,0.45);border-radius:10px;padding:14px 18px;pointer-events:all;">
+              <div style="font-size:13px;font-weight:700;color:#80aaff;margin-bottom:6px;font-family:'Exo 2',sans-serif;">🌐 XR Spatial Analytics</div>
+              <div style="font-size:11px;color:#6080b0;">Drag to rotate &nbsp;|&nbsp; Hover for data</div>
+              <div style="font-size:11px;margin-top:6px;color:#8090b0;" id="xr-stats-display">Students: 0 | Avg Score: 0%</div>
+              <div style="margin-top:8px;font-size:10px;color:#4060a0;">
+                <span style="color:#44ff88;">● Excellent</span> &nbsp;
+                <span style="color:#4488ff;">● Good</span> &nbsp;
+                <span style="color:#ffcc44;">● Average</span> &nbsp;
+                <span style="color:#ff4444;">● Needs Support</span>
+              </div>
+            </div>
+            <div id="xr-title" style="position:absolute;top:16px;right:16px;text-align:right;pointer-events:none;">
+              <div style="font-size:16px;font-weight:700;color:#aaccff;font-family:'Exo 2',sans-serif;">Student Performance</div>
+              <div style="font-size:11px;color:#5080a0;">Digital Science — Year 1</div>
+            </div>
+            <div id="xr-filter-panel" style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;pointer-events:all;">
+              <button class="xr-fbtn active" onclick="xrFilter('all')">All Students</button>
+              <button class="xr-fbtn" onclick="xrFilter('excellent')">🟢 Excellent</button>
+              <button class="xr-fbtn" onclick="xrFilter('good')">🔵 Good</button>
+              <button class="xr-fbtn" onclick="xrFilter('average')">🟡 Average</button>
+              <button class="xr-fbtn" onclick="xrFilter('support')">🔴 Needs Support</button>
+            </div>
+            <div id="xr-axis-x" style="position:absolute;bottom:60px;right:20px;font-size:10px;color:rgba(160,180,255,0.6);font-family:'JetBrains Mono',monospace;">X: Study Hours</div>
+            <div id="xr-axis-y" style="position:absolute;top:50%;right:20px;font-size:10px;color:rgba(160,180,255,0.6);font-family:'JetBrains Mono',monospace;writing-mode:vertical-rl;">Y: Score</div>
+            <div id="xr-axis-z" style="position:absolute;bottom:80px;left:50%;font-size:10px;color:rgba(160,180,255,0.6);font-family:'JetBrains Mono',monospace;">Z: Completion Rate (depth)</div>
+          </div>
+        </div>
+      </div>
+
+      <style>
+        .xr-fbtn{padding:6px 14px;border-radius:20px;border:1px solid rgba(100,150,255,0.4);background:rgba(15,20,60,0.8);color:#c0d4ff;cursor:pointer;font-size:11px;transition:all 0.2s;font-family:'Inter',sans-serif;}
+        .xr-fbtn.active,.xr-fbtn:hover{background:rgba(60,100,255,0.35);border-color:#6496ff;box-shadow:0 0 12px rgba(100,150,255,0.35);}
+        .xr-dp{position:absolute;transform-style:preserve-3d;cursor:pointer;transition:transform 0.2s;}
+        .xr-orb{width:16px;height:16px;border-radius:50%;box-shadow:0 0 10px currentColor;border:2px solid rgba(255,255,255,0.35);transition:all 0.2s;}
+        .xr-dp:hover .xr-orb{transform:scale(1.9);box-shadow:0 0 22px currentColor,0 0 45px currentColor;}
+        .xr-tip{position:absolute;background:rgba(5,10,35,0.94);border:1px solid rgba(100,150,255,0.55);padding:9px 13px;border-radius:8px;font-size:11px;white-space:nowrap;opacity:0;pointer-events:none;transform:translate(14px,-55px);transition:opacity 0.2s;z-index:1000;color:#d0e4ff;}
+        .xr-dp:hover .xr-tip{opacity:1;}
+      </style>
+
+      <!-- Code Block -->
+      <div class="code-container" style="margin-top:1.5rem;">
+        <div class="code-header">
+          <div><span class="code-filename">lesson3_xr_spatial_dashboard.html</span><span class="code-lang">HTML/JS/CSS</span></div>
+          <button class="copy-btn" onclick="copyCode('xr-code')">Copy</button>
+        </div>
+        <div class="code-body" id="xr-code">
+<pre><span class="cm">&lt;!-- =============================================
+     LESSON 3 — XR SPATIAL DATA DASHBOARD
+     File: lesson3_xr_spatial_dashboard.html
+     Open in any modern browser. No installation.
+     ============================================= --&gt;</span>
+
+<span class="cm">/* === CSS: The 3D Scene Stage === */</span>
+<span class="fn">#scene-container</span> {
+  <span class="op">perspective</span>: <span class="nb">800px</span>;           <span class="cm">/* Creates 3D frustum — VR camera FOV */</span>
+  <span class="op">cursor</span>: grab;
+}
+
+<span class="fn">#scene</span> {
+  <span class="op">transform-style</span>: preserve-3d;   <span class="cm">/* Children exist in 3D space */</span>
+  <span class="op">transform</span>: translateX(-50%) translateY(-50%)
+             rotateX(-20deg) rotateY(30deg);
+}
+
+<span class="cm">// === JS: 3D Data Positioning ===
+// Map data dimensions to spatial coordinates:
+// X axis → Study hours per week
+// Y axis → Final score (higher = higher)
+// Z axis → Completion rate (depth = effort)</span>
+
+<span class="kw">const</span> CATEGORIES = {
+  excellent: { colour: <span class="st">'#44ff88'</span>, minScore: <span class="nb">80</span> },
+  good:      { colour: <span class="st">'#4488ff'</span>, minScore: <span class="nb">65</span> },
+  average:   { colour: <span class="st">'#ffcc44'</span>, minScore: <span class="nb">50</span> },
+  support:   { colour: <span class="st">'#ff4444'</span>, minScore: <span class="nb">0</span>  },
+};
+
+students.<span class="fn">forEach</span>(student => {
+  <span class="kw">const</span> x = (student.hours    - <span class="nb">15</span>) * SCALE * <span class="nb">2</span>;
+  <span class="kw">const</span> y = -(student.score   - <span class="nb">65</span>) * SCALE * <span class="nb">2</span>;   <span class="cm">// Inverted</span>
+  <span class="kw">const</span> z = (student.complete - <span class="nb">50</span>) * SCALE * <span class="nb">2</span>;
+
+  <span class="cm">// Place point in 3D space using CSS translate3d</span>
+  pointDiv.style.transform = <span class="st">`translate3d(<span class="fn">${x}</span>px, <span class="fn">${y}</span>px, <span class="fn">${z}</span>px)`</span>;
+});
+
+<span class="cm">// === Mouse Drag = Simulated XR Head Movement ===
+// Left-right drag → rotateY (yaw)
+// Up-down drag    → rotateX (pitch)</span>
+rotY += deltaX * <span class="nb">0.5</span>;
+rotX = Math.<span class="fn">max</span>(-<span class="nb">60</span>, Math.<span class="fn">min</span>(<span class="nb">60</span>, rotX + deltaY * <span class="nb">0.5</span>));
+scene.style.transform = <span class="st">`translateX(-50%) translateY(-50%)
+  rotateX(<span class="fn">${rotX}</span>deg) rotateY(<span class="fn">${rotY}</span>deg)`</span>;</pre>
+        </div>
+      </div>
+
+      <!-- Step Explanation -->
+      <h4 style="font-family:'Exo 2',sans-serif;color:var(--accent);margin:1.5rem 0 1rem;font-size:0.9rem;letter-spacing:1px;">📖 Step-by-Step Code Explanation</h4>
+      <div class="steps-list">
+        <div class="step-item"><div class="step-num" style="color:rgba(255,107,53,0.3);">①</div><div class="step-content"><div class="step-title">The Data Layer</div><div class="step-text">The students array is our synthetic dataset — 60 student records with score, study hours, and assignment completion rate. In a real XR app, this comes from an LMS like Moodle or Canvas via a REST API call.</div></div></div>
+        <div class="step-item"><div class="step-num" style="color:rgba(255,107,53,0.3);">②</div><div class="step-content"><div class="step-title">3D Positioning Logic (Spatial UI Principle 1)</div><div class="step-text">Study hours → X, score → Y, completion rate → Z. A student with high score, many hours, and high completion appears at the top-right-front of the 3D cloud. This is Principle 1: Depth Is Information.</div></div></div>
+        <div class="step-item"><div class="step-num" style="color:rgba(255,107,53,0.3);">③</div><div class="step-content"><div class="step-title">Tooltip System (Spatial UI Principle 4)</div><div class="step-text">Hover triggers contextual overlays showing the student's full record — simulating gaze-triggered contextual menus in XR. In a real headset, the trigger would be eye gaze dwelling on a point for 300ms.</div></div></div>
+        <div class="step-item"><div class="step-num" style="color:rgba(255,107,53,0.3);">④</div><div class="step-content"><div class="step-title">Drag Rotation (Spatial UI Principle 2)</div><div class="step-text">Mouse drag maps to 3D rotation — the same axes from Lesson 2's head tracking. Left-right drag = yaw rotation; up-down = pitch. The user IS the cursor — Spatial UI Principle 2.</div></div></div>
+      </div>
+    </div>
+
+    <!-- 3.8 Where is XR Going? -->
+    <div class="card">
+      <div class="card-title" style="color:var(--accent);">🌐 3.8 Where is XR Going? — Key Developments to Watch</div>
+      <div class="future-grid">
+        <div class="future-card">
+          <div class="future-title">🍎 Apple Vision Pro</div>
+          <div class="future-text">Released 2024 at USD $3,499. First truly production-ready spatial computing device. Runs visionOS — applications exist as windows floating in your physical space.</div>
+          <a href="https://www.apple.com/apple-vision-pro/" target="_blank" class="future-link">apple.com/apple-vision-pro ↗</a>
+        </div>
+        <div class="future-card">
+          <div class="future-title">🌍 Meta Horizon OS</div>
+          <div class="future-text">Meta building an open ecosystem for spatial computing. Meta Quest 3 positioned as the affordable consumer/developer entry point into XR.</div>
+          <a href="https://www.meta.com/blog/quest/meta-horizon-os/" target="_blank" class="future-link">meta.com/horizon-os ↗</a>
+        </div>
+        <div class="future-card">
+          <div class="future-title">🌐 WebXR API</div>
+          <div class="future-text">W3C developing the WebXR standard — XR experiences running inside web browsers. Any website could become an XR application without app installation.</div>
+          <a href="https://www.w3.org/TR/webxr/" target="_blank" class="future-link">w3.org/TR/webxr ↗</a>
+        </div>
+        <div class="future-card">
+          <div class="future-title">🔧 OpenXR (Khronos)</div>
+          <div class="future-text">Open, royalty-free standard for VR/AR application and device interoperability. Most major XR platforms have adopted it — the USB standard for XR.</div>
+          <a href="https://www.khronos.org/openxr/" target="_blank" class="future-link">khronos.org/openxr ↗</a>
+        </div>
+        <div class="future-card">
+          <div class="future-title">⚡ NVIDIA Omniverse</div>
+          <div class="future-text">Platform for building and operating 3D simulations and collaborative virtual environments. Backbone of several major industrial metaverse applications.</div>
+          <a href="https://developer.nvidia.com/omniverse" target="_blank" class="future-link">developer.nvidia.com/omniverse ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== GLOSSARY =================== -->
+<section id="glossary" class="section-ref" style="border-top:3px solid rgba(0,255,136,0.3);">
+  <div class="section">
+    <div class="section-header" id="gloss-header">
+      <span class="section-eyebrow">Quick Reference</span>
+      <h2 class="section-title">📝 Concept Review — Key Terms</h2>
+      <p class="section-desc">22 essential terms from this lecture — searchable definitions with full forms.</p>
+    </div>
+    <input type="text" class="glossary-search" placeholder="🔍  Search terms... (e.g. SLAM, FOV, HUD)" oninput="filterGlossary(this.value)">
+    <div class="glossary-grid" id="glossary-grid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- =================== REFERENCES =================== -->
+<section id="references">
+  <div class="section">
+    <div class="section-header" id="ref-header">
+      <span class="section-eyebrow">Resources</span>
+      <h2 class="section-title">🔗 Reference Links &amp; Further Reading</h2>
+      <p class="section-desc">All 30 organisations, tools, and resources referenced in this lecture. Always verify URLs before visiting.</p>
+    </div>
+    <div style="background:rgba(255,71,87,0.05);border:1px solid rgba(255,71,87,0.2);border-radius:10px;padding:1rem;margin-bottom:1.5rem;font-size:0.82rem;color:#8090b0;">
+      ⚠️ <strong style="color:var(--red);">Security Reminder:</strong> Before visiting any external link, verify URL safety at <a href="https://www.virustotal.com/gui/home/url" target="_blank" style="color:var(--primary);">VirusTotal.com ↗</a> — paste any URL to scan against 90+ security vendors.
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="ref-table">
+        <thead><tr><th>#</th><th>Resource</th><th>URL</th><th>Description</th></tr></thead>
+        <tbody id="ref-tbody"><!-- Populated by JS --></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- =================== DISCLAIMER =================== -->
+<section id="disclaimer" id="disclaimer-section">
+  <div style="max-width:1100px;margin:0 auto;padding:4rem 2rem;">
+    <div class="disclaimer-box">
+      <div style="text-align:center;margin-bottom:2rem;">
+        <div style="font-family:'Exo 2',sans-serif;font-weight:900;font-size:1.4rem;color:var(--red);">📢 Disclaimer &amp; Intellectual Property Notice</div>
+      </div>
+      <div class="disclaimer-title">Ownership &amp; Intellectual Property</div>
+      <div class="disclaimer-text">
+        All lecture content, original written material, code examples, schematics, diagrams, concept frameworks, and educational narratives contained within this document are the <strong style="color:var(--text);">exclusive intellectual property of Cyber.SoHo</strong>.<br><br>
+        © 2024–2025 <strong style="color:var(--primary);">Cyber.SoHo</strong>. All rights reserved. No part of this material may be reproduced, distributed, transmitted, adapted, published, broadcast, translated, or stored in any retrieval system without prior written permission.
+      </div>
+      <div class="disclaimer-title" style="margin-top:1.5rem;">Copyright &amp; No Affiliation Notice</div>
+      <div class="disclaimer-text">
+        Technologies, platforms, and organisations referenced are mentioned for <strong>purely educational purposes only</strong>. <strong style="color:var(--text);">Cyber.SoHo has no business, financial, commercial, or other affiliation</strong> with Microsoft, Apple, Google, Meta, Sony, Valve, Unity, Epic, Niantic, PTC, NVIDIA, Stanford, UCL, Oxford, W3C, Khronos Group, Walmart, Boeing, Amazon, IKEA, UN-Habitat, Moodle, Instructure, VirusTotal, or any other named entity.
+      </div>
+      <div class="disclaimer-title" style="margin-top:1.5rem;">External Link Safety Advisory</div>
+      <div class="disclaimer-text">
+        Before visiting any external link, verify the URL's safety using: <a href="https://www.virustotal.com/gui/home/url" target="_blank" style="color:var(--primary);">VirusTotal URL Scanner — virustotal.com ↗</a>
+      </div>
+      <div class="disclaimer-title" style="margin-top:1.5rem;">Liability Disclaimer</div>
+      <div class="disclaimer-text">
+        This material is provided "as-is" for educational purposes. Code examples are for <strong>educational illustration only</strong> and should not be deployed in production without proper security review. <strong>Cyber.SoHo accepts no liability</strong> for technical errors, decisions made based on this content, or harm from visiting external links.
+      </div>
+      <div class="disclaimer-title" style="margin-top:1.5rem;">Ethics Statement</div>
+      <div class="disclaimer-text">
+        Developed with commitment to: <strong style="color:var(--text);">Accuracy</strong> · <strong style="color:var(--text);">Respect for intellectual property</strong> · <strong style="color:var(--text);">Inclusion</strong> · <strong style="color:var(--text);">Transparency</strong> · <strong style="color:var(--text);">Student wellbeing</strong> — Technology is presented critically, including its risks and limitations.
+      </div>
+      <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);text-align:center;font-size:0.78rem;color:var(--muted);">
+        Lecture prepared for the Faculty of Digital Science — Graduate Programme<br>
+        Day 13 | Digital Technology Module | Emerging Technologies<br>
+        <strong style="color:var(--primary);">© 2024–2025 Cyber.SoHo — All Rights Reserved</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="footer">
+  <div class="footer-text">
+    <span class="footer-brand">◈ Cyber.SoHo</span> &nbsp;|&nbsp; Faculty of Digital Science &nbsp;|&nbsp; Day 13: Emerging Technologies &nbsp;|&nbsp; AR · VR · XR &nbsp;|&nbsp; © 2024–2025
+  </div>
+</footer>
+
+<script>
+// =============================================
+// PARTICLE HERO BACKGROUND
+// =============================================
+(function(){
+  const canvas = document.getElementById('hero-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  for(let i=0;i<120;i++){
+    particles.push({
+      x: Math.random()*W, y: Math.random()*H,
+      r: Math.random()*1.5+0.3,
+      vx: (Math.random()-0.5)*0.3,
+      vy: (Math.random()-0.5)*0.3,
+      a: Math.random()
+    });
+  }
+  function drawParticles(){
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,229,255,${p.a*0.6})`;
+      ctx.fill();
+    });
+    // Grid lines
+    ctx.strokeStyle='rgba(0,229,255,0.04)';
+    ctx.lineWidth=1;
+    for(let x=0;x<W;x+=80){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=80){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+})();
+
+// =============================================
+// PROGRESS BAR
+// =============================================
+window.addEventListener('scroll',()=>{
+  const s = document.documentElement.scrollTop;
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('progress-bar').style.width = (s/h*100)+'%';
+});
+
+// =============================================
+// INTERSECTION OBSERVER — ANIMATE ON SCROLL
+// =============================================
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('visible'); }
+  });
+},{threshold:0.1});
+document.querySelectorAll('.card,.section-header').forEach(el=>observer.observe(el));
+
+// =============================================
+// NAV ACTIVE STATE
+// =============================================
+const sections = ['hero','lesson1','lesson2','lesson3','glossary','references','disclaimer'];
+window.addEventListener('scroll',()=>{
+  const pos = window.scrollY + 100;
+  sections.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el)return;
+    const link = document.querySelector(`.nav-link[href="#${id}"]`);
+    if(!link)return;
+    if(pos >= el.offsetTop && pos < el.offsetTop+el.offsetHeight){
+      document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+      link.classList.add('active');
+    }
+  });
+});
+
+// =============================================
+// AR ARCHITECTURE DIAGRAM
+// =============================================
+function showArchDetail(type){
+  document.querySelectorAll('.arch-detail').forEach(d=>d.classList.remove('show'));
+  document.querySelectorAll('.arch-box').forEach(b=>b.classList.remove('active'));
+  const detail = document.getElementById('arch-detail-'+type);
+  const box = document.getElementById('box-'+type);
+  if(detail){detail.classList.add('show');}
+  if(box){box.classList.add('active');}
+}
+
+// =============================================
+// CONTINUUM
+// =============================================
+const continuumData = {
+  real: {title:'Real Reality',color:'#ffffff',text:'Your actual physical environment — no digital layer whatsoever. Pure, unmodified reality as perceived by your senses. This is the baseline from which all XR technologies deviate.'},
+  ar: {title:'Augmented Reality (AR)',color:'#00e5ff',text:'Real world remains primary — digital overlays are additive. Examples: Snapchat filters, Google Maps AR navigation, AR warehouse systems (as in Lesson 1). The physical environment dominates your perception.'},
+  mr: {title:'Mixed Reality (MR)',color:'#a78bfa',text:'Digital objects are spatially anchored to and interact with physical surfaces in real time. Examples: Apple Vision Pro, Microsoft HoloLens 2. A virtual chair sits on your real floor and stays in place as you move around it.'},
+  vr: {title:'Virtual Reality (VR)',color:'#7c3aed',text:'Fully synthetic world — the real world is invisible behind the headset. Examples: Meta Quest 3, PlayStation VR2. Your brain receives entirely computer-generated visual, auditory, and haptic signals. Complete sensory substitution.'}
+};
+function showContinuum(type){
+  const d = continuumData[type];
+  document.getElementById('continuum-detail').innerHTML =
+    `<div class="cont-detail-title" style="color:${d.color};">${d.title}</div><div class="cont-detail-text">${d.text}</div>`;
+}
+
+// =============================================
+// COPY CODE
+// =============================================
+function copyCode(id){
+  const el = document.getElementById(id);
+  const text = el.innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = el.closest('.code-container').querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(()=>btn.textContent='Copy',1500);
+  });
+}
+
+// =============================================
+// GLOSSARY DATA
+// =============================================
+const glossaryData = [
+  {term:'AR',full:'Augmented Reality',def:'Real world + digital overlay; real world is primary experience'},
+  {term:'VR',full:'Virtual Reality',def:'Fully synthetic world; real world is replaced entirely'},
+  {term:'MR',full:'Mixed Reality',def:'Digital objects anchored to and interacting with physical world in real time'},
+  {term:'XR',full:'Extended Reality',def:'Umbrella term for AR + MR + VR and everything between on Milgram\'s continuum'},
+  {term:'IMU',full:'Inertial Measurement Unit',def:'Sensor chip measuring orientation, movement, and acceleration (gyroscope + accelerometer + magnetometer)'},
+  {term:'SLAM',full:'Simultaneous Localisation And Mapping',def:'Algorithm that builds a map of the environment and locates the device within it — simultaneously — in real time'},
+  {term:'DOF',full:'Degrees of Freedom',def:'Number of independent axes of movement (3DOF = rotation only; 6DOF = rotation + translation)'},
+  {term:'FOV',full:'Field of View',def:'The angular extent of the world visible through the lens — VR headsets require 100°+ to match human binocular vision'},
+  {term:'FPS',full:'Frames Per Second',def:'How many image frames are rendered and displayed per second — VR requires 72–120 FPS to prevent motion sickness'},
+  {term:'GPU',full:'Graphics Processing Unit',def:'Specialised chip for rendering 3D graphics at high speed — essential for real-time VR/AR rendering pipelines'},
+  {term:'HUD',full:'Heads-Up Display',def:'Persistent information overlay always visible at the periphery of view — used in military aircraft since 1950s, now in AR/VR'},
+  {term:'API',full:'Application Programming Interface',def:'A standard way for software systems to communicate with each other — AR overlays query databases via API calls'},
+  {term:'GUI',full:'Graphical User Interface',def:'The visual, clickable interface paradigm dominant since the 1980s — XR moves beyond this "flat" paradigm to spatial UI'},
+  {term:'LMS',full:'Learning Management System',def:'Software platform for delivering and tracking education — e.g. Moodle, Canvas — source of student data for XR dashboards'},
+  {term:'UI',full:'User Interface',def:'The means through which a user interacts with a system — in XR, this becomes spatial rather than flat'},
+  {term:'UX',full:'User Experience',def:'The overall quality of a person\'s interaction with a system — spatial UX requires new design principles (see Lesson 3)'},
+  {term:'PTSD',full:'Post-Traumatic Stress Disorder',def:'Mental health condition treated with VR-based exposure therapy — Oxford CDAT published statistically significant clinical results'},
+  {term:'MCU',full:'Microcontroller Unit',def:'Low-power processor chip used in embedded systems like VR headsets — runs IMU tracking at 1000Hz in C++'},
+  {term:'NPC',full:'Non-Player Character',def:'AI-controlled character in a virtual environment — contributes to the Plausibility pillar of VR immersion'},
+  {term:'IPD',full:'Inter-Pupillary Distance',def:'The distance between the centres of a person\'s two pupils — critical for VR stereo rendering and preventing eye strain'},
+  {term:'W3C',full:'World Wide Web Consortium',def:'International standards body for web technologies — developing the WebXR standard for browser-based XR experiences'},
+  {term:'CSS',full:'Cascading Style Sheets',def:'Stylesheet language for HTML document presentation — CSS3D transforms used in the Lesson 3 spatial dashboard demo'},
+];
+
+function renderGlossary(filter=''){
+  const grid = document.getElementById('glossary-grid');
+  grid.innerHTML = '';
+  glossaryData.filter(g=>
+    !filter || g.term.toLowerCase().includes(filter.toLowerCase()) ||
+    g.full.toLowerCase().includes(filter.toLowerCase()) ||
+    g.def.toLowerCase().includes(filter.toLowerCase())
+  ).forEach(g=>{
+    const div = document.createElement('div');
+    div.className = 'glossary-item';
+    div.innerHTML = `<div class="glossary-term">${g.term}</div><div class="glossary-full">${g.full}</div><div class="glossary-def">${g.def}</div>`;
+    grid.appendChild(div);
+  });
+}
+function filterGlossary(v){ renderGlossary(v); }
+renderGlossary();
+
+// =============================================
+// REFERENCES DATA
+// =============================================
+const refsData = [
+  {n:1,name:'Microsoft HoloLens',url:'https://www.microsoft.com/en-us/hololens',desc:'MR headset for industrial and enterprise AR/MR use cases'},
+  {n:2,name:'Apple ARKit',url:'https://developer.apple.com/augmented-reality/',desc:'Apple\'s official AR development framework for iOS devices'},
+  {n:3,name:'Google ARCore',url:'https://developers.google.com/ar',desc:'Google\'s AR platform for Android — powers AR in Google Search and Maps'},
+  {n:4,name:'PTC Vuforia',url:'https://www.ptc.com/en/technologies/augmented-reality',desc:'Enterprise-grade industrial AR platform widely used in manufacturing'},
+  {n:5,name:'Niantic Lightship ARDK',url:'https://nianticlabs.com/',desc:'Company behind Pokémon GO, building planet-scale AR infrastructure'},
+  {n:6,name:'Meta Reality Labs',url:'https://about.meta.com/realitylabs/',desc:'Meta\'s XR research and product division — Quest headsets, Horizon OS'},
+  {n:7,name:'Meta Quest',url:'https://www.meta.com/quest/',desc:'Consumer VR headset line; Quest 3 is current generation (2024)'},
+  {n:8,name:'PlayStation VR2',url:'https://www.playstation.com/en-us/ps-vr2/',desc:'Sony\'s VR headset for PlayStation 5 — eye tracking, adaptive triggers'},
+  {n:9,name:'SteamVR',url:'https://store.steampowered.com/vr',desc:'Valve\'s VR platform and storefront; Index headset manufacturer'},
+  {n:10,name:'Unity3D for VR',url:'https://unity.com/solutions/vr',desc:'Industry-standard game engine; used for 70%+ of VR applications'},
+  {n:11,name:'Unreal Engine 5 VR',url:'https://www.unrealengine.com/en-US/vr',desc:'Epic\'s photorealistic VR/AR engine; used for AAA games and industrial sims'},
+  {n:12,name:'Stanford VHIL',url:'https://vhil.stanford.edu/',desc:'Virtual Human Interaction Lab — world-leading academic VR research'},
+  {n:13,name:'Chris Milk TED Talk',url:'https://www.ted.com/talks/chris_milk_how_virtual_reality_can_create_the_ultimate_empathy_machine',desc:'2015 TED Talk on VR as an empathy machine — essential viewing'},
+  {n:14,name:'Apple Vision Pro',url:'https://www.apple.com/apple-vision-pro/',desc:'Apple\'s spatial computing headset — visionOS platform (launched 2024)'},
+  {n:15,name:'Meta Horizon OS',url:'https://www.meta.com/blog/quest/meta-horizon-os/',desc:'Meta\'s open spatial computing OS for XR devices'},
+  {n:16,name:'WebXR W3C Standard',url:'https://www.w3.org/TR/webxr/',desc:'W3C specification for XR experiences in web browsers'},
+  {n:17,name:'Khronos OpenXR',url:'https://www.khronos.org/openxr/',desc:'Cross-platform open standard for VR/AR device and app interoperability'},
+  {n:18,name:'NVIDIA Omniverse',url:'https://developer.nvidia.com/omniverse',desc:'NVIDIA\'s platform for 3D simulation, digital twins, and industrial XR'},
+  {n:19,name:'Walmart VR Training',url:'https://corporate.walmart.com/news/2018/09/20/walmart-is-training-its-employees-with-vr',desc:'Walmart\'s VR employee training programme — one million employees trained'},
+  {n:20,name:'VirusTotal URL Check',url:'https://www.virustotal.com/gui/home/url',desc:'Free tool to scan URLs for malware and phishing — use before visiting links'},
+  {n:21,name:'Moodle LMS',url:'https://moodle.org/',desc:'Open-source Learning Management System used by universities worldwide'},
+  {n:22,name:'W3C Organisation',url:'https://www.w3.org/',desc:'World Wide Web Consortium — international standards body for the web'},
+  {n:23,name:'Khronos Group',url:'https://www.khronos.org/',desc:'Industry consortium managing OpenGL, Vulkan, WebGL, OpenXR, and more'},
+  {n:24,name:'UN-Habitat',url:'https://unhabitat.org/',desc:'United Nations agency for sustainable urban development'},
+  {n:25,name:'Amazon',url:'https://www.amazon.com',desc:'Reference for AR-enabled warehouse management at scale'},
+  {n:26,name:'IKEA AR App',url:'https://www.ikea.com',desc:'IKEA Place app uses AR to visualise furniture in your home'},
+  {n:27,name:'Instructure Canvas',url:'https://www.instructure.com/canvas',desc:'Cloud-based LMS used by universities; source of student data for XR dashboards'},
+  {n:28,name:'UCL Medicine',url:'https://www.ucl.ac.uk',desc:'University College London — using VR for surgical training'},
+  {n:29,name:'Oxford CDAT',url:'https://www.psych.ox.ac.uk/research/oxford-centre-for-anxiety-disorders-and-trauma',desc:'Clinical VR therapy research for PTSD and phobias — statistically significant results'},
+  {n:30,name:'Boeing',url:'https://www.boeing.com',desc:'Uses VR for aircraft assembly training — one of the largest corporate XR deployments'},
+];
+
+function renderRefs(){
+  const tbody = document.getElementById('ref-tbody');
+  refsData.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.75rem;">${String(r.n).padStart(2,'0')}</td><td><strong style="color:var(--text);">${r.name}</strong></td><td><a href="${r.url}" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;">${r.url.replace('https://','').substring(0,40)}${r.url.length>47?'…':''} ↗</a></td><td style="color:#8090b0;font-size:0.8rem;">${r.desc}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+renderRefs();
+
+// =============================================
+// AR CANVAS DEMO
+// =============================================
+(function(){
+  const canvas = document.getElementById('ar-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio || 900;
+  canvas.height = 280;
+  const W = canvas.width, H = canvas.height;
+  const scale = W / 900;
+
+  const items = [
+    {id:'A',name:'Organic Apples',stock:40,expiry:'2025-09-10',alert:false,x:30,y:80,w:170,h:140},
+    {id:'B',name:'Full-Fat Milk',stock:5,expiry:'2025-08-01',alert:true,x:240,y:80,w:170,h:140},
+    {id:'C',name:'Sourdough Bread',stock:22,expiry:'2025-07-29',alert:false,x:450,y:80,w:170,h:140},
+    {id:'D',name:'Cheddar Cheese',stock:3,expiry:'2025-08-15',alert:true,x:660,y:80,w:170,h:140},
+  ];
+
+  let tick = 0;
+  function draw(){
+    tick++;
+    ctx.clearRect(0,0,W,H);
+    ctx.scale(scale, 1);
+
+    // Background wall
+    const wallGrad = ctx.createLinearGradient(0,50,0,230);
+    wallGrad.addColorStop(0,'#1a2030');
+    wallGrad.addColorStop(1,'#0d1520');
+    ctx.fillStyle = wallGrad;
+    ctx.fillRect(15,50,870,185);
+
+    // Camera feed label
+    ctx.fillStyle='rgba(0,229,255,0.7)';
+    ctx.font='bold 11px JetBrains Mono, monospace';
+    ctx.fillText('[ WAREHOUSE CAMERA FEED — AISLE 3 ]',20,30);
+
+    // Pulsing dot
+    const alpha = 0.4 + 0.5*Math.abs(Math.sin(tick*0.05));
+    ctx.beginPath();ctx.arc(W/scale-30,20,6,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,71,87,${alpha})`;ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.7)';ctx.font='10px sans-serif';
+    ctx.fillText('REC',W/scale-50,24);
+
+    // Shelf plank
+    const shelfGrad = ctx.createLinearGradient(0,230,0,250);
+    shelfGrad.addColorStop(0,'#6b4a1f');shelfGrad.addColorStop(1,'#3d2810');
+    ctx.fillStyle=shelfGrad;
+    ctx.fillRect(15,225,870,28);
+
+    items.forEach(item=>{
+      const cx = item.x + item.w/2;
+      const color = item.alert ? '#ff4757' : '#00ff88';
+
+      // Box shadow
+      ctx.shadowColor = item.alert ? 'rgba(255,71,87,0.3)' : 'rgba(0,255,136,0.2)';
+      ctx.shadowBlur = 15;
+
+      // Box (physical)
+      const boxGrad = ctx.createLinearGradient(item.x,item.y,item.x+item.w,item.y+item.h);
+      boxGrad.addColorStop(0,'#8b6535');boxGrad.addColorStop(1,'#5a3f1e');
+      ctx.fillStyle = boxGrad;
+      ctx.fillRect(item.x,item.y,item.w,item.h);
+      ctx.strokeStyle = '#3d2810';ctx.lineWidth=1.5;
+      ctx.strokeRect(item.x,item.y,item.w,item.h);
+      ctx.shadowBlur = 0;
+
+      // SKU label on box
+      ctx.fillStyle='rgba(255,255,255,0.5)';
+      ctx.font='9px JetBrains Mono, monospace';
+      ctx.fillText(`SKU:${item.id}`,item.x+6,item.y+item.h-8);
+
+      // Overlay panel (the AR digital layer)
+      const py = item.y - 80;
+      const px1 = item.x - 5;
+      const pw = item.w + 10;
+
+      // Panel background
+      ctx.fillStyle = 'rgba(5,10,30,0.92)';
+      ctx.beginPath();
+      ctx.roundRect(px1, py, pw, 72, 6);
+      ctx.fill();
+      ctx.strokeStyle = color;ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Anchor line (connecting overlay to box)
+      ctx.beginPath();ctx.moveTo(cx, py+72);ctx.lineTo(cx, item.y);
+      ctx.strokeStyle = color; ctx.lineWidth = 1;
+      const dashOffset = (tick*0.5) % 12;
+      ctx.setLineDash([4,4]);ctx.lineDashOffset = -dashOffset;
+      ctx.stroke();ctx.setLineDash([]);
+
+      // Name
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px Inter, sans-serif';
+      ctx.fillText(item.name, px1+8, py+18);
+
+      // Stock
+      ctx.fillStyle = color;
+      ctx.font = 'bold 10px Inter, sans-serif';
+      const stockText = `Stock: ${item.stock} units${item.alert?' ⚠':''}`;
+      ctx.fillText(stockText, px1+8, py+36);
+
+      // Expiry
+      ctx.fillStyle = '#8090b0';
+      ctx.font = '9px JetBrains Mono, monospace';
+      ctx.fillText(`Exp: ${item.expiry}`, px1+8, py+52);
+
+      // Item type icon dot
+      ctx.beginPath();ctx.arc(px1+pw-14, py+14, 5, 0, Math.PI*2);
+      ctx.fillStyle = color + '66';ctx.fill();
+      ctx.strokeStyle = color;ctx.lineWidth=1;ctx.stroke();
+    });
+
+    // HUD bar
+    ctx.fillStyle = 'rgba(0,0,0,0.9)';
+    ctx.fillRect(0, H-35, W/scale, 35);
+    const now = new Date().toLocaleTimeString();
+    ctx.fillStyle = '#00ff88';
+    ctx.font = 'bold 10px JetBrains Mono, monospace';
+    ctx.fillText(`AR MODE ACTIVE  |  ${now}  |  ITEMS TRACKED: 4  |  ALERTS: 2`, 12, H-14);
+
+    ctx.setTransform(1,0,0,1,0,0);
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// =============================================
+// VR TRACKING VISUALISATION
+// =============================================
+(function(){
+  const canvas = document.getElementById('vr-tracking-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  let tick = 0;
+
+  function draw(){
+    tick += 0.02;
+    ctx.fillStyle = '#0a0a1a';
+    ctx.fillRect(0,0,W,H);
+
+    // Grid
+    ctx.strokeStyle='rgba(124,58,237,0.1)';ctx.lineWidth=1;
+    for(let x=0;x<W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+    // Draw tracking path
+    const cx = W/2, cy = H/2;
+    const NUM = 120;
+    ctx.lineWidth = 2;
+
+    // Show moving window of look direction trace
+    for(let i=1;i<NUM;i++){
+      const progress = i/NUM;
+      const phase = progress + tick*0.3;
+      const yaw = 60*Math.sin(Math.PI*progress);
+      const pitch = 15*Math.sin(2*Math.PI*progress);
+
+      // Project sphere coords to 2D (equirectangular)
+      const px = cx + (yaw/90)*280;
+      const py = cy - (pitch/30)*80;
+
+      const prev_yaw = 60*Math.sin(Math.PI*(i-1)/NUM);
+      const prev_pitch = 15*Math.sin(2*Math.PI*(i-1)/NUM);
+      const ppx = cx + (prev_yaw/90)*280;
+      const ppy = cy - (prev_pitch/30)*80;
+
+      const r = Math.round(progress*255);
+      const b = Math.round((1-progress)*255);
+      const alpha = 0.3 + 0.7*Math.max(0,(progress - (tick*0.3 % 1))*3);
+      ctx.strokeStyle = `rgba(${r},80,${b},0.7)`;
+      ctx.beginPath();ctx.moveTo(ppx,ppy);ctx.lineTo(px,py);ctx.stroke();
+    }
+
+    // Animated current head position
+    const curProgress = (tick*0.15) % 1;
+    const curYaw = 60*Math.sin(Math.PI*curProgress);
+    const curPitch = 15*Math.sin(2*Math.PI*curProgress);
+    const curX = cx + (curYaw/90)*280;
+    const curY = cy - (curPitch/30)*80;
+
+    // Glow effect
+    const g = ctx.createRadialGradient(curX,curY,0,curX,curY,20);
+    g.addColorStop(0,'rgba(167,139,250,0.8)');
+    g.addColorStop(1,'rgba(167,139,250,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();ctx.arc(curX,curY,20,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(curX,curY,6,0,Math.PI*2);
+    ctx.fillStyle='#a78bfa';ctx.fill();
+
+    // Labels
+    ctx.fillStyle='rgba(167,139,250,0.6)';
+    ctx.font='10px JetBrains Mono, monospace';
+    ctx.fillText('VR HEAD TRACKING — LOOK DIRECTION PATH (YAW vs PITCH)',20,20);
+    ctx.fillText(`Current Yaw: ${curYaw.toFixed(1)}°  |  Pitch: ${curPitch.toFixed(1)}°`,20,H-15);
+
+    // Axes
+    ctx.strokeStyle='rgba(167,139,250,0.3)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(cx-300,cy);ctx.lineTo(cx+300,cy);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx,10);ctx.lineTo(cx,H-10);ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle='rgba(167,139,250,0.5)';ctx.font='9px sans-serif';
+    ctx.fillText('0° YAW',cx+5,cy-5);
+    ctx.fillText('0° PITCH',cx-40,cy+15);
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// =============================================
+// XR STARFIELD
+// =============================================
+(function(){
+  const canvas = document.getElementById('xr-star-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const parent = canvas.parentElement;
+  canvas.width = parent.clientWidth || 800;
+  canvas.height = parent.clientHeight || 520;
+  const W = canvas.width, H = canvas.height;
+  const stars = Array.from({length:150},()=>({
+    x:Math.random()*W, y:Math.random()*H,
+    r:Math.random()*1.2+0.2,
+    a:Math.random()*0.6+0.1,
+    twinkle:Math.random()*Math.PI*2
+  }));
+  let t=0;
+  function drawStars(){
+    t+=0.02;
+    ctx.clearRect(0,0,W,H);
+    stars.forEach(s=>{
+      const alpha = s.a*(0.5+0.5*Math.sin(t+s.twinkle));
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(200,220,255,${alpha})`;ctx.fill();
+    });
+    requestAnimationFrame(drawStars);
+  }
+  drawStars();
+})();
+
+// =============================================
+// XR SPATIAL DASHBOARD
+// =============================================
+(function(){
+  const scene = document.getElementById('xr-scene');
+  const container = document.getElementById('xr-scene-container');
+  if(!scene||!container) return;
+
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+  const CATS = {
+    excellent:{colour:'#44ff88',label:'Excellent',minScore:80},
+    good:{colour:'#4488ff',label:'Good',minScore:65},
+    average:{colour:'#ffcc44',label:'Average',minScore:50},
+    support:{colour:'#ff4444',label:'Needs Support',minScore:0},
+  };
+
+  const students = [];
+  for(let i=0;i<60;i++){
+    const score = rand(30,100);
+    const hours = score*0.3 + rand(-5,10);
+    const complete = score*0.8 + rand(-15,15);
+    let cat;
+    if(score>=80)cat='excellent';
+    else if(score>=65)cat='good';
+    else if(score>=50)cat='average';
+    else cat='support';
+    students.push({id:i+1,name:`Student ${String(i+1).padStart(2,'0')}`,score:Math.round(score),hours:Math.max(0,Math.round(hours*10)/10),complete:Math.min(100,Math.max(0,Math.round(complete))),category:cat});
+  }
+
+  const SCALE = 2.5;
+  const pointEls = [];
+
+  students.forEach(s=>{
+    const x=(s.hours-15)*SCALE*2;
+    const y=-(s.score-65)*SCALE*2;
+    const z=(s.complete-50)*SCALE*2;
+    const cat=CATS[s.category];
+    const div=document.createElement('div');
+    div.className='xr-dp';
+    div.style.transform=`translate3d(${x}px,${y}px,${z}px)`;
+    div.dataset.cat=s.category;
+    div.innerHTML=`<div class="xr-orb" style="background:${cat.colour};color:${cat.colour};"></div><div class="xr-tip"><div style="color:${cat.colour};font-weight:700;margin-bottom:3px;">${s.name}</div><div>Score: <strong>${s.score}%</strong></div><div>Hours: <strong>${s.hours}h/wk</strong></div><div>Done: <strong>${s.complete}%</strong></div><div style="margin-top:3px;color:${cat.colour};">${cat.label}</div></div>`;
+    scene.appendChild(div);
+    pointEls.push(div);
+  });
+
+  const avgScore = Math.round(students.reduce((s,st)=>s+st.score,0)/students.length);
+  document.getElementById('xr-stats-display').textContent=`Students: ${students.length} | Avg Score: ${avgScore}%`;
+
+  window.xrFilter = function(cat){
+    document.querySelectorAll('.xr-fbtn').forEach(b=>b.classList.remove('active'));
+    event.target.classList.add('active');
+    pointEls.forEach(el=>{
+      if(cat==='all'||el.dataset.cat===cat){el.style.opacity='1';el.style.pointerEvents='auto';}
+      else{el.style.opacity='0.07';el.style.pointerEvents='none';}
+    });
+  };
+
+  let isDrag=false,prevX=0,prevY=0,rotX=-20,rotY=30;
+  container.addEventListener('mousedown',e=>{isDrag=true;prevX=e.clientX;prevY=e.clientY;container.style.cursor='grabbing';});
+  document.addEventListener('mousemove',e=>{
+    if(!isDrag)return;
+    rotY+=(e.clientX-prevX)*0.5;
+    rotX=Math.max(-60,Math.min(60,rotX+(e.clientY-prevY)*0.5));
+    scene.style.transform=`translateX(-50%) translateY(-50%) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    prevX=e.clientX;prevY=e.clientY;
+  });
+  document.addEventListener('mouseup',()=>{isDrag=false;container.style.cursor='grab';});
+
+  // Touch support
+  container.addEventListener('touchstart',e=>{isDrag=true;prevX=e.touches[0].clientX;prevY=e.touches[0].clientY;},{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!isDrag)return;
+    rotY+=(e.touches[0].clientX-prevX)*0.5;
+    rotX=Math.max(-60,Math.min(60,rotX+(e.touches[0].clientY-prevY)*0.5));
+    scene.style.transform=`translateX(-50%) translateY(-50%) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    prevX=e.touches[0].clientX;prevY=e.touches[0].clientY;
+  },{passive:true});
+  document.addEventListener('touchend',()=>isDrag=false);
+
+  setInterval(()=>{if(!isDrag){rotY+=0.15;scene.style.transform=`translateX(-50%) translateY(-50%) rotateX(${rotX}deg) rotateY(${rotY}deg)`;}},50);
+})();
+
+// =============================================
+// SECTION HEADER VISIBILITY
+// =============================================
+document.querySelectorAll('.section-header').forEach(h=>observer.observe(h));
+</script>
+</body>
+</html>

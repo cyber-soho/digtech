@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XR Emerging Tech Study Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 3D Flip Card CSS */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .is-flipped .transform-style-3d {
+            transform: rotateY(180deg);
+        }
+        
+        /* Custom Scrollbar for Quiz */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans antialiased">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                XR Emerging Tech Studio
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">AR, VR & XR Concepts — Digital Science Graduate Programme</p>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Tabs Navigation -->
+        <div class="border-b border-slate-200 mb-8">
+            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                <button onclick="switchTab('flashcards')" id="tab-flashcards" class="border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    Flashcards (25)
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    Practice Quiz (10)
+                </button>
+            </nav>
+        </div>
+
+        <!-- Flashcards Section -->
+        <div id="view-flashcards" class="block">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-slate-800">Concept Review</h2>
+                <div class="text-sm font-medium text-slate-500 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200">
+                    Card <span id="current-card-num" class="text-indigo-600 font-bold">1</span> of 25
+                </div>
+            </div>
+
+            <!-- Card Container -->
+            <div class="perspective-1000 w-full max-w-2xl mx-auto h-80 sm:h-96 cursor-pointer" onclick="flipCard()" id="flashcard-container">
+                <div class="transform-style-3d relative w-full h-full rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    
+                    <!-- Front -->
+                    <div class="backface-hidden absolute inset-0 bg-white rounded-2xl flex flex-col items-center justify-center p-8 border border-slate-100 text-center">
+                        <span class="absolute top-4 right-4 text-xs font-semibold tracking-wider text-slate-400 uppercase">Front</span>
+                        <h3 id="card-front-text" class="text-2xl sm:text-3xl font-bold text-slate-800 leading-tight">Augmented Reality (AR)</h3>
+                        <p class="text-slate-400 mt-6 text-sm flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                            Click to flip
+                        </p>
+                    </div>
+
+                    <!-- Back -->
+                    <div class="backface-hidden rotate-y-180 absolute inset-0 bg-indigo-600 rounded-2xl flex flex-col items-center justify-center p-8 border border-indigo-700 text-center text-white">
+                        <span class="absolute top-4 right-4 text-xs font-semibold tracking-wider text-indigo-300 uppercase">Back</span>
+                        <p id="card-back-text" class="text-lg sm:text-xl font-medium leading-relaxed">The practice of layering computer-generated content on top of the real world, where the physical environment remains the primary experience.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex justify-center items-center gap-4 mt-8">
+                <button onclick="prevCard()" class="px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-colors font-medium shadow-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    Previous
+                </button>
+                <button onclick="nextCard()" class="px-5 py-2.5 rounded-lg bg-indigo-600 border border-transparent text-white hover:bg-indigo-700 transition-colors font-medium shadow-sm flex items-center gap-2">
+                    Next
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="view-quiz" class="hidden">
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold text-slate-800">Applied Knowledge Assessment</h2>
+                <p class="text-slate-500 mt-1">Test your practical understanding of AR, VR, and XR systems.</p>
+            </div>
+            
+            <div id="quiz-container" class="space-y-6">
+                <!-- Quiz Questions injected here via JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- DATA ---
+        
+        const flashcards = [
+            { front: "Augmented Reality (AR)", back: "The practice of layering computer-generated content on top of the real world, where the physical environment remains the primary experience." },
+            { front: "The four technical pillars of AR", back: "Sensing, Tracking, Rendering, and Display." },
+            { front: "SLAM", back: "Simultaneous Localisation And Mapping; an algorithm that builds a map of the environment and locates the device within it in real time." },
+            { front: "Data Scientist's role in AR", back: "Building the data pipeline, model, and API that feeds the digital overlay shown in the physical environment." },
+            { front: "Virtual Reality (VR)", back: "A technology that completely replaces the real world with entirely synthetic visual, auditory, and haptic signals." },
+            { front: "Immersion", back: "The experience in VR where the brain is genuinely fooled into believing a synthetic environment is real." },
+            { front: "The three pillars of VR immersion", back: "Presence, Interactivity, and Social Presence." },
+            { front: "Motion-to-Photon latency threshold", back: "Less than 20 milliseconds; going above this mismatch causes cybersickness." },
+            { front: "Stereo rendering", back: "Rendering two separate images simultaneously (one for each eye) to create the illusion of 3D depth in a headset." },
+            { front: "VR therapy applications", back: "Used by clinical psychologists for exposure therapy to treat PTSD, phobias, and anxiety disorders in controlled environments." },
+            { front: "Extended Reality (XR)", back: "The umbrella term encompassing Augmented Reality (AR), Mixed Reality (MR), Virtual Reality (VR), and the spectrum between them." },
+            { front: "Reality-Virtuality Continuum", back: "A mental model (Milgram, 1994) illustrating the spectrum from the completely real world to fully virtual environments." },
+            { front: "Primary difference: AR vs MR", back: "In MR, digital objects are spatially anchored and interact with the physical world (e.g., casting shadows); in AR they may just float on screen." },
+            { front: "Spatial Computing", back: "A paradigm shift in UI design moving away from flat 2D rectangles to 3D spatial environments that a user inhabits." },
+            { front: "\"Depth is Information\" principle", back: "A spatial UI principle stating that objects closer to the user on the Z-axis convey higher urgency and priority." },
+            { front: "\"The Body is the Cursor\" principle", back: "A spatial UI principle where the user's eyes, head pose, hands, and voice replace the traditional mouse and keyboard." },
+            { front: "Spatial UI Comfort Zone", back: "Keeping interactive elements within 0.5m to 2m of the user to prevent neck and eye strain." },
+            { front: "\"Context Collapses Menus\" principle", back: "In XR, menus appear near the relevant object in 3D space rather than existing in a static, global menu bar." },
+            { front: "\"The Environment is the Canvas\" principle", back: "The concept that walls, floors, and tables become valid UI real estate, eliminating flat screen size constraints." },
+            { front: "IMU (Inertial Measurement Unit)", back: "A sensor chip used to measure the device's orientation, movement, and acceleration." },
+            { front: "6DOF (Six Degrees of Freedom)", back: "Full spatial tracking including both rotation (pitch, yaw, roll) and translation (movement along X, Y, and Z axes)." },
+            { front: "FOV (Field of View)", back: "The angular extent of the world visible through a lens; needs to be over 100 degrees to match human vision in VR." },
+            { front: "HUD (Heads-Up Display)", back: "A persistent information overlay that remains constantly visible at the periphery of the user's view." },
+            { front: "IPD (Inter-Pupillary Distance)", back: "The distance between the centers of a person's pupils; critical for correct VR stereo rendering." },
+            { front: "WebXR", back: "A W3C standard that allows Extended Reality experiences to run directly inside web browsers without app installations." }
+        ];
+
+        const quizData = [
+            {
+                q: "An engineer notices that the digital overlay of a schematic on their AR glasses is slowly drifting away from the actual physical machine. Which component is most likely failing?",
+                options: [
+                    "The mathematical rendering pipeline.",
+                    "The optical display hardware.",
+                    "The SLAM (Simultaneous Localisation And Mapping) tracking algorithm.",
+                    "The primary camera sensor."
+                ],
+                correct: 2,
+                rationale: "SLAM is responsible for anchoring digital content to the real world by mapping the environment and updating position. If it fails, the digital layer will drift."
+            },
+            {
+                q: "A team tests a new VR flight simulator. Users complain of cybersickness within 5 minutes, despite 90 FPS photorealistic graphics. What technical metric needs optimization?",
+                options: [
+                    "Field of View (FOV)",
+                    "Motion-to-Photon latency",
+                    "Stereo rendering resolution",
+                    "Spatial audio accuracy"
+                ],
+                correct: 1,
+                rationale: "If the delay between head movement and screen update exceeds ~20ms, the sensory mismatch in the brain causes cybersickness regardless of visual quality."
+            },
+            {
+                q: "You build an app where a virtual pet hides behind your physical sofa and casts a realistic shadow onto the floor. According to Milgram, what technology is this?",
+                options: [
+                    "Standard Augmented Reality (AR)",
+                    "Virtual Reality (VR)",
+                    "Spatial Computing",
+                    "Mixed Reality (MR)"
+                ],
+                correct: 3,
+                rationale: "MR is distinct because digital objects are anchored to and physically interact with the real world (hiding behind physical geometry, casting shadows)."
+            },
+            {
+                q: "A 3D data visualization in XR requires users to look straight up at a 75-degree elevation to read the main KPI. According to spatial UI principles, what is the primary issue?",
+                options: [
+                    "It violates the comfort zone principle, risking severe neck strain.",
+                    "It ignores the 'context collapses menus' principle.",
+                    "It fails to use depth as information.",
+                    "It doesn't utilize the environment as a canvas."
+                ],
+                correct: 0,
+                rationale: "Interactive/viewed elements must remain within a comfortable reach and viewing zone (below 60 degrees elevation) to prevent physical strain."
+            },
+            {
+                q: "A psychologist needs a completely controlled, measurable environment to simulate standing on a skyscraper for exposure therapy. Which technology is best suited?",
+                options: [
+                    "Augmented Reality (AR)",
+                    "Mixed Reality (MR)",
+                    "Heads-Up Display (HUD)",
+                    "Virtual Reality (VR)"
+                ],
+                correct: 3,
+                rationale: "VR replaces the real world entirely, creating a fully synthetic, immersive environment ideal for controlled therapy where the physical office is hidden."
+            },
+            {
+                q: "A hospital uses AR glasses to overlay live vitals onto a surgeon's view. As the lead Data Scientist, what is your primary technical responsibility?",
+                options: [
+                    "Designing the transparent display optics.",
+                    "Developing the SLAM algorithms to track head movements.",
+                    "Building the data pipeline and API that feeds the vital statistics.",
+                    "Creating 3D graphical models of the heart."
+                ],
+                correct: 2,
+                rationale: "In XR projects, the data scientist's core role is building the backend pipelines and models that securely and quickly deliver data to the spatial interface."
+            },
+            {
+                q: "You are designing an XR dashboard for emergency responders. How should you position critical, time-sensitive alerts compared to secondary historical data?",
+                options: [
+                    "Place all alerts at the same depth, but make critical ones flash.",
+                    "Place the critical alerts closer to the user on the Z-axis.",
+                    "Pin critical alerts to a static menu bar at the top of vision.",
+                    "Anchor critical alerts to the physical floor."
+                ],
+                correct: 1,
+                rationale: "The 'Depth is Information' principle states that objects physically closer to the user in 3D space (Z-axis) naturally feel more urgent and convey higher priority."
+            },
+            {
+                q: "Why does transitioning a desktop 3D simulation to a VR headset suddenly require significantly more computational power?",
+                options: [
+                    "VR requires the real-world environment to be constantly mapped.",
+                    "VR physics engines are fundamentally more complex.",
+                    "VR requires higher resolution textures than 4K monitors.",
+                    "VR must simultaneously render two separate high-framerate images (stereo rendering)."
+                ],
+                correct: 3,
+                rationale: "Stereo rendering requires the system to draw the complex 3D scene twice per frame (left and right eye) at 72-120 FPS, effectively doubling the workload."
+            },
+            {
+                q: "You port 2D analytics software into XR. In 2D, all 50 tools are in a static top menu bar. How should you adapt this for Spatial UI?",
+                options: [
+                    "Recreate the 2D menu bar as a persistent HUD.",
+                    "Anchor a massive virtual monitor to a wall for the 2D interface.",
+                    "Make menus contextual, appearing directly next to the 3D data objects being analyzed.",
+                    "Map all 50 tools to voice commands to eliminate visual clutter."
+                ],
+                correct: 2,
+                rationale: "The 'Context Collapses Menus' principle dictates that in XR, static menu bars disappear; interaction happens in-place near the relevant object."
+            },
+            {
+                q: "A user wearing a budget headset leans forward to look closer at a 360-video, but their perspective doesn't move forward in the virtual space. What feature is lacking?",
+                options: [
+                    "A high refresh rate display",
+                    "6DOF (Six Degrees of Freedom) tracking",
+                    "SLAM (Simultaneous Localisation And Mapping)",
+                    "Inter-Pupillary Distance (IPD) adjustment"
+                ],
+                correct: 1,
+                rationale: "The headset only has 3DOF (rotation). It lacks the translation tracking (X, Y, Z axes) of 6DOF, which calculates physical movement through space like leaning."
+            }
+        ];
+
+
+        // --- FLASHCARDS LOGIC ---
+
+        let currentCardIndex = 0;
+        const container = document.getElementById('flashcard-container');
+        const frontText = document.getElementById('card-front-text');
+        const backText = document.getElementById('card-back-text');
+        const counter = document.getElementById('current-card-num');
+
+        function updateCardDisplay() {
+            // Remove flip state to show front
+            container.classList.remove('is-flipped');
+            
+            // Short timeout to allow flip animation to start before swapping text
+            setTimeout(() => {
+                frontText.innerText = flashcards[currentCardIndex].front;
+                backText.innerText = flashcards[currentCardIndex].back;
+                counter.innerText = currentCardIndex + 1;
+            }, 150);
+        }
+
+        function flipCard() {
+            container.classList.toggle('is-flipped');
+        }
+
+        function nextCard() {
+            currentCardIndex = (currentCardIndex + 1) % flashcards.length;
+            updateCardDisplay();
+        }
+
+        function prevCard() {
+            currentCardIndex = (currentCardIndex - 1 + flashcards.length) % flashcards.length;
+            updateCardDisplay();
+        }
+
+
+        // --- QUIZ LOGIC ---
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            
+            quizData.forEach((q, qIndex) => {
+                const qDiv = document.createElement('div');
+                qDiv.className = "bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-slate-200 transition-all";
+                
+                let optionsHtml = '';
+                q.options.forEach((opt, oIndex) => {
+                    optionsHtml += `
+                        <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors" id="label-${qIndex}-${oIndex}">
+                            <input type="radio" name="q${qIndex}" value="${oIndex}" class="mt-1 w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                            <span class="text-slate-700">${opt}</span>
+                        </label>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <div class="flex gap-4 mb-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
+                            ${qIndex + 1}
+                        </div>
+                        <h3 class="text-lg font-medium text-slate-800 pt-1">${q.q}</h3>
+                    </div>
+                    <div class="pl-12 space-y-2 mb-6">
+                        ${optionsHtml}
+                    </div>
+                    <div class="pl-12">
+                        <button onclick="checkAnswer(${qIndex})" id="btn-${qIndex}" class="px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors">
+                            Check Answer
+                        </button>
+                    </div>
+                    
+                    <!-- Feedback Section (Hidden initially) -->
+                    <div id="feedback-${qIndex}" class="hidden pl-12 mt-4 pt-4 border-t border-slate-100">
+                        <div class="flex items-start gap-3">
+                            <div id="icon-container-${qIndex}" class="mt-0.5"></div>
+                            <div>
+                                <h4 id="feedback-title-${qIndex}" class="font-bold mb-1"></h4>
+                                <p class="text-sm text-slate-600">${q.rationale}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(qDiv);
+            });
+        }
+
+        function checkAnswer(qIndex) {
+            const selected = document.querySelector(`input[name="q${qIndex}"]:checked`);
+            if (!selected) return; // Ignore if nothing selected
+            
+            const selectedVal = parseInt(selected.value);
+            const isCorrect = selectedVal === quizData[qIndex].correct;
+            const correctVal = quizData[qIndex].correct;
+
+            // Disable all radio buttons for this question
+            const radios = document.querySelectorAll(`input[name="q${qIndex}"]`);
+            radios.forEach(r => r.disabled = true);
+            
+            // Hide button
+            document.getElementById(`btn-${qIndex}`).classList.add('hidden');
+
+            // Style labels
+            const correctLabel = document.getElementById(`label-${qIndex}-${correctVal}`);
+            correctLabel.classList.remove('border-slate-100', 'hover:bg-slate-50');
+            correctLabel.classList.add('border-green-500', 'bg-green-50');
+
+            if (!isCorrect) {
+                const selectedLabel = document.getElementById(`label-${qIndex}-${selectedVal}`);
+                selectedLabel.classList.remove('border-slate-100', 'hover:bg-slate-50');
+                selectedLabel.classList.add('border-red-300', 'bg-red-50');
+            }
+
+            // Show Feedback
+            const feedbackDiv = document.getElementById(`feedback-${qIndex}`);
+            const feedbackTitle = document.getElementById(`feedback-title-${qIndex}`);
+            const iconContainer = document.getElementById(`icon-container-${qIndex}`);
+            
+            feedbackDiv.classList.remove('hidden');
+
+            if (isCorrect) {
+                feedbackTitle.innerText = "Correct!";
+                feedbackTitle.className = "font-bold mb-1 text-green-700";
+                iconContainer.innerHTML = `<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            } else {
+                feedbackTitle.innerText = "Incorrect";
+                feedbackTitle.className = "font-bold mb-1 text-red-700";
+                iconContainer.innerHTML = `<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            }
+        }
+
+
+        // --- TAB NAVIGATION ---
+
+        function switchTab(tabId) {
+            // Hide both views
+            document.getElementById('view-flashcards').classList.add('hidden');
+            document.getElementById('view-quiz').classList.add('hidden');
+            
+            // Reset tab styling
+            const inactiveClasses = ['border-transparent', 'text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300'];
+            const activeClasses = ['border-indigo-500', 'text-indigo-600'];
+            
+            document.getElementById('tab-flashcards').classList.remove(...activeClasses);
+            document.getElementById('tab-flashcards').classList.add(...inactiveClasses);
+            
+            document.getElementById('tab-quiz').classList.remove(...activeClasses);
+            document.getElementById('tab-quiz').classList.add(...inactiveClasses);
+            
+            // Show requested view and set active styling
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).classList.remove(...inactiveClasses);
+            document.getElementById(`tab-${tabId}`).classList.add(...activeClasses);
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            updateCardDisplay();
+            renderQuiz();
+        };
+
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

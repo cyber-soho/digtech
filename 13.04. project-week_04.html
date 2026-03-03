@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 04 — AR · VR · XR UI Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #04040a;
+    --deep: #080814;
+    --surface: #0d0d1f;
+    --panel: #111128;
+    --edge: #1a1a38;
+    --rim: #252548;
+    --cyan: #00e5ff;
+    --violet: #7c3aed;
+    --violet-soft: #9b59f5;
+    --green: #00ff87;
+    --amber: #ffb830;
+    --red: #ff4d6d;
+    --text-1: #f0f0ff;
+    --text-2: #a0a0c8;
+    --text-3: #5a5a88;
+    --glow-cyan: 0 0 30px rgba(0,229,255,0.25), 0 0 60px rgba(0,229,255,0.1);
+    --glow-violet: 0 0 30px rgba(124,58,237,0.3);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--void);
+    color: var(--text-1);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID NOISE BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.02) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SIDEBAR NAV ── */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: rgba(8,8,20,0.95);
+    border-right: 1px solid var(--edge);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-brand {
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--edge);
+    margin-bottom: 20px;
+  }
+
+  .sidebar-brand .week-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--cyan);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .sidebar-brand .course-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-1);
+    line-height: 1.4;
+  }
+
+  .nav-section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text-3);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0 24px;
+    margin: 16px 0 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 24px;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text-2);
+    font-size: 13px;
+    font-weight: 400;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-item:hover, .nav-item.active {
+    color: var(--cyan);
+    background: rgba(0,229,255,0.05);
+    border-left-color: var(--cyan);
+  }
+
+  .nav-item .nav-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--text-3);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .nav-item:hover .nav-dot, .nav-item.active .nav-dot {
+    background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan);
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-track {
+    margin: auto 24px 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--edge);
+  }
+
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text-3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .progress-bar-bg {
+    height: 3px;
+    background: var(--edge);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    margin-left: 240px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 80px 80px 80px 80px;
+    overflow: hidden;
+  }
+
+  .hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+  }
+
+  .hero-orb-1 {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%);
+    top: -100px; right: -100px;
+    animation: float1 8s ease-in-out infinite;
+  }
+
+  .hero-orb-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,229,255,0.12) 0%, transparent 70%);
+    bottom: 0; left: 20%;
+    animation: float2 10s ease-in-out infinite;
+  }
+
+  @keyframes float1 {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(-20px, 20px) scale(1.05); }
+  }
+
+  @keyframes float2 {
+    0%, 100% { transform: translate(0,0); }
+    50% { transform: translate(20px, -15px); }
+  }
+
+  .hero-content { position: relative; z-index: 2; max-width: 800px; }
+
+  .hero-kicker {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-kicker::before {
+    content: '';
+    width: 30px; height: 1px;
+    background: var(--cyan);
+    box-shadow: var(--glow-cyan);
+  }
+
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1.05;
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-title .line-thin { font-weight: 400; color: var(--text-2); }
+  .hero-title .accent { color: var(--cyan); }
+  .hero-title .accent-v { color: var(--violet-soft); }
+
+  .hero-subtitle {
+    font-size: 16px;
+    color: var(--text-2);
+    max-width: 560px;
+    margin-bottom: 40px;
+    line-height: 1.8;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .meta-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .meta-chip .label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text-3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .meta-chip .value {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-1);
+  }
+
+  /* Scanning line animation */
+  .hero::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.4), transparent);
+    animation: scan 6s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes scan {
+    0% { top: -2px; }
+    100% { top: 100%; }
+  }
+
+  /* ── SECTION COMMONS ── */
+  .section {
+    padding: 80px 80px;
+    border-top: 1px solid var(--edge);
+    position: relative;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+
+  .section-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 0.1em;
+    margin-top: 6px;
+    white-space: nowrap;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .section-title .dim { color: var(--text-3); font-weight: 400; }
+
+  /* ── PONDERATION GRID ── */
+  .ponder-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 2px;
+    margin-bottom: 48px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--edge);
+  }
+
+  .ponder-cell {
+    background: var(--panel);
+    padding: 28px 24px;
+    text-align: center;
+    position: relative;
+    transition: background 0.25s;
+  }
+
+  .ponder-cell:hover { background: var(--rim); }
+
+  .ponder-cell .day-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .ponder-cell .day-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-1);
+    margin-bottom: 6px;
+  }
+
+  .ponder-cell .day-sub {
+    font-size: 12px;
+    color: var(--text-2);
+  }
+
+  .ponder-cell .weight-bar {
+    margin-top: 16px;
+    height: 3px;
+    background: var(--edge);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .ponder-cell .weight-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+  }
+
+  .ponder-cell.center-day { background: rgba(124,58,237,0.1); border-left: 1px solid var(--violet); border-right: 1px solid var(--violet); }
+
+  /* ── DAY CARDS / ACCORDION ── */
+  .day-card {
+    border: 1px solid var(--edge);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: border-color 0.25s;
+  }
+
+  .day-card:hover { border-color: var(--rim); }
+  .day-card.open { border-color: rgba(0,229,255,0.3); }
+
+  .day-card-header {
+    padding: 24px 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--panel);
+    user-select: none;
+    transition: background 0.2s;
+  }
+
+  .day-card-header:hover { background: var(--surface); }
+  .day-card.open .day-card-header { background: rgba(0,229,255,0.04); }
+
+  .day-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--void);
+    background: var(--cyan);
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+
+  .day-badge.violet-badge { background: var(--violet-soft); }
+
+  .day-card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    flex: 1;
+  }
+
+  .day-card-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-3);
+    flex-shrink: 0;
+  }
+
+  .day-chevron {
+    color: var(--text-3);
+    font-size: 18px;
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .day-card.open .day-chevron { transform: rotate(180deg); color: var(--cyan); }
+
+  .day-card-body {
+    display: none;
+    padding: 0 28px 28px;
+    background: var(--deep);
+  }
+
+  .day-card.open .day-card-body { display: block; animation: fadein 0.25s ease; }
+
+  @keyframes fadein {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── CONTENT ELEMENTS ── */
+  .subsection {
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid var(--edge);
+  }
+
+  .subsection:first-child { border-top: none; padding-top: 16px; }
+
+  .subsection-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--cyan);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .subsection-title::before {
+    content: '';
+    width: 16px; height: 1px;
+    background: var(--cyan);
+  }
+
+  p { color: var(--text-2); margin-bottom: 14px; }
+  p:last-child { margin-bottom: 0; }
+
+  strong { color: var(--text-1); font-weight: 600; }
+  em { color: var(--violet-soft); font-style: italic; }
+
+  /* ── LISTS ── */
+  .styled-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .styled-list li {
+    color: var(--text-2);
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.65;
+  }
+
+  .styled-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--cyan);
+    font-size: 10px;
+    top: 5px;
+  }
+
+  .styled-list li strong { color: var(--text-1); }
+
+  /* ── LEARNING OUTCOMES ── */
+  .outcomes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .outcome-card {
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 10px;
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s, transform 0.25s;
+  }
+
+  .outcome-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan), transparent);
+  }
+
+  .outcome-card:hover { border-color: rgba(0,229,255,0.3); transform: translateY(-2px); }
+
+  .outcome-icon {
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+
+  .outcome-text {
+    font-size: 13.5px;
+    color: var(--text-2);
+    line-height: 1.6;
+  }
+
+  /* ── TOOL COMPARISON TABLE ── */
+  .tool-table-wrap {
+    overflow-x: auto;
+    margin-top: 20px;
+    border-radius: 10px;
+    border: 1px solid var(--edge);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  thead tr {
+    background: rgba(0,229,255,0.06);
+    border-bottom: 1px solid rgba(0,229,255,0.2);
+  }
+
+  th {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--cyan);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 14px 18px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 13px 18px;
+    color: var(--text-2);
+    border-bottom: 1px solid var(--edge);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover td { background: rgba(255,255,255,0.02); }
+
+  td strong { color: var(--text-1); }
+
+  .tag {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .tag-ar { background: rgba(0,229,255,0.12); color: var(--cyan); border: 1px solid rgba(0,229,255,0.25); }
+  .tag-vr { background: rgba(124,58,237,0.15); color: var(--violet-soft); border: 1px solid rgba(124,58,237,0.3); }
+  .tag-xr { background: rgba(0,255,135,0.1); color: var(--green); border: 1px solid rgba(0,255,135,0.25); }
+
+  /* ── INTERACTION FLOW ── */
+  .flow-grid {
+    display: grid;
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .flow-item {
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 10px;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 20px;
+    align-items: start;
+    transition: border-color 0.2s;
+  }
+
+  .flow-item:hover { border-color: var(--rim); }
+
+  .flow-step-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--violet);
+    opacity: 0.5;
+    line-height: 1;
+  }
+
+  .flow-step-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-1);
+    margin-bottom: 6px;
+  }
+
+  .flow-step-desc { font-size: 13px; color: var(--text-2); }
+
+  /* ── CONCEPT CARDS ── */
+  .concept-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .concept-card {
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 12px;
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s;
+  }
+
+  .concept-card:hover { transform: translateY(-3px); }
+
+  .concept-card.ar-card { border-top: 3px solid var(--cyan); }
+  .concept-card.ar-card:hover { box-shadow: 0 8px 40px rgba(0,229,255,0.1); }
+
+  .concept-card.vr-card { border-top: 3px solid var(--violet-soft); }
+  .concept-card.vr-card:hover { box-shadow: 0 8px 40px rgba(124,58,237,0.15); }
+
+  .concept-card.xr-card { border-top: 3px solid var(--green); }
+  .concept-card.xr-card:hover { box-shadow: 0 8px 40px rgba(0,255,135,0.1); }
+
+  .concept-abbr {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .concept-card.ar-card .concept-abbr { color: var(--cyan); }
+  .concept-card.vr-card .concept-abbr { color: var(--violet-soft); }
+  .concept-card.xr-card .concept-abbr { color: var(--green); }
+
+  .concept-full {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+
+  .concept-def { font-size: 13px; color: var(--text-2); line-height: 1.65; }
+
+  /* ── LINKS ── */
+  a {
+    color: var(--cyan);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0,229,255,0.3);
+    transition: all 0.2s;
+  }
+
+  a:hover {
+    color: white;
+    border-bottom-color: white;
+  }
+
+  /* ── CALLOUT / INFO BOX ── */
+  .callout {
+    border-left: 3px solid var(--cyan);
+    background: rgba(0,229,255,0.04);
+    border-radius: 0 8px 8px 0;
+    padding: 18px 22px;
+    margin: 20px 0;
+  }
+
+  .callout.violet { border-left-color: var(--violet-soft); background: rgba(124,58,237,0.05); }
+  .callout.amber { border-left-color: var(--amber); background: rgba(255,184,48,0.05); }
+  .callout.green { border-left-color: var(--green); background: rgba(0,255,135,0.04); }
+
+  .callout-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .callout.violet .callout-title { color: var(--violet-soft); }
+  .callout .callout-title { color: var(--cyan); }
+  .callout.amber .callout-title { color: var(--amber); }
+  .callout.green .callout-title { color: var(--green); }
+
+  .callout p { margin: 0; }
+
+  /* ── REPORT SPECS ── */
+  .specs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .spec-item {
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 8px;
+    padding: 18px;
+  }
+
+  .spec-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text-3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .spec-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-1);
+  }
+
+  /* ── STRUCTURE LIST ── */
+  .structure-list {
+    counter-reset: struct;
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+  }
+
+  .structure-list li {
+    counter-increment: struct;
+    display: flex;
+    gap: 18px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--edge);
+  }
+
+  .structure-list li:last-child { border-bottom: none; }
+
+  .structure-list li::before {
+    content: counter(struct);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--cyan);
+    width: 28px;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+
+  .struct-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-1);
+    margin-bottom: 4px;
+  }
+
+  .struct-desc { font-size: 13px; color: var(--text-2); }
+
+  /* ── FOOTER ── */
+  .page-footer {
+    padding: 48px 80px;
+    border-top: 1px solid var(--edge);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--deep);
+  }
+
+  .footer-note {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-3);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-links a {
+    font-size: 12px;
+    color: var(--text-3);
+    border-bottom-color: transparent;
+  }
+
+  .footer-links a:hover { color: var(--cyan); }
+
+  /* ── MOBILE MENU TOGGLE ── */
+  .menu-toggle {
+    display: none;
+    position: fixed;
+    top: 16px; left: 16px;
+    z-index: 200;
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 8px;
+    width: 42px; height: 42px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px;
+  }
+
+  .menu-toggle span {
+    display: block;
+    height: 2px;
+    width: 22px;
+    background: var(--text-1);
+    border-radius: 1px;
+    transition: all 0.3s;
+  }
+
+  /* ── ACCESSIBILITY RISK TABLE ── */
+  .risk-row-header { background: rgba(255,77,109,0.08) !important; }
+  .risk-icon { color: var(--red); font-weight: 600; }
+
+  /* ── CHECKLIST ── */
+  .checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .checklist li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 13.5px;
+    color: var(--text-2);
+  }
+
+  .checklist li .check {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--cyan);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .checklist li.checked .check {
+    background: var(--cyan);
+  }
+
+  .checklist li.checked .check::after {
+    content: '✓';
+    font-size: 11px;
+    color: var(--void);
+    font-weight: 700;
+  }
+
+  .checklist li.checked > span:last-child {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .menu-toggle { display: flex; }
+    .hero, .section { padding: 60px 28px; }
+    .concept-cards { grid-template-columns: 1fr; }
+    .ponder-grid { grid-template-columns: 1fr; }
+    .page-footer { flex-direction: column; gap: 20px; text-align: center; }
+  }
+
+  /* ── ANIMATION STAGGER ON LOAD ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- Mobile toggle -->
+<button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- ──────── SIDEBAR ──────── -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">// Week 04 · Project</div>
+    <div class="course-title">Ponderation 1‑2‑1<br>Continuous Project</div>
+  </div>
+
+  <div class="nav-section-label">Overview</div>
+  <a class="nav-item active" href="#hero"><span class="nav-dot"></span>Introduction</a>
+  <a class="nav-item" href="#goals"><span class="nav-dot"></span>Learning Goals</a>
+  <a class="nav-item" href="#structure"><span class="nav-dot"></span>4-Day Structure</a>
+
+  <div class="nav-section-label">Days</div>
+  <a class="nav-item" href="#day1"><span class="nav-dot"></span>Day 1 — Concepts</a>
+  <a class="nav-item" href="#days23"><span class="nav-dot"></span>Days 2–3 — Design</a>
+  <a class="nav-item" href="#day4"><span class="nav-dot"></span>Day 4 — Integration</a>
+
+  <div class="nav-section-label">Deliverable</div>
+  <a class="nav-item" href="#report"><span class="nav-dot"></span>Report Specs</a>
+  <a class="nav-item" href="#labsheet"><span class="nav-dot"></span>Lab Sheet</a>
+  <a class="nav-item" href="#checklist-section"><span class="nav-dot"></span>Checklist</a>
+
+  <div class="progress-track">
+    <div class="progress-label">
+      <span>Progress</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ──────── MAIN ──────── -->
+<main class="main">
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-content">
+      <div class="hero-kicker">Digital Science Lab · Continuous Project</div>
+      <h1 class="hero-title">
+        <span class="line-thin">Augmented, Virtual &</span><br>
+        <span class="accent">Extended Reality</span><br>
+        <span class="accent-v">UI Design</span>
+      </h1>
+      <p class="hero-subtitle">
+        Design and document a realistic AR/VR/XR user interface linked to another digital‑technology topic from the course. Explore spatial interaction, accessibility, and ethics across four structured days.
+      </p>
+      <div class="hero-meta">
+        <div class="meta-chip">
+          <span class="label">Ponderation</span>
+          <span class="value">1 – 2 – 1</span>
+        </div>
+        <div class="meta-chip">
+          <span class="label">Total effort</span>
+          <span class="value">≥ 6 hours</span>
+        </div>
+        <div class="meta-chip">
+          <span class="label">Deliverable</span>
+          <span class="value">4-page report</span>
+        </div>
+        <div class="meta-chip">
+          <span class="label">Theme</span>
+          <span class="value">AR · VR · XR</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEARNING GOALS -->
+  <section class="section fade-up" id="goals">
+    <div class="section-header">
+      <span class="section-number">§ 01</span>
+      <h2 class="section-title">Project Scenario &amp;<br><span class="dim">Learning Goals</span></h2>
+    </div>
+
+    <p>You are part of a junior digital‑science team in a <strong>university innovation lab</strong> that explores how AR (Augmented Reality), VR (Virtual Reality), and XR (eXtended Reality) interfaces can support future digital services in areas such as smart cities, industry, or education.</p>
+
+    <div class="concept-cards">
+      <div class="concept-card ar-card">
+        <div class="concept-abbr">AR — Augmented Reality</div>
+        <div class="concept-full">Augmented Reality</div>
+        <div class="concept-def">Digital content overlaid on the real world in real time, often via smartphones, tablets, or smart glasses.</div>
+      </div>
+      <div class="concept-card vr-card">
+        <div class="concept-abbr">VR — Virtual Reality</div>
+        <div class="concept-full">Virtual Reality</div>
+        <div class="concept-def">Fully computer‑generated immersive environments typically experienced via head‑mounted displays and motion tracking.</div>
+      </div>
+      <div class="concept-card xr-card">
+        <div class="concept-abbr">XR — eXtended Reality</div>
+        <div class="concept-full">eXtended Reality</div>
+        <div class="concept-def">Umbrella term for AR, VR and Mixed Reality (MR), covering the full continuum from real‑to‑virtual worlds and all human–computer interactions within them.</div>
+      </div>
+    </div>
+
+    <div class="outcomes-grid" style="margin-top:40px;">
+      <div class="outcome-card">
+        <div class="outcome-icon">🧠</div>
+        <div class="outcome-text">Explain core concepts of AR, VR, and XR and their differences in your own words.</div>
+      </div>
+      <div class="outcome-card">
+        <div class="outcome-icon">🔗</div>
+        <div class="outcome-text">Identify at least one realistic use‑case where AR or VR extends an existing digital‑technology topic from the course (IoT, blockchain, network architecture, digital‑twin monitoring).</div>
+      </div>
+      <div class="outcome-card">
+        <div class="outcome-icon">✏️</div>
+        <div class="outcome-text">Sketch and describe a simple XR user interface (UI) focusing on spatial layout, interactions, and usability.</div>
+      </div>
+      <div class="outcome-card">
+        <div class="outcome-icon">⚖️</div>
+        <div class="outcome-text">Reflect critically on benefits, limitations, accessibility, ethics, and safety aspects of AR/VR/XR tools in real‑world‑like lab environments.</div>
+      </div>
+    </div>
+
+    <div class="callout violet" style="margin-top:32px;">
+      <div class="callout-title">Open Lab</div>
+      <p>Any proposed tools, platforms, devices, frameworks, or techniques are <strong>only examples</strong> and <strong>can be replaced</strong> by other suitable and available alternatives. You are explicitly encouraged to research, compare, and even prototype your own tools or techniques.</p>
+    </div>
+  </section>
+
+  <!-- STRUCTURE -->
+  <section class="section fade-up" id="structure">
+    <div class="section-header">
+      <span class="section-number">§ 02</span>
+      <h2 class="section-title">Structure of the<br><span class="dim">4-Day Ponderation 1‑2‑1</span></h2>
+    </div>
+
+    <div class="ponder-grid">
+      <div class="ponder-cell">
+        <div class="day-label">Day 1 · Weight 1</div>
+        <div class="day-name">Foundations</div>
+        <div class="day-sub">Concepts, use‑case, and research<br><br>≈ 1.5 hours</div>
+        <div class="weight-bar"><div class="weight-fill" style="width:25%"></div></div>
+      </div>
+      <div class="ponder-cell center-day">
+        <div class="day-label">Days 2–3 · Weight 2</div>
+        <div class="day-name">Design &amp; Exploration</div>
+        <div class="day-sub">Core design work and interaction flow<br><br>≈ 3 hours total</div>
+        <div class="weight-bar"><div class="weight-fill" style="width:100%"></div></div>
+      </div>
+      <div class="ponder-cell">
+        <div class="day-label">Day 4 · Weight 1</div>
+        <div class="day-name">Consolidation</div>
+        <div class="day-sub">Reflection and report writing<br><br>≈ 1.5 hours</div>
+        <div class="weight-bar"><div class="weight-fill" style="width:25%"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DAY 1 -->
+  <section class="section fade-up" id="day1">
+    <div class="section-header">
+      <span class="section-number">§ 03</span>
+      <h2 class="section-title">Day 1<br><span class="dim">Concepts, Use‑Case &amp; Research</span></h2>
+    </div>
+
+    <div class="day-card open" id="card-day1-1">
+      <div class="day-card-header" onclick="toggleCard('card-day1-1')">
+        <span class="day-badge">3.1</span>
+        <span class="day-card-title">Clarify Core Concepts</span>
+        <span class="day-card-time">Individual or pairs</span>
+        <span class="day-chevron">▾</span>
+      </div>
+      <div class="day-card-body">
+        <div class="subsection">
+          <p>Write short, <strong>own‑words explanations (3–5 sentences each)</strong> for AR, VR, and XR. Always write the full expansion of any abbreviation in round brackets directly after first use — for example: GUI (Graphical User Interface), HMI (Human–Machine Interface).</p>
+        </div>
+        <div class="subsection">
+          <div class="subsection-title">Recommended References</div>
+          <ul class="styled-list">
+            <li><strong>Interaction Design Foundation</strong> — Extended Reality overview:<br>
+              <a href="https://www.interaction-design.org/literature/topics/extended-reality-xr" target="_blank">interaction-design.org/literature/topics/extended-reality-xr</a></li>
+            <li><strong>W3C (World Wide Web Consortium)</strong> — XR Accessibility User Requirements:<br>
+              <a href="https://www.w3.org/TR/xaur/" target="_blank">w3.org/TR/xaur/</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="day-card" id="card-day1-2">
+      <div class="day-card-header" onclick="toggleCard('card-day1-2')">
+        <span class="day-badge">3.2</span>
+        <span class="day-card-title">Choose a Use‑Case Linked to Course Topics</span>
+        <span class="day-card-time">1 paragraph, 5–8 sentences</span>
+        <span class="day-chevron">▾</span>
+      </div>
+      <div class="day-card-body">
+        <p>Select <strong>one concrete scenario</strong> that connects AR/VR/XR to another topic from the course plan. Examples:</p>
+        <ul class="styled-list" style="margin:16px 0;">
+          <li>Visualizing <strong>IoT (Internet of Things)</strong> sensor data from a smart building in AR, directly on doors and devices.</li>
+          <li>A VR training room for explaining <strong>blockchain</strong> transaction flows or network protocols.</li>
+          <li>An XR dashboard to monitor <strong>Cloud‑computing</strong> resources across different data centers.</li>
+        </ul>
+        <p>Your paragraph should address:</p>
+        <ul class="styled-list">
+          <li>Who are the users (technicians, students, customers)?</li>
+          <li>What problem or need do they have?</li>
+          <li>Why might AR, VR, or XR be a better option than a traditional 2D screen?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="day-card" id="card-day1-3">
+      <div class="day-card-header" onclick="toggleCard('card-day1-3')">
+        <span class="day-badge">3.3</span>
+        <span class="day-card-title">Tool &amp; Platform Exploration</span>
+        <span class="day-card-time">Open choice — at least 2 tools</span>
+        <span class="day-chevron">▾</span>
+      </div>
+      <div class="day-card-body">
+        <p>Research <strong>at least two possible tools or platforms</strong>. These can be commercial, open‑source, research prototypes, or conceptual designs. You are <strong>not required to implement code</strong>.</p>
+
+        <div class="tool-table-wrap" style="margin-top:20px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Platform / Tool</th>
+                <th>XR Type</th>
+                <th>Hardware</th>
+                <th>Strengths</th>
+                <th>Limitations</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Meta Quest</strong><br><a href="https://www.meta.com/quest/" target="_blank">meta.com/quest</a></td>
+                <td><span class="tag tag-vr">VR</span> <span class="tag tag-xr">XR</span></td>
+                <td>Standalone headset</td>
+                <td>Self-contained, no PC needed, large app ecosystem</td>
+                <td>Closed platform, limited enterprise customization</td>
+              </tr>
+              <tr>
+                <td><strong>HTC VIVE</strong><br><a href="https://www.vive.com" target="_blank">vive.com</a></td>
+                <td><span class="tag tag-vr">VR</span></td>
+                <td>PC + sensors required</td>
+                <td>High fidelity tracking, enterprise-grade</td>
+                <td>Higher setup cost, cabled</td>
+              </tr>
+              <tr>
+                <td><strong>ARCore</strong><br><a href="https://developers.google.com/ar" target="_blank">developers.google.com/ar</a></td>
+                <td><span class="tag tag-ar">AR</span></td>
+                <td>Android smartphone</td>
+                <td>Free, massive device reach, Google‑backed</td>
+                <td>Android only, limited 3D tracking depth</td>
+              </tr>
+              <tr>
+                <td><strong>ARKit</strong><br><a href="https://developer.apple.com/augmented-reality/" target="_blank">developer.apple.com/augmented-reality</a></td>
+                <td><span class="tag tag-ar">AR</span></td>
+                <td>iPhone / iPad</td>
+                <td>Tight hardware‑software integration, LiDAR support</td>
+                <td>Apple ecosystem only, closed APIs</td>
+              </tr>
+              <tr>
+                <td><strong>Unity</strong><br><a href="https://unity.com" target="_blank">unity.com</a></td>
+                <td><span class="tag tag-ar">AR</span> <span class="tag tag-vr">VR</span> <span class="tag tag-xr">XR</span></td>
+                <td>Cross-platform</td>
+                <td>Industry standard, large community, multi-device</td>
+                <td>Learning curve, licensing costs for commercial use</td>
+              </tr>
+              <tr>
+                <td><strong>Unreal Engine</strong><br><a href="https://www.unrealengine.com" target="_blank">unrealengine.com</a></td>
+                <td><span class="tag tag-ar">AR</span> <span class="tag tag-vr">VR</span> <span class="tag tag-xr">XR</span></td>
+                <td>Cross-platform</td>
+                <td>Photorealistic graphics, strong VR pipeline</td>
+                <td>Higher hardware requirements, complex for beginners</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout amber" style="margin-top:20px;">
+          <div class="callout-title">Reminder</div>
+          <p>All tools in this table are <strong>examples only</strong>. You may replace any of them. You are also invited to imagine or design your own conceptual tool if you have a better idea.</p>
+        </div>
+
+        <p style="margin-top:16px;">For each tool you choose, note in 3–4 bullet points: what type of XR it mainly targets, what hardware is required, and its main strengths and limitations for your scenario.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DAYS 2–3 -->
+  <section class="section fade-up" id="days23">
+    <div class="section-header">
+      <span class="section-number">§ 04</span>
+      <h2 class="section-title">Days 2–3<br><span class="dim">XR UI Design &amp; Interaction</span></h2>
+    </div>
+
+    <div class="day-card" id="card-d2-1">
+      <div class="day-card-header" onclick="toggleCard('card-d2-1')">
+        <span class="day-badge violet-badge">4.1</span>
+        <span class="day-card-title">Define User Tasks and Interaction Flow</span>
+        <span class="day-card-time">3–5 key tasks</span>
+        <span class="day-chevron">▾</span>
+      </div>
+      <div class="day-card-body">
+        <p>Describe <strong>3–5 key tasks</strong> a typical user should be able to perform in your XR system. Example tasks:</p>
+        <ul class="styled-list" style="margin:16px 0;">
+          <li>"View live sensor readings on specific machines by looking at them and selecting a floating data panel."</li>
+          <li>"Walk through a VR environment and trigger step‑by‑step blockchain transaction visualizations."</li>
+        </ul>
+        <p>For each task, define the four components below:</p>
+
+        <div class="flow-grid" style="margin-top:20px;">
+          <div class="flow-item">
+            <div class="flow-step-num">01</div>
+            <div>
+              <div class="flow-step-name">Goal</div>
+              <div class="flow-step-desc">What the user wants to achieve.</div>
+            </div>
+          </div>
+          <div class="flow-item">
+            <div class="flow-step-num">02</div>
+            <div>
+              <div class="flow-step-name">Trigger</div>
+              <div class="flow-step-desc">What starts the task — menu selection, gaze, hand gesture, controller click, or voice command.</div>
+            </div>
+          </div>
+          <div class="flow-item">
+            <div class="flow-step-num">03</div>
+            <div>
+              <div class="flow-step-name">Main Steps</div>
+              <div class="flow-step-desc">3–6 steps in simple bullet points describing the interaction sequence.</div>
+            </div>
+          </div>
+          <div class="flow-item">
+            <div class="flow-step-num">04</div>
+            <div>
+              <div class="flow-step-name">Feedback</div>
+              <div class="flow-step-desc">How the system shows success or failure — visual highlights, sound, haptic feedback.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout" style="margin-top:20px;">
+          <div class="callout-title">Design Principle</div>
+          <p>Base your decisions on recognized XR design principles: <strong>natural gesture mapping</strong>, <strong>multi‑modal input</strong>, and <strong>immediate feedback</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="day-card" id="card-d2-2">
+      <div class="day-card-header" onclick="toggleCard('card-d2-2')">
+        <span class="day-badge violet-badge">4.2</span>
+        <span class="day-card-title">Sketch the Spatial User Interface</span>
+        <span class="day-card-time">No artistic talent required</span>
+        <span class="day-chevron">▾</span>
+      </div>
+      <div class="day-card-body">
+        <p>On paper or with a drawing tool of your choice, draw <strong>at least two simple views</strong> of your XR interface.</p>
+
+        <div class="tool-table-wrap" style="margin-top:16px; margin-bottom:20px;">
+          <table>
+            <thead>
+              <tr><th>View</th><th>Description</th><th>Must Include</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Default view</strong></td>
+                <td>What the user sees when first entering the experience.</td>
+                <td>Main UI elements, initial spatial layout</td>
+              </tr>
+              <tr>
+                <td><strong>Task‑focused view</strong></td>
+                <td>What the user sees when a specific interaction is active.</td>
+                <td>Active interaction state, feedback cues</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Each sketch should include:</p>
+        <ul class="styled-list" style="margin:12px 0 16px;">
+          <li>Main UI elements (menus, panels, virtual objects).</li>
+          <li>Approximate positions relative to the user (in front, left, right, near the floor, etc.).</li>
+          <li>Interaction hints (icons for hand gestures, gaze cursors, controller rays, or voice commands).</li>
+          <li>Short text annotations explaining <em>what</em> each element does and <em>why</em> it is placed there.</li>
+        </ul>
+
+        <div class="callout green">
+          <div class="callout-title">Suggested Free Tools</div>
+          <p>
+            <a href="https://www.drawio.com" target="_blank">draw.io</a> — browser-based diagramming, no install needed. &nbsp;|&nbsp;
+            <a href="https://www.figma.com" target="_blank">Figma</a> — collaborative UI design tool with free tier. You are free to use any other tool or simply draw by hand.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="day-card" id="card-d2-3">
+      <div class="day-card-header" onclick="toggleCard('card-d2-3')">
+        <span class="day-badge violet-badge">4.3</span>
+        <span class="day-card-title">Accessibility, Safety &amp; Ethics</span>
+        <span class="day-card-time">W3C XAUR guidance</span>
+        <span class="day-chevron">▾</span>
+      </div>
+      <div class="day-card-body">
+        <p>Using resources such as <strong><a href="https://www.w3.org/TR/xaur/" target="_blank">W3C XR Accessibility User Requirements (XAUR)</a></strong>, address the following:</p>
+
+        <div class="tool-table-wrap" style="margin-top:16px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Accessibility Risk</th>
+                <th>Example</th>
+                <th>Practical Mitigation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="risk-icon">⚠ Motion Sickness</td>
+                <td>Rapid camera movement or locomotion</td>
+                <td>Use teleport instead of continuous movement; limit FoV during motion</td>
+              </tr>
+              <tr>
+                <td class="risk-icon">⚠ Small Text</td>
+                <td>UI labels too small at viewing distance</td>
+                <td>Adjustable font sizes; keep text at eye‑level zones</td>
+              </tr>
+              <tr>
+                <td class="risk-icon">⚠ No Audio Descriptions</td>
+                <td>Visual-only feedback excludes visually impaired users</td>
+                <td>Add subtitles and audio cues for all important events</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Privacy &amp; Data Protection</div>
+          <p>Discuss how you would protect user data and privacy in this XR environment. Consider: limiting data stored from motion tracking, anonymizing analytics, and complying with applicable data-protection regulations.</p>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Ethical &amp; Educational Context</div>
+          <p>Explain in 1–2 paragraphs how your design stays within an ethical and legal educational context and avoids encouraging unsafe or non‑authorized operations that might exist in real industrial systems. The lab is exploratory — no real‑world critical infrastructure is connected.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DAY 4 -->
+  <section class="section fade-up" id="day4">
+    <div class="section-header">
+      <span class="section-number">§ 05</span>
+      <h2 class="section-title">Day 4<br><span class="dim">Integration, Reflection &amp; Report</span></h2>
+    </div>
+
+    <div class="day-card" id="card-d4-1">
+      <div class="day-card-header" onclick="toggleCard('card-d4-1')">
+        <span class="day-badge">5.1</span>
+        <span class="day-card-title">Connect XR to Other Course Topics</span>
+        <span class="day-card-time">At least 2 topics, 1–2 paragraphs</span>
+        <span class="day-chevron">▾</span>
+      </div>
+      <div class="day-card-body">
+        <p>Choose at least <strong>two topics</strong> from the overall course plan and explain how XR could support them.</p>
+
+        <div class="tool-table-wrap" style="margin-top:16px;">
+          <table>
+            <thead>
+              <tr><th>Course Topic</th><th>Possible XR Angle</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>IoT (Internet of Things)</strong></td>
+                <td>XR as a visualization layer for live sensor networks — see data floating above physical devices</td>
+              </tr>
+              <tr>
+                <td><strong>Blockchain</strong></td>
+                <td>XR as a training tool to walk through transaction flows in 3D space</td>
+              </tr>
+              <tr>
+                <td><strong>Cloud Computing</strong></td>
+                <td>XR dashboard to monitor distributed cloud resource usage across data centers</td>
+              </tr>
+              <tr>
+                <td><strong>Network Architecture</strong></td>
+                <td>VR environment to explain routing, protocols, and topology to students</td>
+              </tr>
+              <tr>
+                <td><strong>Machine Learning (ML)</strong></td>
+                <td>AR overlay showing model predictions on real objects in real time</td>
+              </tr>
+              <tr>
+                <td><strong>Industry 4.0 / Digital Twins</strong></td>
+                <td>XR interface to interact with cloud-based control centers and digital representations of factories</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p style="margin-top:16px;">Where appropriate, mention relevant organizations and standards bodies and link to their official websites — for example <strong>IEEE</strong> (<a href="https://www.ieee.org" target="_blank">ieee.org</a>), <strong>ISO (International Organization for Standardization)</strong> (<a href="https://www.iso.org" target="_blank">iso.org</a>).</p>
+      </div>
+    </div>
+
+    <div class="day-card" id="card-d4-2">
+      <div class="day-card-header" onclick="toggleCard('card-d4-2')">
+        <span class="day-badge">5.2</span>
+        <span class="day-card-title">Reflection on Tools &amp; Creativity</span>
+        <span class="day-card-time">≈ half a page</span>
+        <span class="day-chevron">▾</span>
+      </div>
+      <div class="day-card-body">
+        <p>Write a short reflective section answering these three prompts:</p>
+        <ul class="styled-list" style="margin:14px 0;">
+          <li>How did you select or imagine your tools and technologies?</li>
+          <li>Which aspects are strongly influenced by existing platforms, and which are your own innovations?</li>
+          <li>If you had access to more resources, how would you extend or change the design?</li>
+        </ul>
+        <div class="callout violet">
+          <div class="callout-title">Open Invitation</div>
+          <p>Re‑emphasize that all tools and techniques are open choices. <strong>Invite future teams</strong> to modify, extend, replace, or completely re‑invent the system.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REPORT SPECS -->
+  <section class="section fade-up" id="report">
+    <div class="section-header">
+      <span class="section-number">§ 06</span>
+      <h2 class="section-title">Week 04 Deliverable<br><span class="dim">Report Specifications</span></h2>
+    </div>
+
+    <div class="specs-grid">
+      <div class="spec-item">
+        <div class="spec-label">Maximum length</div>
+        <div class="spec-value">4 pages A4</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Excludes</div>
+        <div class="spec-value">Cover page &amp; references</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Font size</div>
+        <div class="spec-value">11 or 12 pt</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Line spacing</div>
+        <div class="spec-value">Single or 1.15</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Margins</div>
+        <div class="spec-value">≈ 2–2.5 cm</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Typeface</div>
+        <div class="spec-value">Arial, Calibri, or Times New Roman</div>
+      </div>
+    </div>
+
+    <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin:40px 0 16px;color:var(--text-1);">Suggested Structure</h3>
+    <ol class="structure-list">
+      <li>
+        <div>
+          <div class="struct-title">Introduction <span style="color:var(--text-3);font-size:12px;font-weight:400">≈ 0.5 page</span></div>
+          <div class="struct-desc">Briefly introduce your scenario and why AR/VR/XR is relevant.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="struct-title">Concepts &amp; Background <span style="color:var(--text-3);font-size:12px;font-weight:400">≈ 0.5 page</span></div>
+          <div class="struct-desc">Explain AR, VR, and XR in your own words; summarize key design principles with references to Interaction Design Foundation or W3C.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="struct-title">Use‑Case &amp; User Tasks <span style="color:var(--text-3);font-size:12px;font-weight:400">≈ 1 page</span></div>
+          <div class="struct-desc">Describe the context, users, and 3–5 main tasks.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="struct-title">XR UI Design <span style="color:var(--text-3);font-size:12px;font-weight:400">≈ 1–1.5 pages</span></div>
+          <div class="struct-desc">Present your spatial layout, interaction patterns, and example screens or sketches; discuss accessibility and comfort.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="struct-title">Integration &amp; Reflection <span style="color:var(--text-3);font-size:12px;font-weight:400">≈ 0.5–1 page</span></div>
+          <div class="struct-desc">Connect your XR design to other digital‑technology topics from the course; include critical reflection on tools, ethics, and your own creativity.</div>
+        </div>
+      </li>
+    </ol>
+
+    <div class="callout amber" style="margin-top:32px;">
+      <div class="callout-title">Academic Integrity</div>
+      <p>Use only your own formulations. Do not copy text from websites, articles, or other sources. When you use ideas, diagrams, screenshots, or definitions, <strong>cite the source and give the official link</strong>. Direct quotations must be minimal and clearly marked.</p>
+    </div>
+
+    <div class="callout" style="margin-top:16px;">
+      <div class="callout-title">Responsible Use Statement</div>
+      <p>Clearly state in the report that all tools, platforms, and scenarios are used for <strong>educational purposes only</strong> and do not provide operational access to real industrial, financial, or critical infrastructure systems.</p>
+    </div>
+  </section>
+
+  <!-- LAB SHEET -->
+  <section class="section fade-up" id="labsheet">
+    <div class="section-header">
+      <span class="section-number">§ 07</span>
+      <h2 class="section-title">Lab Sheet Summary<br><span class="dim">Quick Reference (≈ 2 A4 pages)</span></h2>
+    </div>
+
+    <div class="callout green">
+      <div class="callout-title">Goal</div>
+      <p>Design a simple, realistic AR/VR/XR concept linked to another digital‑technology topic from the course and document it in a maximum 4‑page report.</p>
+    </div>
+
+    <div class="tool-table-wrap" style="margin-top:28px;">
+      <table>
+        <thead>
+          <tr><th>Day</th><th>Activity</th><th>Time</th><th>Key Output</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Day 1</strong></td>
+            <td>Write AR/VR/XR definitions; choose one use‑case; research ≥ 2 tools</td>
+            <td>≈ 1.5 h</td>
+            <td>Notes on concepts + tool comparison</td>
+          </tr>
+          <tr>
+            <td><strong>Day 2</strong></td>
+            <td>Define 3–5 user tasks with triggers, steps, and feedback; start UI sketches</td>
+            <td>≈ 1.5 h</td>
+            <td>Task flow descriptions + sketch drafts</td>
+          </tr>
+          <tr>
+            <td><strong>Day 3</strong></td>
+            <td>Finalize sketches; analyze accessibility and comfort issues; address privacy</td>
+            <td>≈ 1.5 h</td>
+            <td>Annotated UI sketches + accessibility notes</td>
+          </tr>
+          <tr>
+            <td><strong>Day 4</strong></td>
+            <td>Connect XR to ≥ 2 course topics; reflect on tool choice and ethics; write and proofread report</td>
+            <td>≈ 1.5 h</td>
+            <td>Final 4-page report</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Open Tools — Creativity Required</div>
+      <ul class="styled-list">
+        <li>All tools and techniques in this lab are <strong>open examples only</strong>.</li>
+        <li>You are <strong>free and encouraged</strong> to choose different tools, frameworks, devices, or even hypothetical platforms.</li>
+        <li>Research any tools you use: technical capabilities, hardware requirements, licensing, and ethical implications — then justify your choices briefly in the report.</li>
+        <li>You are encouraged to <strong>invent or design your own tools or interaction techniques</strong> if current solutions don't meet your needs.</li>
+      </ul>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">Connection to Final Course Project</div>
+      <p>This Week 04 output becomes one chapter of your <strong>continuous term project</strong>, which will ultimately integrate earlier topics: digitalization, network architecture, blockchain, IoT, AR/VR/XR, and more. Keep your notes, sketches, and references well organized for the final cumulative report and presentation.</p>
+    </div>
+  </section>
+
+  <!-- CHECKLIST -->
+  <section class="section fade-up" id="checklist-section">
+    <div class="section-header">
+      <span class="section-number">§ 08</span>
+      <h2 class="section-title">Week 04<br><span class="dim">Completion Checklist</span></h2>
+    </div>
+    <p>Click items as you complete them.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:32px; margin-top:28px;">
+
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--cyan);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px;">Day 1</div>
+        <ul class="checklist" id="cl-day1">
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Wrote own-words definitions for AR, VR, and XR</span></li>
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Chose one concrete use-case linked to a course topic</span></li>
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Researched at least 2 tools or platforms</span></li>
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Noted strengths and limitations for each tool</span></li>
+        </ul>
+      </div>
+
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--violet-soft);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px;">Days 2–3</div>
+        <ul class="checklist" id="cl-d23">
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Defined 3–5 key user tasks with Goal, Trigger, Steps, Feedback</span></li>
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Drew at least two XR interface sketches (default + task-focused)</span></li>
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Added annotations to sketches explaining placement and purpose</span></li>
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Identified ≥ 3 accessibility risks with mitigations</span></li>
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Addressed data privacy and ethical educational context</span></li>
+        </ul>
+      </div>
+
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--green);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px;">Day 4 &amp; Report</div>
+        <ul class="checklist" id="cl-d4">
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Connected XR to at least 2 other course topics</span></li>
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Wrote reflective section on tool choice and creativity</span></li>
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Report is ≤ 4 pages A4 (excl. cover and references)</span></li>
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Figures have captions and are referenced in the text</span></li>
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>All sources cited with official links</span></li>
+          <li onclick="toggleCheck(this)"><span class="check"></span><span>Included responsible-use statement in report</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="page-footer">
+    <span class="footer-note">Week 04 · Ponderation 1‑2‑1 · Continuous Project · AR · VR · XR UI Design</span>
+    <div class="footer-links">
+      <a href="https://www.interaction-design.org/literature/topics/extended-reality-xr" target="_blank">IDF — XR Overview</a>
+      <a href="https://www.w3.org/TR/xaur/" target="_blank">W3C XAUR</a>
+      <a href="https://www.ieee.org" target="_blank">IEEE</a>
+      <a href="https://www.iso.org" target="_blank">ISO</a>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+  // ── ACCORDION ──
+  function toggleCard(id) {
+    const card = document.getElementById(id);
+    card.classList.toggle('open');
+  }
+
+  // ── CHECKLIST ──
+  function toggleCheck(li) {
+    li.classList.toggle('checked');
+    updateProgress();
+  }
+
+  // ── PROGRESS ──
+  function updateProgress() {
+    const all = document.querySelectorAll('.checklist li');
+    const done = document.querySelectorAll('.checklist li.checked');
+    const pct = all.length ? Math.round((done.length / all.length) * 100) : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+  }
+
+  // ── ACTIVE NAV ──
+  const sections = document.querySelectorAll('section[id], footer');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navItems.forEach(n => {
+          n.classList.toggle('active', n.getAttribute('href') === '#' + e.target.id);
+        });
+      }
+    });
+  }, { threshold: 0.25 });
+
+  sections.forEach(s => observer.observe(s));
+
+  // ── SCROLL FADE-IN ──
+  const fadeEls = document.querySelectorAll('.fade-up');
+  const fadeObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); fadeObs.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  fadeEls.forEach(el => fadeObs.observe(el));
+
+  // ── MOBILE MENU ──
+  const menuBtn = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  menuBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
+  document.addEventListener('click', (e) => {
+    if (!sidebar.contains(e.target) && e.target !== menuBtn) sidebar.classList.remove('open');
+  });
+
+  // Initial progress
+  updateProgress();
+</script>
+</body>
+</html>
