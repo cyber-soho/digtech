@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybersecurity & Compliance: Mid-Term Study Portal</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Tailwind Config for Custom Colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            200: '#e7e5e4',
+                            800: '#292524',
+                            900: '#1c1917',
+                        },
+                        teal: {
+                            600: '#0d9488',
+                            700: '#0f766e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- 
+    Placeholder Comments Required by Prompt:
+
+    <!-- Chosen Palette: Warm Neutrals with Teal Accents (Stone 50/100/800 and Teal 600/700). Chosen to reduce cognitive load and create a calm, focused studying environment, avoiding the aggressive neon colors often associated with cybersecurity tropes. -->
+    
+    <!-- Application Structure Plan: The SPA is structured as a Tabbed Dashboard. 
+         1. Overview (Dashboard): Provides visual data on what to study (charts mapping exam weight and technology risks). 
+         2. Core Concepts: An accordion-based study guide organizing the dense text into consumable, interactive chunks.
+         3. Case Simulator: Translates text-based scenarios into interactive "Flashcards" where users read the scenario and must actively click to reveal the compliance analysis, promoting active recall.
+         4. Practice Exam: A dynamic, paginated quiz engine that parses all 75 text questions into a functional test with immediate feedback. 
+         WHY: This structure transforms passive reading into an active, task-oriented study flow, separating conceptual learning from practical application (cases) and testing. -->
+    
+    <!-- Visualization & Content Choices: 
+         - Goal: Inform on Study Focus -> Method: Chart.js Doughnut Chart -> Interaction: Hover tooltips -> Justification: Shows distribution of 75 questions across 4 chapters so students know where to allocate time. (Library: Chart.js)
+         - Goal: Compare Risks -> Method: Chart.js Radar Chart -> Interaction: Hover data points -> Justification: Visually compares IoT, XR, and Crypto across risk vectors (Latency, Data Exposure, etc.) helping students synthesize cross-chapter concepts. (Library: Chart.js)
+         - Goal: Organize Concepts -> Method: Accordion UI -> Interaction: Click to expand -> Justification: Hides intimidating walls of text until requested.
+         - Goal: Test Knowledge -> Method: Interactive Flashcards & JS Quiz Engine -> Interaction: Click to flip/select -> Justification: Active recall is proven to be the most effective study method for exams.
+         - Confirming: NO SVG graphics used. NO Mermaid JS used. -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    -->
+
+    <style>
+        /* Base Styles & Typography */
+        body {
+            background-color: #fafaf9; /* stone-50 */
+            color: #292524; /* stone-800 */
+        }
+        
+        /* Chart Container CSS - MANDATORY CONSTRAINTS */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Hide Scrollbar but keep functionality for clean UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Flashcard Animation */
+        .flashcard-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+        }
+        
+        /* Hide elements dynamically */
+        .hidden-view {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-bold text-teal-700">⛨</span>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">Compliance & Cyber Study Portal</h1>
+            </div>
+            <div class="text-sm font-medium text-stone-500 bg-stone-100 px-3 py-1 rounded-full">
+                Est. Time: 3 Hours
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex overflow-x-auto no-scrollbar border-t border-stone-100">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn whitespace-nowrap py-3 px-4 border-b-2 border-teal-600 text-teal-700 font-semibold text-sm transition-colors">📊 Overview</button>
+            <button onclick="switchTab('concepts')" id="nav-concepts" class="nav-btn whitespace-nowrap py-3 px-4 border-b-2 border-transparent text-stone-500 hover:text-stone-700 font-medium text-sm transition-colors">📚 Core Concepts</button>
+            <button onclick="switchTab('cases')" id="nav-cases" class="nav-btn whitespace-nowrap py-3 px-4 border-b-2 border-transparent text-stone-500 hover:text-stone-700 font-medium text-sm transition-colors">🧠 Case Simulator</button>
+            <button onclick="switchTab('quiz')" id="nav-quiz" class="nav-btn whitespace-nowrap py-3 px-4 border-b-2 border-transparent text-stone-500 hover:text-stone-700 font-medium text-sm transition-colors">📝 Practice Exam</button>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <!-- VIEW 1: DASHBOARD -->
+        <section id="view-dashboard" class="view-section animate-fade-in">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Welcome to your Final Exam Review</h2>
+                <p class="text-stone-600 max-w-3xl leading-relaxed">
+                    This dashboard acts as your central hub for mastering emerging digital technologies and their compliance implications. 
+                    The visualizations below break down the distribution of topics across your 75 practice questions and compare the relative compliance risk profiles of different technologies based on the course material. Use this data to strategize your study session.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Chart 1: Exam Breakdown -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 flex flex-col">
+                    <h3 class="text-lg font-bold text-stone-800 mb-1">Exam Topic Weighting</h3>
+                    <p class="text-xs text-stone-500 mb-6">Distribution of questions in the 75-question test bank.</p>
+                    <div class="chart-container flex-grow flex items-center justify-center">
+                        <canvas id="topicChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Risk Profile -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 flex flex-col">
+                    <h3 class="text-lg font-bold text-stone-800 mb-1">Comparative Risk Vectors</h3>
+                    <p class="text-xs text-stone-500 mb-6">Relative compliance impact of emerging technologies.</p>
+                    <div class="chart-container flex-grow flex items-center justify-center">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 bg-teal-50 border-l-4 border-teal-600 p-4 rounded-r-lg">
+                <h4 class="font-bold text-teal-800 mb-1">Getting Started</h4>
+                <p class="text-sm text-teal-700">Start with the <button onclick="switchTab('concepts')" class="underline font-semibold">Core Concepts</button> to review definitions, then apply your knowledge in the <button onclick="switchTab('cases')" class="underline font-semibold">Case Simulator</button>, and finally test yourself with the <button onclick="switchTab('quiz')" class="underline font-semibold">Practice Exam</button>.</p>
+            </div>
+        </section>
+
+        <!-- VIEW 2: CORE CONCEPTS -->
+        <section id="view-concepts" class="view-section hidden-view">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Core Concepts Review</h2>
+                <p class="text-stone-600 max-w-3xl leading-relaxed">
+                    This section consolidates the core principles from your four lecture modules. Understanding how these technologies work is secondary; your primary goal as compliance students is to understand the <strong>data they handle, the networks they utilize, and the risks they introduce</strong>. Click on each chapter to explore.
+                </p>
+            </div>
+
+            <div class="space-y-4" id="concepts-container">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- VIEW 3: CASE SIMULATOR -->
+        <section id="view-cases" class="view-section hidden-view">
+             <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-stone-800 mb-2">Case Study Simulator</h2>
+                    <p class="text-stone-600 max-w-2xl leading-relaxed">
+                        Read each scenario and question. Formulate your answer mentally before clicking the card to reveal the expert compliance analysis. This active recall process strengthens memory retention.
+                    </p>
+                </div>
+                <div class="text-sm font-medium bg-white border border-stone-200 px-4 py-2 rounded-lg text-stone-600 shadow-sm">
+                    10 Scenarios Available
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="cases-container">
+                <!-- Injected via JS -->
+            </div>
+        </section>
+
+        <!-- VIEW 4: PRACTICE EXAM -->
+        <section id="view-quiz" class="view-section hidden-view">
+            <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-stone-800 mb-2">Knowledge Check: 75 Questions</h2>
+                    <p class="text-stone-600 max-w-3xl leading-relaxed">
+                        This interactive exam contains all 75 MCQs and MSQs extracted from the course material. Select your answers and submit to receive immediate compliance feedback.
+                    </p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-center bg-white px-4 py-2 rounded-lg border border-stone-200 shadow-sm">
+                        <span class="block text-xs text-stone-500 uppercase tracking-wider font-bold">Score</span>
+                        <span class="block text-xl font-bold text-teal-700" id="quiz-score-display">0 / 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 md:p-8">
+                <!-- Quiz Container -->
+                <div id="quiz-container" class="space-y-8">
+                    <!-- Injected via JS -->
+                </div>
+                
+                <!-- Pagination / Controls -->
+                <div class="mt-8 pt-6 border-t border-stone-100 flex justify-between items-center">
+                    <button id="btn-prev-page" onclick="changeQuizPage(-1)" class="px-5 py-2 rounded-lg border border-stone-300 text-stone-600 hover:bg-stone-50 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        &larr; Previous
+                    </button>
+                    <span id="quiz-page-indicator" class="text-sm font-medium text-stone-500">Page 1 of X</span>
+                    <button id="btn-next-page" onclick="changeQuizPage(1)" class="px-5 py-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 font-medium transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                        Next &rarr;
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Raw Data Embed (Ensures 100% data retention without massive JSON token overhead) -->
+    <script id="raw-quiz-data" type="text/plain">
+**1. What is the primary definition of IoT (Internet of Things)? (MCQ)**
+A) A localized intranet for office computers
+B) A network of physical objects embedded with sensors and software to connect and exchange data over the internet
+C) A completely virtual environment for gaming
+D) A consensus mechanism for cryptocurrencies
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**2. Which of the following best describes Edge Computing? (MCQ)**
+A) Centralizing all data in a single massive server farm
+B) Processing data closer to where it is generated rather than sending it to a central cloud
+C) The outer casing of a mobile device
+D) The graphical interface of an AR (Augmented Reality) application
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**3. What does M2M stand for? (MCQ)**
+A) Machine-to-Machine
+B) Mobile-to-Mobile
+C) Memory-to-Memory
+D) Modem-to-Machine
+*Answer: A | Chapter: IoT, Edge and M2M*
+
+**4. Which of the following are primary benefits of Edge Computing? (MSQ)**
+A) Reduced latency
+B) Infinite local storage capacity
+C) Decreased bandwidth usage
+D) Enhanced local data privacy
+*Answer: A, C, D | Chapter: IoT, Edge and M2M*
+
+**5. In an M2M (Machine-to-Machine) system, what is notably absent from the communication loop? (MCQ)**
+A) Telemetry data
+B) Power sources
+C) Human intervention
+D) Sensors
+*Answer: C | Chapter: IoT, Edge and M2M*
+
+**6. Which technology bridges the gap between the physical world and digital networks by gathering data? (MCQ)**
+A) Blockchain
+B) Sensors (IoT)
+C) VR (Virtual Reality) headsets
+D) Web browsers
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**7. Why is sending all IoT data directly to the cloud often considered problematic? (MSQ)**
+A) It can be too slow (latency)
+B) It consumes too much network bandwidth
+C) It guarantees 100% security
+D) It can expose sensitive data during transit
+*Answer: A, B, D | Chapter: IoT, Edge and M2M*
+
+**8. An autonomous vehicle processing collision-avoidance data onboard is an example of what? (MCQ)**
+A) Blockchain computing
+B) Cloud computing
+C) Edge computing
+D) Spatial computing
+*Answer: C | Chapter: IoT, Edge and M2M*
+
+**9. Which of the following is a common security risk associated with IoT devices? (MCQ)**
+A) They rely heavily on paper records
+B) They often have weak default passwords and lack regular patch updates
+C) They require massive amounts of physical space
+D) They cannot connect to Wi-Fi
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**10. What role do "actuators" play in an IoT/M2M ecosystem? (MCQ)**
+A) They encrypt data for storage
+B) They take an electrical signal and translate it into physical action (e.g., closing a valve)
+C) They mine cryptocurrency
+D) They project holograms
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**11. How does AR (Augmented Reality) differ from VR (Virtual Reality)? (MCQ)**
+A) AR shuts out the physical world; VR adds to it.
+B) AR overlays digital content onto the real world; VR is a fully immersive digital environment.
+C) AR requires no hardware; VR requires a smartphone.
+D) There is no difference; they are interchangeable terms.
+*Answer: B | Chapter: Augmented, Virtual Realities and XR*
+
+**12. XR (Extended Reality) is best defined as: (MCQ)**
+A) An outdated term for 3D movies
+B) An umbrella term that covers AR, VR, and Mixed Reality
+C) A specific brand of headset
+D) A programming language
+*Answer: B | Chapter: Augmented, Virtual Realities and XR*
+
+**13. Which of the following are examples of AR (Augmented Reality)? (MSQ)**
+A) A smartphone app showing virtual furniture in your real living room
+B) A fully immersive digital recreation of Mars viewed through a closed headset
+C) Snapchat face filters
+D) A heads-up display on a car windshield
+*Answer: A, C, D | Chapter: Augmented, Virtual Realities and XR*
+
+**14. What is a primary compliance concern regarding XR technologies? (MCQ)**
+A) The collection of highly sensitive spatial and biometric data (e.g., eye tracking)
+B) The high cost of electricity to charge the headsets
+C) The inability to play video games
+D) The lack of color display options
+*Answer: A | Chapter: Augmented, Virtual Realities and XR*
+
+**15. In VR (Virtual Reality), the concept of "immersion" relies heavily on shutting out which of the following? (MCQ)**
+A) The internet connection
+B) The physical, external real-world environment
+C) Digital sounds
+D) Haptic feedback
+*Answer: B | Chapter: Augmented, Virtual Realities and XR*
+
+**16. Which term describes the computing paradigm heavily utilized by AR and VR to understand physical 3D spaces? (MCQ)**
+A) Quantum computing
+B) Spatial computing
+C) Linear computing
+D) Batch computing
+*Answer: B | Chapter: Augmented, Virtual Realities and XR*
+
+**17. If a factory worker uses smart glasses to see repair instructions overlaid onto a broken machine, they are using: (MCQ)**
+A) M2M (Machine-to-Machine)
+B) VR (Virtual Reality)
+C) AR (Augmented Reality)
+D) Blockchain
+*Answer: C | Chapter: Augmented, Virtual Realities and XR*
+
+**18. From a security standpoint, why are AR/VR headsets a unique threat vector? (MSQ)**
+A) They map the physical layouts of homes and offices
+B) They record audio and video constantly to function
+C) They bypass traditional antivirus software by default
+D) They track physical user movements and biometrics
+*Answer: A, B, D | Chapter: Augmented, Virtual Realities and XR*
+
+**19. Mixed Reality (MR) is unique because: (MCQ)**
+A) It only uses text.
+B) Digital objects can interact with physical objects in the real world.
+C) It requires users to be fully blindfolded.
+D) It is only used in agriculture.
+*Answer: B | Chapter: Augmented, Virtual Realities and XR*
+
+**20. What is the fundamental building block of a Blockchain? (MCQ)**
+A) A centralized SQL database
+B) A decentralized, distributed digital ledger of transactions
+C) A localized intranet
+D) A single, highly secure physical server
+*Answer: B | Chapter: BlockChain and Crypto Currencies*
+
+**21. In blockchain technology, what ensures that past transactions cannot be easily altered? (MCQ)**
+A) Good faith among users
+B) Cryptographic hashing linking each block to the previous one (immutability)
+C) A central administrator who locks the files
+D) Antivirus software
+*Answer: B | Chapter: BlockChain and Crypto Currencies*
+
+**22. Which of the following statements about Cryptocurrencies are true? (MSQ)**
+A) They rely on cryptography to secure transactions
+B) They are always controlled by a central government bank
+C) They operate on decentralized networks (usually blockchains)
+D) They utilize public and private keys
+*Answer: A, C, D | Chapter: BlockChain and Crypto Currencies*
+
+**23. What is a "Smart Contract"? (MCQ)**
+A) A legally binding paper document signed by a lawyer
+B) Self-executing code on a blockchain that automatically enforces the terms of an agreement
+C) An AI that negotiates prices
+D) A secure email service
+*Answer: B | Chapter: BlockChain and Crypto Currencies*
+
+**24. If a user loses their Private Key to a cryptocurrency wallet, what is the most likely outcome? (MCQ)**
+A) They can reset it via email
+B) The bank will issue a new one
+C) They permanently lose access to their funds
+D) The smart contract reverses their last transaction
+*Answer: C | Chapter: BlockChain and Crypto Currencies*
+
+**25. Which of the following is an example of DeFi (Decentralized Finance)? (MCQ)**
+A) Opening a checking account at a local bank branch
+B) Using a smart contract to borrow cryptocurrency without a central intermediary
+C) Paying for groceries with a standard credit card
+D) Trading stocks through a traditional brokerage firm
+*Answer: B | Chapter: BlockChain and Crypto Currencies*
+
+**26. Why is blockchain considered "trustless"? (MCQ)**
+A) Because nobody trusts the technology yet
+B) Because it relies on mathematical proofs and consensus rather than trusting a central authority or intermediary
+C) Because hackers frequently steal the data
+D) Because all participants remain completely anonymous
+*Answer: B | Chapter: BlockChain and Crypto Currencies*
+
+**27. In the context of blockchain, what does "decentralization" mean? (MCQ)**
+A) All servers are located in one city center
+B) Control and decision-making are distributed among a distributed network rather than a single central entity
+C) Only the government controls the network
+D) The network operates without the internet
+*Answer: B | Chapter: BlockChain and Crypto Currencies*
+
+**28. Which of these is a common consensus mechanism used by blockchains to validate transactions? (MSQ)**
+A) Proof of Work (PoW)
+B) Proof of Stake (PoS)
+C) Proof of Authority (PoA)
+D) Proof of Concept (PoC)
+*Answer: A, B, C | Chapter: BlockChain and Crypto Currencies*
+
+**29. What acts as a user's publicly visible address on a blockchain network? (MCQ)**
+A) Their social security number
+B) Their Private Key
+C) Their Public Key
+D) Their email address
+*Answer: C | Chapter: BlockChain and Crypto Currencies*
+
+**30. How did Alphabet (Google) establish a massive "business moat"? (MCQ)**
+A) By selling hardware exclusively
+B) Through an AI-driven, data-rich advertising ecosystem that becomes smarter with every search
+C) By avoiding digital transformation
+D) By relying entirely on printed media
+*Answer: B | Chapter: Leading Companies Business Cases*
+
+**31. What is the core resource that powers leading digital business models today? (MCQ)**
+A) Office real estate
+B) Raw physical materials
+C) User data
+D) Manual labor
+*Answer: C | Chapter: Leading Companies Business Cases*
+
+**32. Digital Transformation is best defined as: (MCQ)**
+A) Scanning paper documents into PDF format
+B) The strategic adoption of digital technologies to improve processes, value, and innovation across a whole organization
+C) Buying new laptops for employees
+D) Moving from a desktop computer to a mobile phone
+*Answer: B | Chapter: Leading Companies Business Cases*
+
+**33. Why is data considered a "network effect" in modern business cases? (MCQ)**
+A) Because data requires a strong Wi-Fi connection
+B) Because the more users generate data, the better the service becomes, attracting even more users
+C) Because data is easily deleted
+D) Because network cables transmit data
+*Answer: B | Chapter: Leading Companies Business Cases*
+
+**34. A compliance assessor reviewing a company’s AI advertising model must carefully scrutinize: (MSQ)**
+A) User consent protocols for data collection
+B) The color palette of the advertisements
+C) Data anonymization techniques
+D) How long consumer data is retained
+*Answer: A, C, D | Chapter: Leading Companies Business Cases*
+
+**35. Which organization is a key body for developing compliance frameworks related to digital data security? (MCQ)**
+A) NATO
+B) NIST (National Institute of Standards and Technology)
+C) WHO
+D) W3C
+*Answer: B | Chapter: Leading Companies Business Cases*
+
+**36. In IoT, what connects the physical sensors to the processing software? (MCQ)**
+A) The blockchain
+B) Telecommunications networks (Wi-Fi, 5G, Bluetooth)
+C) The Private Key
+D) AR (Augmented Reality) markers
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**37. Which scenario represents the most critical need for Edge Computing? (MCQ)**
+A) Calculating quarterly financial reports
+B) Real-time heart arrhythmia detection in a wearable medical device
+C) Updating a user's social media profile picture
+D) Sending a daily email newsletter
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**38. M2M technology is the foundational predecessor to which modern ecosystem? (MCQ)**
+A) Virtual Reality
+B) The Internet of Things (IoT)
+C) Cryptocurrency mining
+D) Search engine optimization
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**39. When conducting a compliance assessment on an IoT network, what is the term for the sum of all points where an unauthorized user could enter data or extract data? (MCQ)**
+A) The Block hash
+B) The Attack Surface
+C) The Public Key
+D) The Virtual environment
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**40. True or False: Edge computing completely replaces cloud computing. (MCQ)**
+A) True
+B) False
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**41. Which of the following is considered "Spatial Data" collected by XR devices? (MSQ)**
+A) The user's heart rate and pupil dilation
+B) The user's credit card expiration date
+C) The exact dimensions of the user's living room
+D) The physical tracking of the user's hand movements
+*Answer: A, C, D | Chapter: Augmented, Virtual Realities and XR*
+
+**42. What visual tracking feature makes AR apps like Pokemon Go possible? (MCQ)**
+A) Smart contracts
+B) Decentralized ledgers
+C) Camera-based environmental mapping and GPS
+D) Edge computing latency
+*Answer: C | Chapter: Augmented, Virtual Realities and XR*
+
+**43. A major hurdle in the widespread corporate adoption of VR (Virtual Reality) is: (MCQ)**
+A) The lack of internet availability
+B) User disorientation/motion sickness and the isolation of wearing a headset
+C) The inability to use colors
+D) The strict requirements of the W3C
+*Answer: B | Chapter: Augmented, Virtual Realities and XR*
+
+**44. "Heads-Up Displays" (HUDs) used by airline pilots are an early form of: (MCQ)**
+A) AR (Augmented Reality)
+B) VR (Virtual Reality)
+C) Blockchain
+D) M2M
+*Answer: A | Chapter: Augmented, Virtual Realities and XR*
+
+**45. For compliance, why is spatial data highly regulated? (MCQ)**
+A) Because it takes up too much hard drive space
+B) Because it is easily confused with blockchain data
+C) Because it can map private, secure locations and collect intimate biometric identifiers
+D) Because it is open-source
+*Answer: C | Chapter: Augmented, Virtual Realities and XR*
+
+**46. Each block in a blockchain contains the cryptographic hash of what? (MCQ)**
+A) The creator's password
+B) The previous block
+C) The next block
+D) The central server's IP address
+*Answer: B | Chapter: BlockChain and Crypto Currencies*
+
+**47. What makes a Smart Contract "smart"? (MCQ)**
+A) It uses AI to write itself
+B) It has a high IQ
+C) It automatically executes predefined actions when specific conditions are met
+D) It can change its own rules whenever it wants
+*Answer: C | Chapter: BlockChain and Crypto Currencies*
+
+**48. Which is a recognized risk of utilizing Smart Contracts? (MSQ)**
+A) They require human lawyers to physically sign them every time
+B) Bugs in the code cannot be easily fixed once deployed to the blockchain
+C) Exploits in the code can lead to massive automated financial theft
+D) They execute automatically, meaning human judgment is removed at execution time
+*Answer: B, C, D | Chapter: BlockChain and Crypto Currencies*
+
+**49. In Cryptocurrency, what is a "Wallet"? (MCQ)**
+A) A physical leather pouch
+B) A software program or hardware device that stores public/private keys and interacts with the blockchain
+C) The bank vault where the digital coins are kept
+D) A smart contract that buys groceries
+*Answer: B | Chapter: BlockChain and Crypto Currencies*
+
+**50. What problem does a blockchain specifically solve in digital transactions? (MCQ)**
+A) The slow speed of the internet
+B) The Double-Spending problem (ensuring a digital token cannot be spent twice)
+C) The need for computer monitors
+D) The high cost of marketing
+*Answer: B | Chapter: BlockChain and Crypto Currencies*
+
+**51. Alphabet’s business success heavily relies on converting unstructured data (like search queries) into: (MCQ)**
+A) Cryptocurrencies
+B) Actionable, targeted advertising intelligence
+C) Virtual Reality headsets
+D) Edge hardware
+*Answer: B | Chapter: Leading Companies Business Cases*
+
+**52. What is a "competitive moat"? (MCQ)**
+A) A physical barrier around a data center
+B) A distinct business advantage that protects a company's market share from competitors
+C) A type of blockchain consensus
+D) A virtual reality game
+*Answer: B | Chapter: Leading Companies Business Cases*
+
+**53. Digital companies leverage Machine Learning (a subset of AI) to: (MSQ)**
+A) Identify patterns in massive datasets
+B) Automate decision-making processes
+C) Replace physical hardware completely
+D) Predict consumer behavior
+*Answer: A, B, D | Chapter: Leading Companies Business Cases*
+
+**54. In digital business models, what does "scalability" refer to? (MCQ)**
+A) The ability to weigh servers physically
+B) The capability of a system or network to grow and manage increased demand efficiently
+C) The process of shrinking data files
+D) The act of selling off business assets
+*Answer: B | Chapter: Leading Companies Business Cases*
+
+**55. Which of these is a core characteristic of a data-driven business model? (MCQ)**
+A) Relying heavily on intuition and gut feelings for strategy
+B) Using continuous data feedback loops to refine products and services
+C) Deleting all user data every 24 hours
+D) Avoiding digital transformation
+*Answer: B | Chapter: Leading Companies Business Cases*
+
+**56. An IoT thermostat that learns your schedule and adjusts the temperature automatically is utilizing: (MCQ)**
+A) Only hardware sensors
+B) M2M communication and basic AI/Machine Learning
+C) Blockchain validation
+D) Augmented Reality
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**57. If a compliance officer finds that an IoT camera sends unencrypted video to a foreign server, this is a failure of: (MSQ)**
+A) Data encryption standards
+B) Edge computing hardware
+C) Data localization and privacy compliance
+D) Blockchain consensus
+*Answer: A, C | Chapter: IoT, Edge and M2M*
+
+**58. What does "latency" mean in the context of network communications? (MCQ)**
+A) The amount of data that can be sent at once
+B) The time delay between a data request and a response
+C) The physical distance between two routers
+D) The cost of the internet service
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**59. Which technology allows a surgeon to see vital signs floating next to a patient during an operation? (MCQ)**
+A) Virtual Reality (VR)
+B) Augmented Reality (AR)
+C) Cryptocurrency
+D) Machine-to-Machine (M2M)
+*Answer: B | Chapter: Augmented, Virtual Realities and XR*
+
+**60. The "Metaverse" concept relies heavily on the integration of which technologies? (MCQ)**
+A) AR, VR, and XR
+B) Only paper-based ledgers
+C) Edge computing only
+D) Alphabet's search algorithm exclusively
+*Answer: A | Chapter: Augmented, Virtual Realities and XR*
+
+**61. A "Node" in a blockchain network refers to: (MCQ)**
+A) A single block of data
+B) Any computer connected to the network that maintains a copy of the ledger
+C) The cryptocurrency itself
+D) The person who invented the network
+*Answer: B | Chapter: BlockChain and Crypto Currencies*
+
+**62. If data is "immutable," it means: (MCQ)**
+A) It cannot be changed or deleted once recorded
+B) It can be easily muted or silenced
+C) It is constantly changing
+D) It is invisible
+*Answer: A | Chapter: BlockChain and Crypto Currencies*
+
+**63. The primary risk of Decentralized Finance (DeFi) for a newbie user is: (MCQ)**
+A) It is too slow to use
+B) The lack of regulatory safety nets (e.g., FDIC insurance) if things go wrong
+C) It requires wearing a VR headset
+D) Banks have full control over it
+*Answer: B | Chapter: BlockChain and Crypto Currencies*
+
+**64. How does Edge Computing assist IoT networks in remote locations (like deep-sea oil rigs)? (MCQ)**
+A) By beaming data to the moon
+B) By processing critical sensor data locally where internet connectivity to the cloud is unreliable or non-existent
+C) By using Augmented Reality to fix pipes
+D) By issuing cryptocurrency to workers
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**65. Which of the following best defines "Telemetry" in an IoT context? (MCQ)**
+A) Watching television over the internet
+B) The automatic measurement and transmission of data from remote sources to IT systems
+C) Telepathic communication
+D) The physical wiring of a network
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**66. What is the fundamental difference between AR and MR (Mixed Reality)? (MCQ)**
+A) AR is auditory only; MR is visual.
+B) In MR, digital objects can interact realistically with the physical environment, whereas AR typically just overlays information.
+C) AR uses blockchain; MR does not.
+D) There is absolutely no difference.
+*Answer: B | Chapter: Augmented, Virtual Realities and XR*
+
+**67. A business case built around "Targeted Advertising" requires: (MCQ)**
+A) Decentralized ledgers
+B) Massive sets of demographic and behavioral data
+C) Complete user anonymity at all times
+D) M2M manufacturing
+*Answer: B | Chapter: Leading Companies Business Cases*
+
+**68. Why must compliance assessors understand algorithms in modern business cases? (MCQ)**
+A) Because algorithms might unintentionally execute biased or discriminatory actions based on bad data
+B) Because assessors are expected to write the code
+C) Because algorithms take up physical space in the office
+D) Because algorithms are a type of cryptocurrency
+*Answer: A | Chapter: Leading Companies Business Cases*
+
+**69. What is "Proof of Work" (PoW)? (MCQ)**
+A) An employee's timesheet
+B) A blockchain consensus mechanism requiring computational effort to solve complex puzzles to validate transactions
+C) A smart contract that pays salaries
+D) A VR training simulator
+*Answer: B | Chapter: BlockChain and Crypto Currencies*
+
+**70. What is "Proof of Stake" (PoS)? (MCQ)**
+A) Validating transactions by holding and "staking" a certain amount of cryptocurrency, rather than using heavy computational power
+B) Eating at a restaurant
+C) Verifying data using Edge computing
+D) A compliance form required by NIST
+*Answer: A | Chapter: BlockChain and Crypto Currencies*
+
+**71. What does the acronym "AI" stand for in digital technology? (MCQ)**
+A) Automated Internet
+B) Artificial Intelligence
+C) Augmented Integration
+D) Arrayed Information
+*Answer: B | Chapter: General/Leading Companies*
+
+**72. Why do cyber attackers target M2M networks in industrial settings? (MCQ)**
+A) To steal credit card numbers
+B) To cause physical disruption to critical infrastructure (e.g., power grids, manufacturing)
+C) To play video games on the network
+D) To overlay AR graphics
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**73. What is a "Hash" in blockchain? (MCQ)**
+A) A breakfast food
+B) A mathematical function that converts an input of letters and numbers into an encrypted output of a fixed length
+C) A physical server rack
+D) The central bank's master password
+*Answer: B | Chapter: BlockChain and Crypto Currencies*
+
+**74. Which of these makes IoT devices vulnerable to DDoS (Distributed Denial of Service) attacks? (MCQ)**
+A) They are too large to hide
+B) Massive networks of poorly secured IoT devices can be hijacked and grouped into a "botnet"
+C) They use blockchain ledgers
+D) They only work in VR
+*Answer: B | Chapter: IoT, Edge and M2M*
+
+**75. What is the overarching goal of a Compliance Assessment when reviewing emerging technologies like IoT, XR, and Blockchain? (MCQ)**
+A) To ban the use of all new technology
+B) To ensure the technology is implemented securely, legal regulations (like data privacy) are met, and organizational risks are managed
+C) To increase the company's advertising revenue
+D) To make sure employees are having fun
+*Answer: B | Chapter: Comprehensive Theme*
+    </script>
+
+    <script>
+        // --- DATA LAYER ---
+        const courseData = [
+            {
+                title: "Chapter 1: IoT, Edge Computing, and M2M",
+                icon: "🌐",
+                points: [
+                    "<b>IoT (Internet of Things):</b> Network of physical objects embedded with sensors. Expands attack surface exponentially; every device is an entry point.",
+                    "<b>Edge Computing:</b> Processing data locally near the source rather than a central cloud. Reduces latency, lowers bandwidth costs, and limits sensitive data exposure during transit.",
+                    "<b>M2M (Machine-to-Machine):</b> Direct device communication without human intervention. The protocol that allows autonomous IoT function."
+                ]
+            },
+            {
+                title: "Chapter 2: Augmented, Virtual Realities, and XR",
+                icon: "🕶️",
+                points: [
+                    "<b>AR (Augmented Reality):</b> Overlays digital information onto the real world (e.g., HUDs, filters).",
+                    "<b>VR (Virtual Reality):</b> Fully immersive digital environment shutting out the physical world.",
+                    "<b>XR (Extended Reality):</b> Umbrella term. Introduces heavy 'spatial data' risks: tracking eye movements, room dimensions, and biometrics. Standardized by <a href='https://www.w3.org/' class='text-teal-600 underline' target='_blank'>W3C</a>."
+                ]
+            },
+            {
+                title: "Chapter 3: Leading Digital Company Business Cases",
+                icon: "📈",
+                points: [
+                    "<b>Data-Driven Models:</b> Companies like Alphabet (<a href='https://abc.xyz/' class='text-teal-600 underline' target='_blank'>Google</a>) build competitive moats using massive user data combined with AI.",
+                    "<b>Digital Transformation:</b> Integrating tech into all business areas to solve real problems. Requires auditing data collection against frameworks like <a href='https://www.nist.gov/' class='text-teal-600 underline' target='_blank'>NIST</a>."
+                ]
+            },
+            {
+                title: "Chapter 4: Blockchain and Cryptocurrencies",
+                icon: "🔗",
+                points: [
+                    "<b>Blockchain:</b> Decentralized, distributed, immutable public ledger. Ideal for auditing.",
+                    "<b>Cryptocurrencies:</b> Digital currencies using cryptography, independent of central banks.",
+                    "<b>Smart Contracts:</b> Self-executing code on networks like <a href='https://ethereum.org/' class='text-teal-600 underline' target='_blank'>Ethereum</a>.",
+                    "<b>DeFi (Decentralized Finance):</b> Financial services using smart contracts instead of banks."
+                ]
+            }
+        ];
+
+        const caseStudies = [
+            {
+                scenario: "A modern hospital installs internet-connected IV pumps. Management wants to send telemetry to the cloud.",
+                question: "What is the primary compliance risk, and which technology mitigates it?",
+                answer: "<b>Risk:</b> Exposure of sensitive health data over external networks. <br><b>Solution:</b> Implement <b>Edge Computing</b> to process data locally and only send anonymized summaries to the cloud."
+            },
+            {
+                scenario: "A car manufacturing plant uses robotic arms communicating via M2M to adjust conveyor speeds autonomously.",
+                question: "What happens if a malicious actor intercepts the M2M protocol?",
+                answer: "Unlike traditional data theft, compromising M2M affects <b>physical world operations</b> and industrial safety, potentially causing physical damage."
+            },
+            {
+                scenario: "Alphabet uses its search engine to feed queries into AI advertising algorithms.",
+                question: "How does this create a 'moat', and what is the compliance concern?",
+                answer: "<b>Moat:</b> More users = better AI = more advertisers. <br><b>Concern:</b> Antitrust laws and data privacy (tracking without explicit consent)."
+            },
+            {
+                scenario: "A furniture company offers an AR app to visualize sofas in living rooms.",
+                question: "What unique data is gathered, and why flag it?",
+                answer: "The app collects <b>Spatial Data</b> (room dimensions, contents). Assessors flag it because users grant a 3D map of their private residence unknowingly."
+            },
+            {
+                scenario: "A bank uses VR headsets to train tellers on bank robberies.",
+                question: "What makes this effective, and what is the hardware dependency?",
+                answer: "Effective due to total <b>immersion</b> triggering genuine responses. Dependency: Requires enclosed headsets and high computing power."
+            },
+            {
+                scenario: "A luxury brand tracks diamonds using a blockchain ledger.",
+                question: "Why use blockchain instead of a standard database?",
+                answer: "Standard databases can be secretly altered. Blockchain provides an <b>immutable, decentralized ledger</b>, proving compliance and eliminating internal fraud."
+            },
+            {
+                scenario: "Two parties use a smart contract to handle a house sale. The code contains a bug sending funds to the wrong address.",
+                question: "Can it be reversed?",
+                answer: "<b>No.</b> Smart contracts execute automatically and the blockchain is immutable. Rigorous code auditing is mandatory before deployment."
+            },
+            {
+                scenario: "A user borrows crypto from a DeFi platform by locking up collateral. No bank is involved.",
+                question: "What handles the approval and liquidation?",
+                answer: "<b>Smart Contracts.</b> Code automatically monitors collateral value and liquidates assets if they drop below a threshold, with zero human intervention."
+            },
+            {
+                scenario: "A self-driving car must identify a pedestrian and brake within milliseconds.",
+                question: "Why is relying on cloud-based AI disastrous here?",
+                answer: "<b>Latency.</b> Cloud introduces network delay. Edge computing places processing power inside the car for instantaneous decisions."
+            },
+            {
+                scenario: "A user loses the private key to a crypto wallet with millions of dollars and contacts administrators to reset it.",
+                question: "What will they be told?",
+                answer: "Funds are lost forever. There is no central authority or password reset. The user is solely responsible for their <b>Private Key</b>."
+            }
+        ];
+
+        // --- APP STATE & LOGIC ---
+        let parsedQuizData = [];
+        let currentQuizPage = 0;
+        const questionsPerPage = 10;
+        let userAnswers = {}; // Store user selections
+
+        // Function to parse the raw text block into structured JSON
+        function parseRawQuiz() {
+            const rawText = document.getElementById('raw-quiz-data').textContent;
+            const blocks = rawText.split(/\*\*\d+\.\s/).filter(b => b.trim().length > 0);
+            
+            blocks.forEach((block, index) => {
+                const lines = block.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                
+                // First line contains question and type (up to **)
+                const qLineRaw = lines[0];
+                const qTextMatch = qLineRaw.match(/(.*?)\s*\((MCQ|MSQ)\)\*\*/);
+                if (!qTextMatch) return;
+                
+                const questionText = qTextMatch[1].trim();
+                const qType = qTextMatch[2]; // MCQ or MSQ
+
+                const options = [];
+                let answerStr = "";
+                let chapterStr = "";
+
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].startsWith('*Answer:')) {
+                        const ansParts = lines[i].replace('*Answer:', '').replace('*', '').split('|');
+                        answerStr = ansParts[0].trim();
+                        if (ansParts.length > 1) chapterStr = ansParts[1].replace('Chapter:', '').trim();
+                    } else if (lines[i].match(/^[A-Z]\)/)) {
+                        options.push(lines[i]);
+                    }
+                }
+
+                // Process correct answers (e.g., "A, B, C" to array ['A', 'B', 'C'])
+                const correctAnswers = answerStr.split(',').map(s => s.trim().charAt(0));
+
+                parsedQuizData.push({
+                    id: index + 1,
+                    question: questionText,
+                    type: qType,
+                    options: options,
+                    correctAnswers: correctAnswers,
+                    chapter: chapterStr,
+                    explanation: answerStr
+                });
+            });
+        }
+
+        // --- UI RENDER FUNCTIONS ---
+        function renderConcepts() {
+            const container = document.getElementById('concepts-container');
+            let html = '';
+            courseData.forEach((chapter, index) => {
+                html += `
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+                    <button onclick="toggleAccordion('concept-${index}')" class="w-full text-left px-6 py-4 flex items-center justify-between hover:bg-stone-50 transition-colors focus:outline-none">
+                        <span class="font-bold text-lg text-stone-800 flex items-center gap-3">
+                            <span class="text-2xl">${chapter.icon}</span> ${chapter.title}
+                        </span>
+                        <span class="text-stone-400" id="icon-concept-${index}">▼</span>
+                    </button>
+                    <div id="concept-${index}" class="hidden px-6 py-4 border-t border-stone-100 bg-stone-50">
+                        <ul class="list-disc pl-5 space-y-3 text-stone-600 leading-relaxed">
+                            ${chapter.points.map(p => `<li>${p}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function toggleAccordion(id) {
+            const el = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                icon.textContent = '▲';
+            } else {
+                el.classList.add('hidden');
+                icon.textContent = '▼';
+            }
+        }
+
+        function renderCaseStudies() {
+            const container = document.getElementById('cases-container');
+            let html = '';
+            caseStudies.forEach((cs, index) => {
+                html += `
+                <div class="flashcard cursor-pointer h-72 perspective-1000" onclick="this.classList.toggle('flipped')">
+                    <div class="flashcard-inner relative w-full h-full rounded-2xl shadow-sm border border-stone-200 transition-transform duration-500">
+                        <!-- Front -->
+                        <div class="flashcard-front absolute w-full h-full bg-white rounded-2xl p-6 flex flex-col justify-between">
+                            <div>
+                                <div class="text-xs font-bold text-teal-600 uppercase tracking-wide mb-3">Scenario ${index + 1}</div>
+                                <p class="text-stone-800 font-medium mb-4 text-sm">${cs.scenario}</p>
+                            </div>
+                            <div class="bg-stone-50 p-3 rounded-lg border border-stone-100">
+                                <p class="text-stone-600 text-sm font-semibold italic">Q: ${cs.question}</p>
+                            </div>
+                            <div class="text-center text-xs text-stone-400 mt-2">Click to reveal analysis</div>
+                        </div>
+                        <!-- Back -->
+                        <div class="flashcard-back absolute w-full h-full bg-teal-50 border-teal-200 border rounded-2xl p-6 flex flex-col justify-center overflow-y-auto no-scrollbar">
+                            <div class="text-xs font-bold text-teal-700 uppercase tracking-wide mb-3">Compliance Analysis</div>
+                            <p class="text-stone-800 text-sm leading-relaxed">${cs.answer}</p>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderQuizPage() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            
+            const startIdx = currentQuizPage * questionsPerPage;
+            const endIdx = Math.min(startIdx + questionsPerPage, parsedQuizData.length);
+            const currentQuestions = parsedQuizData.slice(startIdx, endIdx);
+
+            currentQuestions.forEach(q => {
+                const isMSQ = q.type === 'MSQ';
+                const inputType = isMSQ ? 'checkbox' : 'radio';
+                const hasAnswered = userAnswers[q.id] !== undefined;
+                
+                let optionsHtml = '';
+                q.options.forEach(opt => {
+                    const optLetter = opt.charAt(0);
+                    const isChecked = hasAnswered && userAnswers[q.id].includes(optLetter);
+                    
+                    // Logic to color answers if already submitted
+                    let labelClasses = "flex items-start gap-3 p-3 rounded-lg border border-stone-200 cursor-pointer hover:bg-stone-50 transition-colors";
+                    if (hasAnswered) {
+                        const isCorrectOption = q.correctAnswers.includes(optLetter);
+                        if (isCorrectOption) {
+                            labelClasses = "flex items-start gap-3 p-3 rounded-lg border border-teal-500 bg-teal-50 cursor-default";
+                        } else if (isChecked && !isCorrectOption) {
+                            labelClasses = "flex items-start gap-3 p-3 rounded-lg border border-red-300 bg-red-50 cursor-default";
+                        } else {
+                            labelClasses = "flex items-start gap-3 p-3 rounded-lg border border-stone-200 opacity-50 cursor-default";
+                        }
+                    }
+
+                    optionsHtml += `
+                        <label class="${labelClasses}">
+                            <input type="${inputType}" name="q${q.id}" value="${optLetter}" class="mt-1 ${isMSQ ? 'rounded text-teal-600 focus:ring-teal-500' : 'text-teal-600 focus:ring-teal-500'}" ${isChecked ? 'checked' : ''} ${hasAnswered ? 'disabled' : ''}>
+                            <span class="text-sm text-stone-700 leading-tight">${opt}</span>
+                        </label>
+                    `;
+                });
+
+                // Feedback section
+                let feedbackHtml = '';
+                if (hasAnswered) {
+                    // Check if strictly correct (arrays match)
+                    const userArr = userAnswers[q.id].sort();
+                    const correctArr = [...q.correctAnswers].sort();
+                    const isCorrect = JSON.stringify(userArr) === JSON.stringify(correctArr);
+                    
+                    feedbackHtml = `
+                        <div class="mt-4 p-3 rounded-lg text-sm ${isCorrect ? 'bg-teal-50 text-teal-800 border border-teal-200' : 'bg-red-50 text-red-800 border border-red-200'}">
+                            <b>${isCorrect ? 'Correct!' : 'Incorrect.'}</b> The correct answer is <b>${q.correctAnswers.join(', ')}</b>.<br>
+                            <span class="text-xs opacity-80 mt-1 block">Context: ${q.chapter}</span>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML += `
+                    <div class="border-b border-stone-100 pb-6 last:border-0 last:pb-0" id="question-block-${q.id}">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="bg-stone-100 text-stone-500 font-bold px-2 py-1 rounded text-xs">Q${q.id}</span>
+                            <span class="bg-teal-50 text-teal-700 font-semibold px-2 py-1 rounded text-xs">${q.type}</span>
+                        </div>
+                        <h4 class="text-base font-semibold text-stone-800 mb-4">${q.question}</h4>
+                        <div class="space-y-2">
+                            ${optionsHtml}
+                        </div>
+                        ${!hasAnswered ? `<button onclick="submitAnswer(${q.id}, '${q.type}')" class="mt-4 text-sm bg-stone-800 text-white px-4 py-2 rounded shadow-sm hover:bg-stone-700 transition-colors">Submit Answer</button>` : ''}
+                        ${feedbackHtml}
+                    </div>
+                `;
+            });
+
+            // Update Controls
+            document.getElementById('quiz-page-indicator').textContent = `Page ${currentQuizPage + 1} of ${Math.ceil(parsedQuizData.length / questionsPerPage)}`;
+            document.getElementById('btn-prev-page').disabled = currentQuizPage === 0;
+            document.getElementById('btn-next-page').disabled = endIdx >= parsedQuizData.length;
+            
+            updateScoreDisplay();
+        }
+
+        function submitAnswer(qId, type) {
+            const inputs = document.querySelectorAll(`input[name="q${qId}"]:checked`);
+            if (inputs.length === 0) {
+                alert("Please select an answer.");
+                return;
+            }
+            
+            const selectedVals = Array.from(inputs).map(i => i.value);
+            userAnswers[qId] = selectedVals;
+            
+            // Re-render to show feedback
+            renderQuizPage();
+        }
+
+        function updateScoreDisplay() {
+            let correctCount = 0;
+            let answeredCount = Object.keys(userAnswers).length;
+
+            for (const [qId, userArr] of Object.entries(userAnswers)) {
+                const q = parsedQuizData.find(x => x.id === parseInt(qId));
+                const correctArr = [...q.correctAnswers].sort();
+                const uArr = [...userArr].sort();
+                if (JSON.stringify(uArr) === JSON.stringify(correctArr)) {
+                    correctCount++;
+                }
+            }
+
+            document.getElementById('quiz-score-display').textContent = `${correctCount} / ${answeredCount}`;
+        }
+
+        function changeQuizPage(dir) {
+            currentQuizPage += dir;
+            renderQuizPage();
+            window.scrollTo({ top: document.getElementById('view-quiz').offsetTop - 100, behavior: 'smooth' });
+        }
+
+        // --- NAVIGATION LOGIC ---
+        function switchTab(tabId) {
+            // Hide all views
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden-view'));
+            // Reset all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('border-teal-600', 'text-teal-700');
+                el.classList.add('border-transparent', 'text-stone-500');
+            });
+            
+            // Show target
+            document.getElementById(`view-${tabId}`).classList.remove('hidden-view');
+            
+            // Highlight active nav
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            activeNav.classList.remove('border-transparent', 'text-stone-500');
+            activeNav.classList.add('border-teal-600', 'text-teal-700');
+            
+            // Re-trigger chart render if dashboard to ensure canvas sizing
+            if(tabId === 'dashboard') initCharts();
+        }
+
+        // --- CHART.JS INITIALIZATION ---
+        let topicChartInstance = null;
+        let riskChartInstance = null;
+
+        function initCharts() {
+            // Data Processing for Charts
+            // 1. Topic Breakdown (Count questions per chapter)
+            const chapterCounts = {};
+            parsedQuizData.forEach(q => {
+                let chap = q.chapter;
+                // Grouping similar chapters for cleaner chart
+                if (chap.includes('IoT')) chap = "IoT & Edge";
+                else if (chap.includes('BlockChain')) chap = "Blockchain/Crypto";
+                else if (chap.includes('Augmented')) chap = "AR/VR/XR";
+                else chap = "Business Models & Other";
+                
+                chapterCounts[chap] = (chapterCounts[chap] || 0) + 1;
+            });
+
+            const topicLabels = Object.keys(chapterCounts);
+            const topicData = Object.values(chapterCounts);
+
+            // Destroy existing instances to prevent overlap on tab switching
+            if(topicChartInstance) topicChartInstance.destroy();
+            if(riskChartInstance) riskChartInstance.destroy();
+
+            // Setup Doughnut Chart
+            const ctxTopic = document.getElementById('topicChart').getContext('2d');
+            topicChartInstance = new Chart(ctxTopic, {
+                type: 'doughnut',
+                data: {
+                    labels: topicLabels,
+                    datasets: [{
+                        data: topicData,
+                        backgroundColor: [
+                            '#0d9488', // teal-600
+                            '#d6d3d1', // stone-300
+                            '#57534e', // stone-600
+                            '#99f6e4'  // teal-200
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Inter' }, padding: 20 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw} questions`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // Setup Radar Chart for Risk Vectors
+            // Derived conceptually from the text material
+            const ctxRisk = document.getElementById('riskChart').getContext('2d');
+            riskChartInstance = new Chart(ctxRisk, {
+                type: 'radar',
+                data: {
+                    labels: ['Data Exposure', 'Physical Danger', 'Latency Risk', 'Spatial Privacy', 'Decentralization Bug Risk'],
+                    datasets: [
+                        {
+                            label: 'IoT/M2M Systems',
+                            data: [9, 8, 7, 2, 1], // High exposure, physical danger
+                            backgroundColor: 'rgba(13, 148, 136, 0.2)', // teal
+                            borderColor: '#0d9488',
+                            pointBackgroundColor: '#0d9488',
+                        },
+                        {
+                            label: 'XR / Virtual Reality',
+                            data: [6, 2, 3, 10, 1], // Very high spatial privacy risk
+                            backgroundColor: 'rgba(87, 83, 78, 0.2)', // stone
+                            borderColor: '#57534e',
+                            pointBackgroundColor: '#57534e',
+                        },
+                        {
+                            label: 'Blockchain/Smart Contracts',
+                            data: [2, 1, 2, 1, 9], // High risk of bugs being immutable
+                            backgroundColor: 'rgba(214, 211, 209, 0.4)', // light stone
+                            borderColor: '#a8a29e',
+                            borderDash: [5, 5],
+                            pointBackgroundColor: '#a8a29e',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e7e5e4' },
+                            grid: { color: '#e7e5e4' },
+                            pointLabels: { font: { family: 'Inter', size: 11 }, color: '#57534e' },
+                            ticks: { display: false, min: 0, max: 10 }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        // --- INIT ---
+        window.onload = function() {
+            parseRawQuiz();
+            renderConcepts();
+            renderCaseStudies();
+            renderQuizPage();
+            initCharts();
+        };
+
+    </script>
+</body>
+</html>
+
+
